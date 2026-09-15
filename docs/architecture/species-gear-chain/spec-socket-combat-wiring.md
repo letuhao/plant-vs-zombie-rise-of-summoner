@@ -333,9 +333,8 @@ own note.
 
 - **An insert's contribution is a magnitude, so it is `long` wherever this module carries one.** Widen
   before multiplying (`(long)a * b`, never `(long)(a * b)`); divide by 1000 **last, exactly once**;
-  **never `float`** — integer-exactness fails at `Θ` = 232, inside normal play, and `float` is
-  non-deterministic across runtimes, which is disqualifying on a hashed or persisted path; **overflow
-  throws, never wraps.**
+  floating-point is allowed (owner ruling 2026-09-15 — precision is not overflow; a `double` feeding a hashed or persisted value records the platform stamp (`ssot-power-scale.md` §10.7)); **integer
+  overflow throws, never wraps.**
 - ⭐ **The existing seam already got this right, and the reason is on the record.**
   `EquipAtomSource.EquippedDerived` reads `amount` as `long`, not `int`, because *"The first cut of
   this class used `TryGetInt32`, which does not throw on a larger magnitude — it returns false, so the
@@ -346,8 +345,8 @@ own note.
   composition… the `long` rule applies to the values composition **produces**, not to the arithmetic
   that composes ratios."* What this module owes is §10.7's item 2 — **materialize as `long` at the
   boundary where the value leaves composition** (`EntityStatWriter`, a `DamagePacket`, `BattleRuleset`),
-  which the existing path already does. **No new `double` magnitude is introduced outside that path**;
-  one would be an A1 finding, not an A7.
+  which the existing path already does. *(The former "no new `double` magnitude outside that path / A1
+  finding" restriction is superseded 2026-09-15: floating-point allowed.)*
 - The socket index is a small identity `int`, an ordinal, never a multiplier.
 
 ⛔ **No new `ssot-power-scale.md` §10 row is owed.** Nothing here derives a number from a level: the

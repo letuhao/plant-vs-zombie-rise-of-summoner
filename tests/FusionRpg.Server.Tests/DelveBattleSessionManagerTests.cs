@@ -118,11 +118,26 @@ public class DelveBattleSessionManagerTests : IDisposable
     /// every push verbatim, so a test can assert exactly which wire events fired, in what order, with
     /// what payload, with no live SignalR server needed (matches this project's own callback-capture
     /// style rather than reaching for a mocking library this test project does not depend on).</summary>
+    /// <para>Thread-safe on purpose (2026-09-15): <c>Resume</c> starts the resumed session's background run,
+    /// which pushes while the test reads — the unsynchronised list threw "Collection was modified" in
+    /// full-suite runs. Readers get a snapshot.</para>
     sealed class RecordingPush : IDelveLivePush
     {
-        public readonly List<(string EventName, object Payload)> Pushes = new();
-        public void Push(string eventName, object payload) => Pushes.Add((eventName, payload));
-        public IEnumerable<object> PayloadsOf(string eventName) => Pushes.Where(p => p.EventName == eventName).Select(p => p.Payload);
+        readonly object _gate = new();
+        readonly List<(string EventName, object Payload)> _pushes = new();
+        public void Push(string eventName, object payload)
+        {
+            lock (_gate) _pushes.Add((eventName, payload));
+        }
+        public List<(string EventName, object Payload)> Pushes
+        {
+            get { lock (_gate) return new List<(string EventName, object Payload)>(_pushes); }
+        }
+        public void Clear()
+        {
+            lock (_gate) _pushes.Clear();
+        }
+        public IEnumerable<object> PayloadsOf(string eventName) => Pushes.Where(p => p.EventName == eventName).Select(p => p.Payload).ToList();
     }
 
     static async Task RespondToPendingAskOnceAsync(DelveBattleSession session)
@@ -398,7 +413,7 @@ public class DelveBattleSessionManagerTests : IDisposable
         session1.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
         await Record.ExceptionAsync(() => session1.RunTask!);
 
-        push.Pushes.Clear(); // isolate this assertion to the Resume call alone
+        push.Clear(); // isolate this assertion to the Resume call alone
 
         var session2 = manager.Resume(session1.MatchKey, _playerId, automated: new FixedAttacker());
         Assert.NotNull(session2);

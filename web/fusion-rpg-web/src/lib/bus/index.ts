@@ -10,4 +10,6 @@ export * from "./cheat-dirty";
 export * from "./creatures";
 export * from "./commanders";
 export * from "./onboarding";
+export * from "./overlay";
+export * from "./firstOpen";
 export * from "./actorSurface";

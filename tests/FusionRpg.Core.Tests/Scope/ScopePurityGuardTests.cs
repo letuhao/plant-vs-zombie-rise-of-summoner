@@ -20,7 +20,7 @@ public class ScopePurityGuardTests
     }
 
     [Fact]
-    public void Scope_sources_contain_no_wall_clock_ambient_rng_or_floating_point()
+    public void Scope_sources_contain_no_wall_clock_ambient_rng_or_dictionary_enumeration()
     {
         var dir = ScopeDir();
         Assert.True(Directory.Exists(dir), $"scope source dir not found: {dir}");
@@ -29,7 +29,7 @@ public class ScopePurityGuardTests
 
         var offences = KernelPurityScan.Scan(dir);
         Assert.True(offences.Count == 0,
-            "scope-layer purity violated (no wall clock, no ambient RNG, no floating point, " +
+            "scope-layer purity violated (no wall clock, no ambient RNG, " +
             "no dictionary enumeration):\n" + string.Join("\n", offences));
     }
 
@@ -38,8 +38,6 @@ public class ScopePurityGuardTests
     [InlineData("readonly Random _rng = new();", "Random")]
     [InlineData("var g = Guid.NewGuid();", "Guid.NewGuid")]
     [InlineData("var h = key.GetHashCode();", ".GetHashCode(")]
-    [InlineData("double ratio = 0.5;", "double ")]
-    [InlineData("float dt = 0.016f;", "float ")]
     public void A_planted_violation_still_fails_inside_Scope(string badLine, string expectedToken)
     {
         var tmp = NewTempRoot();

@@ -27,7 +27,7 @@ The gap here is smaller than "wave 3, not started" suggests. Almost every substr
 | A development term in upkeep | `LoamPolicy.DevelopmentAndDangerUpkeep` — `LoamPolicy.cs:52-53`, read by `LoamUpkeep.cs:44` |
 | Runtime entity creation, deterministically | `LoamPhases.SpawnTheUnmade` — `LoamPhases.cs:246-257`: a `WorldEntity` built inside a phase, id derived from the sector, no RNG |
 | A per-component pool to spend from | `TerritoryComponents.For` — `TerritoryComponents.cs:17` |
-| A purity guard that catches a wall clock | `WorldDeterminismGuardTests` — `tests/FusionRpg.Guard.Tests/WorldDeterminismGuardTests.cs:16-47` (banned symbols) and `:51` (no floats in world state) |
+| A purity guard that catches a wall clock | `WorldDeterminismGuardTests` — `tests/FusionRpg.Guard.Tests/WorldDeterminismGuardTests.cs:16-47` (banned symbols) and `:51` (no floats in world state — superseded 2026-09-15: floating-point allowed) |
 
 **Genuinely missing: the growth phase's contents, a season term, a project concept, and content.**
 

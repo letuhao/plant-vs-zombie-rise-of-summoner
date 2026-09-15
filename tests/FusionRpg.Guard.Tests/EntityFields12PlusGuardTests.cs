@@ -40,14 +40,14 @@ public class EntityFields12PlusGuardTests
         // test in ChannelExtensionGuardTests).
         var text = ReadInjector(System.IO.Path.Combine("Stats", "EntityStatWriter.cs"));
 
-        Assert.Contains("p.theShieldHealth = ZombieCombatFields.ClampToInt32(y.PlantShield)", text, StringComparison.Ordinal);
+        Assert.Contains("p.theShieldHealth = ClampToInt32Reporting(y.PlantShield, \"plant.shield\", source)", text, StringComparison.Ordinal);
         Assert.Contains("p.thePlantAttackCountDown = (float)y.AttackCountdown", text, StringComparison.Ordinal);
         Assert.Contains("p.attackSpeedAdder = (float)y.AttackSpeedAdder", text, StringComparison.Ordinal);
         Assert.Contains("p.thePlantProduceCountDown = (float)y.ProduceCountdown", text, StringComparison.Ordinal);
         Assert.Contains("p.thePlantSpeed = (float)y.PlantSpeed", text, StringComparison.Ordinal);
         Assert.Contains("p.moveSpeed = (float)y.PlantMoveSpeed", text, StringComparison.Ordinal);
-        Assert.Contains("p.theLevel = ZombieCombatFields.ClampToInt32(y.PlantLevel)", text, StringComparison.Ordinal);
-        Assert.Contains("p.shootingLevel = ZombieCombatFields.ClampToInt32(y.ShootingLevel)", text, StringComparison.Ordinal);
+        Assert.Contains("p.theLevel = ClampToInt32Reporting(y.PlantLevel, \"plant.level\", source)", text, StringComparison.Ordinal);
+        Assert.Contains("p.shootingLevel = ClampToInt32Reporting(y.ShootingLevel, \"plant.shootingLevel\", source)", text, StringComparison.Ordinal);
         Assert.Contains("z.theArmor = (float)y.ArmorFlat", text, StringComparison.Ordinal);
         Assert.Contains("z.takeDmgMultiplier = (float)y.TakeDmgMultiplier", text, StringComparison.Ordinal);
         Assert.Contains("z.theSpeed = (float)y.ZombieSpeedCurrent", text, StringComparison.Ordinal);

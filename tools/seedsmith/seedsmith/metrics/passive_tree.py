@@ -220,7 +220,8 @@ def _widen_mul(a: int, b: int) -> int:
 
 def _trunc_div(n: int, d: int) -> int:
     """Truncating-toward-zero integer division -- C#'s `/` semantics for integers, which Python's
-    `//` (floor) does not match for mixed-sign operands. No float anywhere (CLAUDE.md rule 2)."""
+    `//` (floor) does not match for mixed-sign operands. Pure integer arithmetic, to mirror the C#
+    integer result exactly."""
     q = abs(n) // abs(d)
     return -q if (n < 0) != (d < 0) else q
 

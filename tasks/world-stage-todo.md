@@ -1885,8 +1885,8 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     Arithmetic is the design: reading down the column must reproduce the total exactly.
   - Acceptance: rows are the five operands and **nothing else**, with a test that fails if a sixth
     appears; the total is computed with **one** division —
-    `sum × intensityMilli × handicapMilli ÷ 1_000_000`, never two roundings, never a `float`
-    (`long`-shaped arithmetic per `CLAUDE.md`); a property test over generated
+    `sum × intensityMilli × handicapMilli ÷ 1_000_000`, never two roundings
+    (`long`-shaped arithmetic) *(reworded 2026-09-15 per owner ruling: floating-point allowed)*; a property test over generated
     `(garrison, development, danger, intensity, handicap)` proves the rendered rows reproduce
     `LoamUpkeep.For`'s result after one boundary rounding; nesting is exactly three levels.
   - Verify: `cd web\fusion-rpg-web; npm test -- ModifierLedger`.

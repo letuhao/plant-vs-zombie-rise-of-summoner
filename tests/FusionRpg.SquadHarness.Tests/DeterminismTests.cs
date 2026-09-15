@@ -92,33 +92,11 @@ public class DeterminismTests
             Assert.DoesNotContain(banned, properties);
     }
 
-    [Fact]
-    public void No_double_reaches_the_hash_input()
-    {
-        // Reflection over the hashed record graph: every LEAF field is string or long -- no float, no
-        // double, anywhere the SHA-256 input reads from (CLAUDE.md: a hash of a floating value is
-        // non-deterministic across runtimes). A record field (PairResult inside HarnessRun.Pairs) is
-        // allowed as long as its OWN properties recurse down to that same rule -- "a list of those"
-        // covers a list of records whose fields are themselves string/long, not only bare primitives.
-        bool IsAllowed(Type t, HashSet<Type> seen)
-        {
-            if (t == typeof(string) || t == typeof(long)) return true;
-            if (!seen.Add(t)) return true; // cycle guard; none of these types actually cycle
-
-            var listElement = t.GetInterfaces().Prepend(t)
-                .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IReadOnlyList<>));
-            if (listElement is not null) return IsAllowed(listElement.GetGenericArguments()[0], seen);
-
-            // A compound record (PairResult) is allowed only if EVERY one of its own properties is.
-            var props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            return props.Length > 0 && props.All(p => IsAllowed(p.PropertyType, seen));
-        }
-
-        foreach (var prop in typeof(PairResult).GetProperties(BindingFlags.Public | BindingFlags.Instance))
-            Assert.True(IsAllowed(prop.PropertyType, new HashSet<Type>()), $"PairResult.{prop.Name} is {prop.PropertyType} -- not string/long/list-of-those");
-        foreach (var prop in typeof(HarnessRun).GetProperties(BindingFlags.Public | BindingFlags.Instance))
-            Assert.True(IsAllowed(prop.PropertyType, new HashSet<Type>()), $"HarnessRun.{prop.Name} is {prop.PropertyType} -- not string/long/list-of-those");
-    }
+    // A reflection test banning float/double from the hashed record graph lived here; it was removed
+    // by the 2026-09-15 owner ruling (floating point is allowed for any quantity; determinism of a
+    // double in a hashed golden is handled by the platform stamp, ssot-power-scale.md §10.7). The
+    // byte-identical repeat tests above and the second-process test below still prove determinism by
+    // value.
 
     /// <summary>F1's acceptance bullet: "A second process reproduces the hash." A fresh OS process
     /// (not just a second in-process run) catches static state carried across runs an in-process repeat

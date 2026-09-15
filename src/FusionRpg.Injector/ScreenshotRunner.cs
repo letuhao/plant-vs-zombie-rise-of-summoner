@@ -22,6 +22,15 @@ public static class ScreenshotRunner
 {
     static int _busy;
     static string? _pendingTag;
+    static long _armedAtMs;
+    static long _repaintsSeen;
+
+    /// <summary>live-probe 2026-09-15: a capture armed on a host whose OnGUI never delivers a Repaint
+    /// (observed live on MelonLoader pvzrh-3.9 — every request stuck "already in flight" for the whole
+    /// session) used to wedge the latch forever. After this long with no Repaint, <see cref="TickFallback"/>
+    /// captures through the camera render-to-texture path instead, which is legal outside Repaint.
+    /// Structural (not tunable): long enough for a normal Repaint (one frame), short enough for a probe.</summary>
+    const long RepaintGraceMs = 2000;
 
     // PNG signature — proves the emitted bytes are a real PNG without viewing them.
     static readonly byte[] PngSignature = { 137, 80, 78, 71, 13, 10, 26, 10 };
@@ -36,6 +45,7 @@ public static class ScreenshotRunner
                 CheatState.Note("debug screenshot already in flight");
                 return false;
             }
+            Volatile.Write(ref _armedAtMs, Environment.TickCount64);
             Volatile.Write(ref _pendingTag, tag);
             return true;
         }
@@ -53,12 +63,38 @@ public static class ScreenshotRunner
     /// </summary>
     public static void CaptureOnRepaint()
     {
-        var tag = Volatile.Read(ref _pendingTag);
+        Interlocked.Increment(ref _repaintsSeen);
+        var tag = Interlocked.Exchange(ref _pendingTag, null);
         if (tag == null) return;
-        Volatile.Write(ref _pendingTag, null);
+        Capture(tag, fromRepaint: true);
+    }
+
+    /// <summary>Called every <c>InjectorLoop.Tick</c>. Takes over an armed capture that no Repaint has
+    /// consumed within <see cref="RepaintGraceMs"/> — camera render-to-texture only (the backbuffer is not
+    /// readable mid-frame), so uGUI overlays may be missing; the emit says which primitive ran.</summary>
+    public static void TickFallback()
+    {
+        if (Volatile.Read(ref _pendingTag) == null) return;
+        if (Environment.TickCount64 - Volatile.Read(ref _armedAtMs) < RepaintGraceMs) return;
+        var tag = Interlocked.Exchange(ref _pendingTag, null);
+        if (tag == null) return;
+        Capture(tag, fromRepaint: false);
+    }
+
+    static void Capture(string tag, bool fromRepaint)
+    {
         try
         {
-            var png = CapturePng(out var width, out var height, out var primitive);
+            string primitive;
+            int width, height;
+            byte[]? png;
+            if (fromRepaint)
+                png = CapturePng(out width, out height, out primitive);
+            else
+            {
+                primitive = "camera-fallback-no-repaint";
+                png = CaptureCameraFallback(out width, out height);
+            }
             if (png == null || png.Length < 32 || !HasPngSignature(png))
             {
                 CheatState.Error("debug.screenshot: capture produced no PNG");
@@ -72,7 +108,8 @@ public static class ScreenshotRunner
                 ["height"] = height,
                 ["bytes"] = png.Length,
                 ["validPng"] = true,
-                ["primitive"] = primitive
+                ["primitive"] = primitive,
+                ["repaintsSeen"] = Interlocked.Read(ref _repaintsSeen)
             });
             CheatState.Note($"debug screenshot {tag} {width}x{height} {png.Length}B via {primitive}");
         }

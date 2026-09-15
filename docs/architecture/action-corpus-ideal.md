@@ -56,8 +56,8 @@ A downstream session reads this document, not its links.
 3. **Every RPG feature lives in the RPG layer.** Never built by changing what PvZ is.
 4. **One power ladder, and no private `f(level)`.** This document's §5 is entirely about honouring this
    one, because the obvious design breaks it.
-5. **`long` for every magnitude, never `float`; widen before multiplying; divide by 1000 last; overflow
-   throws.** No hard progression ceilings.
+5. **`long` for every integer magnitude (floating-point allowed — owner ruling 2026-09-15); widen before
+   multiplying; divide by 1000 last; integer overflow throws.** No hard progression ceilings.
 6. **A number a balance pass would change lives in `data/tuning/`, not in code.**
 
 And the one from this program's own neighbourhood — `spec-action-seeding.md` §3:

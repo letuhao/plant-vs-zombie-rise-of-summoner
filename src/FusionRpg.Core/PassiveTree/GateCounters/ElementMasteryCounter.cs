@@ -34,9 +34,9 @@ public readonly record struct ElementMasteryCreditInput(
 /// (<c>:36-38,95-97</c>) -- so the credit test is <c>Outcome == Applied</c> **and**
 /// <c>AppliedAmount != 0</c>, both required, neither sufficient alone.</item>
 /// <item><b>(c) Each component once, never weighted.</b> A fire 0.6 / ice 0.4 packet credits fire +1
-/// AND ice +1 -- <see cref="ElementPayloadComponent.Weight"/> is read for presence only (it is a
-/// <c>double</c>, and CLAUDE.md forbids a float on a magnitude path) and is never multiplied into the
-/// credit. Components are de-duplicated by <see cref="ElementPayloadComponent.Element"/> before
+/// AND ice +1 -- <see cref="ElementPayloadComponent.Weight"/> is read for presence only (a credit is a
+/// whole count per element, so the <c>double</c> weight has nothing to scale) and is never multiplied
+/// into the credit. Components are de-duplicated by <see cref="ElementPayloadComponent.Element"/> before
 /// crediting so a payload that happened to carry the same element twice still credits it once --
 /// belt-and-suspenders alongside the shipped payload shape, which is not expected to duplicate an
 /// element within one packet.</item>

@@ -216,9 +216,9 @@ public static class JsonOverlay
     // widens implicitly to `double` but not the reverse, so the compiler silently converted `l` to
     // `double` every time. `(object)l` on the true branch breaks that unification. Matters more here
     // than in the sibling defect (AtomCompiler.Plain, fixed the same session): this is the grant
-    // overlay's own magnitude path, and CLAUDE.md's own overflow table is explicit that `double` loses
-    // exact-integer precision above 2^53 and is non-deterministic across runtimes in a hashed/persisted
-    // path — `long` was always the intended type here, not an accident of formatting.
+    // overlay's own magnitude path, and an integral JSON number read back as `double` loses
+    // exact-integer precision above 2^53 (precision, not a ban on floating point) — `long` was always
+    // the intended type for an integral value here, not an accident of formatting.
     static object? Unwrap(JsonElement el) => el.ValueKind switch
     {
         JsonValueKind.Null => null,

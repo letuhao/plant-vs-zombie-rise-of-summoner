@@ -202,7 +202,7 @@ class TreeCensus:
 
 
 def _permille(numerator: int, denominator: int) -> int:
-    """Integer per-mille, truncating, no float (CLAUDE.md's numeric rule). A zero denominator is
+    """Integer per-mille, truncating (integer division last). A zero denominator is
     `0`, which every caller reads as "no population" rather than "0% bound" — the two rows differ by
     their own denominators in the report."""
     if denominator <= 0:

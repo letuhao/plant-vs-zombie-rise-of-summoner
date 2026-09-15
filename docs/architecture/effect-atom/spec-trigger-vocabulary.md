@@ -179,7 +179,7 @@ triggerless (`definitions.md` §14.2).
 - **No widening of `resource.delta` / `status.apply` / `shield.grant`.** §2.3 gives the reason and the
   line number.
 - **No magnitudes.** This module carries no numbers. The repo's numeric rules still bind wherever one
-  appears downstream: `long` for a magnitude, never `float`; widen before multiplying; divide by 1000
+  appears downstream: `long` for an integer magnitude (floating-point allowed); widen before multiplying; divide by 1000
   last, exactly once; overflow throws; and a number a balance pass would turn lives in
   `data/tuning/<domain>.v{n}.json`, not in code.
 

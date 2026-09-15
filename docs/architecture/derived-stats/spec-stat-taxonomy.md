@@ -130,8 +130,8 @@ composition**: `Increased` and `More` are ratios, and composing them in integers
 > **The `long` rule binds the value composition *produces*, not the arithmetic that composes it.**
 
 So a `GameUnits` / `GameUnitsPerSecond` channel materializes as `long` at the boundary it leaves
-composition — reaching `EntityStatWriter`, a `DamagePacket`, or `BattleRuleset`. §10.7's one exclusion
-stands: **a new `double` magnitude outside the composition path is A1, not A7**, and stays a defect.
+composition — reaching `EntityStatWriter`, a `DamagePacket`, or `BattleRuleset`. *(§10.7's former exclusion —
+"a new `double` magnitude outside the composition path is A1" — is superseded 2026-09-15: floating-point allowed.)*
 
 ### 2.7 §8's rejection rule constrains `catalog-extension`
 

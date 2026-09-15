@@ -70,17 +70,6 @@ public class ExistingSaveSeedTests
     }
 
     [Fact]
-    public void Never_uses_a_float_text_guard()
-    {
-        var root = ExistingSaveSeedTestsRepoRoot();
-        var text = File.ReadAllText(Path.Combine(root,
-            "src/FusionRpg.Core/PassiveTree/GateCounters/ExistingSaveSeed.cs"));
-        Assert.DoesNotContain("float", text, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("double", text, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("Math.Sqrt", text, StringComparison.Ordinal);
-    }
-
-    [Fact]
     public void Never_imports_the_aptitude_allocation_namespace()
     {
         // Same D35 rule GateCounterBoundaryGuardTests already enforces for the rest of this

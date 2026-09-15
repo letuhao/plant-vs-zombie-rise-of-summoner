@@ -58,6 +58,20 @@ public static class LawnBasicAttackGrantBinder
     static readonly object Gate = new();
     static readonly List<string> Pending = new();
     static readonly List<(string Ptr, int RetriesLeft)> PendingRetry = new();
+    static readonly FusionRpg.Core.Combat.FeatureSwitchEdge SwitchEdge = new();
+
+    static void WithdrawAllBound()
+    {
+        ClearPending();
+        var withdrawn = 0;
+        foreach (var grant in EffectRuntime.Bag.Grants.All().ToList())
+        {
+            if (!FusionRpg.Core.Combat.BasicAttackGrantBuilder.IsBasicAttackGrantId(grant.GrantId)) continue;
+            try { if (EffectRuntime.Withdraw(grant.GrantId)) withdrawn++; }
+            catch (Exception ex) { CheatState.Error("lawn-basic-attack withdraw: " + ex.Message); }
+        }
+        CheatState.Note($"lawn-basic-attack switched off: withdrew {withdrawn} bound grants");
+    }
 
     /// <summary>Record a spawn — called from `MatchHost.Apply` on `plant.spawn`/`zombie.spawn`, inside
     /// the SAME board-fold apply the spec asks this to key on. No board read, no grant call: O(1).</summary>
@@ -73,6 +87,11 @@ public static class LawnBasicAttackGrantBinder
     /// it never grows unbounded while disabled).</summary>
     public static void Tick()
     {
+        // L-N8: the switch turning off mid-match must take the already-bound grants with it, or their riders keep
+        // applying with no cost (ShouldApplyRider passes OnDamageDealt through while the switch is off).
+        if (SwitchEdge.TurnedOff(LawnBasicAttackFeature.Enabled))
+            WithdrawAllBound();
+
         List<string> batch;
         List<(string Ptr, int RetriesLeft)> retryBatch;
         lock (Gate)

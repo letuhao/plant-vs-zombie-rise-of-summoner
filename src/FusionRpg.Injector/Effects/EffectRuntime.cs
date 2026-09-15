@@ -345,12 +345,17 @@ public static class EffectRuntime
         // untouched passthrough for every trigger but OnDamageDealt, and for OnDamageDealt whenever the
         // feature's kill switch is off -- see LawnBasicAttackCostCharger.ShouldApplyRider's own doc.
         if (!LawnBasicAttackCostCharger.ShouldApplyRider(ev)) return;
+        var fsmTraceOn = FsmTrace.Enabled;
+        if (fsmTraceOn)
+            CheatState.Note($"fsm-trace EffectRuntime.OnDrained ev trigger={ev.Trigger} actorPtr={ev.ActorPtr} targetPtr={ev.TargetPtr} damage={ev.Damage} swingId={ev.SwingId} isFirstOfSwing={ev.IsFirstOfSwing}");
         try
         {
             // BEFORE the bag: EffectBag.OnEvent flushes the Funnel inside itself, so a Secondary
             // dispatch enqueued afterwards would wait for the next event (E19).
             AtomPushReceiver.OnEvent(ev, Bag.BoardSnapshot);
             var plan = Bag.OnEvent(ev);
+            if (fsmTraceOn)
+                CheatState.Note($"fsm-trace EffectRuntime.OnDrained plan trigger={plan.Trigger} actions={plan.Actions.Count} skipped={plan.Skipped.Count}");
             MaybeEmitCombatPacketTrace(plan, "drain");
         }
         catch (Exception ex)

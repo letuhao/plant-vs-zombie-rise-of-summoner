@@ -106,7 +106,7 @@ normal versioned tuning file with no special path.
 - **Hand-author an edge.** If the generator cannot express a cell, the *table* is wrong.
 - **Copy `ResourceIds` or the aptitude list.** Read the SSOT — that is the defect being fixed.
 - **Bypass `publish.py`.** Tuning files are never hand-edited.
-- **Use `float`.** Per-mille integers; overflow throws.
+- **Let integer arithmetic overflow silently.** Overflow throws. *(Former "use `float`" prohibition superseded 2026-09-15: floating-point allowed.)*
 - **Cap a magnitude.** The 1.0 efficiency cap is a **bounded ratio**, exempt under `AGENTS.md` and it
   must carry the comment saying so.
 

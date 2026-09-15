@@ -29,9 +29,9 @@ public static class CooldownMath
     /// <summary>
     /// <paramref name="reductionRatioPm"/> (from <c>skill.cooldown.{category}</c>, Race class; per-mille,
     /// 1000 = 100%) is UNCAPPED — only the resulting duration is floored. Capping the reduction instead
-    /// would wall the grind (PS-8); flooring the duration only refuses division by zero. `long`/permille,
-    /// not `double` — this file lives under the Timeline kernel, whose determinism invariant bans
-    /// floating point outright (TimelinePurityGuardTests.Kernel_sources_contain_no_wall_clock_rng_or_floating_point).
+    /// would wall the grind (PS-8); flooring the duration only refuses division by zero. `long`/permille:
+    /// cooldowns are integer tick counts on the Timeline kernel's integer clock, so the result stays a
+    /// `long` with the per-mille division last. (Not a floating-point ban — that was removed 2026-09-15.)
     /// </summary>
     public static long ApplyReduction(long baseCooldownTicks, long reductionRatioPm)
     {

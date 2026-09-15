@@ -78,9 +78,9 @@ public sealed class CheatRegistry
             // effect-runtime/_prove-overlay-combat.json); promoted per spec-overlay-combat-enable.md
             // §7's own "only after the proof" rule.
             Get("OVERLAY-COMBAT").Enabled = true;
-            // lawn-combat-wire T10/T12's shared kill switch — default ON, same reasoning as
-            // OVERLAY-COMBAT immediately above.
-            Get("LAWN-BASIC-ATTACK").Enabled = true;
+            // lawn-combat-wire T10/T12's shared kill switch — default OFF (owner decision 2026-09-15,
+            // L-N1: a measured 300-zombie frame-budget breach; ships behind the switch until a perf pass).
+            Get("LAWN-BASIC-ATTACK").Enabled = false;
         }
     }
 

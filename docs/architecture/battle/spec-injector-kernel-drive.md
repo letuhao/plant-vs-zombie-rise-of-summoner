@@ -129,10 +129,10 @@ case the whole event-pipeline-v2 contract exists for.
 **Decision: the drive advances by measured unscaled wall time, in integer microseconds.**
 
 - Unity hands us a `float` seconds value. It is converted **once, at the injector boundary**, to whole
-  microseconds as a `long`, and no floating-point value crosses into Core. This satisfies
-  `SimulationClock`'s own stated contract ("no floating-point value reaches it",
-  `SimulationClock.cs:81-83`) and keeps the new Core file green under `KernelPurityScan`'s
-  floating-point ban (`tests/FusionRpg.Core.Tests/Battle/Timeline/KernelPurityScan.cs:58`).
+  microseconds as a `long` (a narrowing, so it is checked or reported). This matches
+  `SimulationClock`'s own stated contract (`SimulationClock.cs:81-83`, which takes `long` ticks).
+  *(The former justification — `KernelPurityScan`'s floating-point ban, `KernelPurityScan.cs:58` — is
+  superseded 2026-09-15: floating-point allowed.)*
 - A new `ITimeAdvance` implementation carries the **sub-millisecond remainder in integer
   microseconds**, exactly as `FixedIncrementAdvance` carries its fractional tick. 1 tick = 1 ms is
   unchanged, so `decisions.md:42` is satisfied.
@@ -221,7 +221,7 @@ links.
 ## 5. Numeric types and tunables
 
 - **Ticks are `long`**, 1 tick = 1 ms, per `decisions.md:42`. The microsecond accumulator is `long`.
-  No `float` and no `double` past the injector boundary conversion.
+  *(Former "no `float`/`double` past the injector boundary" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 - **Overflow throws**, reproducing `SimulationClock.cs:70-71`. No silent `unchecked`, no clamp.
 - **The work budget is a per-frame runtime cap, which `tunables-ssot.md` §1 classes as structural, not
   a balance number** — so it is a `const` with a comment naming its class, in the same way
@@ -281,7 +281,7 @@ Per `spec-kernel-performance.md:70-80`, two surfaces catching different failures
 | One event costing more than the whole budget | Still drains — the `Processed > 0` starvation guard (`EventDrain.cs:197`), proven by making it fail |
 | Backpressure | With a carry outstanding, the clock does not advance; once drained, it does |
 | Allocation | `GC.GetAllocatedBytesForCurrentThread()` is **zero** across a warmed steady-state drive loop |
-| Purity | The new Core files are scanned by `KernelPurityScan` with **no exemption** — no wall clock, no RNG, no float, no dictionary enumeration |
+| Purity | The new Core files are scanned by `KernelPurityScan` with **no exemption** — no wall clock, no RNG, no dictionary enumeration *(float clause superseded 2026-09-15: floating-point allowed)* |
 | Substitution (B26) | A scheduled DoT/shield sequence produces the same pulse count and the same ordering as the grid it replaces, over a scripted frame-time sequence including a 2 s hitch |
 
 The stopwatch is injected, never read, in every one of these — a wall-clock assertion in CI measures

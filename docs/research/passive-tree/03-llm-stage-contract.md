@@ -549,7 +549,7 @@ shape.**
 
 The repo already has the apportionment primitive, and it is arithmetically careful in exactly the way
 the repo's overflow rules demand (`AGENTS.md`, Hard boundaries: *"`long` for any magnitude, never
-`float`, widen before multiplying, divide by 1000 last, and let overflow throw"*).
+`float`, widen before multiplying, divide by 1000 last, and let overflow throw"* — the "never `float`" clause is superseded 2026-09-15: floating-point allowed).
 
 **FACT.** `tools/seedsmith/seedsmith/adapters/actions/distribution_planner/derive.py:73-90`:
 

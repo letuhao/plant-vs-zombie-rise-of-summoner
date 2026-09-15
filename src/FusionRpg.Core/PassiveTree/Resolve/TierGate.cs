@@ -10,7 +10,9 @@ public static class TierGate
 {
     /// <summary>The deepest tier reached, bounded by the catalog's own authored tier count — an
     /// ASCENDING INTEGER LOOP, never a closed form (solving `k·t(t+1)/2 &lt;= g` needs a square
-    /// root, and a float has no place on a gate that decides whether content exists). The loop
+    /// root, and a rounded root could misplace an exact boundary on a gate that decides whether
+    /// content exists — the integer loop is exact by construction; a design choice, not a
+    /// floating-point ban, which was removed 2026-09-15). The loop
     /// bound is structural (the tree's own shape), not a progression cap: nothing is refused, there
     /// is simply no node above the authored depth to buy.</summary>
     public static int Reached(long aptitudePoints, int authoredTierCount, long reqScalePoints)

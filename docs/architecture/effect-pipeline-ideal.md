@@ -53,7 +53,7 @@ atom on an actor's list. **None of them participates at runtime.** This is the s
 ### One power ladder · no hard caps · `long` for magnitudes · tunables not literals
 
 Contests read `Θ`, magnitudes read `P(Θ)`. A cap on a magnitude is a progression ceiling until proven
-otherwise. Never `float` for a magnitude. A number a balance pass would change lives in
+otherwise. Floating-point is allowed (owner ruling 2026-09-15). A number a balance pass would change lives in
 `data/tuning/`.
 
 ---

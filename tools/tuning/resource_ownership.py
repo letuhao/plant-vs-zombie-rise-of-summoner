@@ -88,8 +88,9 @@ def load_ownership_table(repo_root=None, version=1):
 
 
 def _require_int_kmilli(value, where):
-    # bool is a subclass of int in Python -- exclude it explicitly, same as every other tuning-file
-    # loader this session refuses a non-integer kMilli (no float on a magnitude path, ever).
+    # bool is a subclass of int in Python -- exclude it explicitly. kMilli is an integer per-mille
+    # field by this file's schema (the C# reader consumes it as an integer), so a non-integer value is a
+    # schema error. This is a schema contract, not a floating-point ban (removed 2026-09-15).
     if isinstance(value, bool) or not isinstance(value, int):
         raise ResourceOwnershipRejection(
             "%s must be an integer kMilli (per-mille magnitude, never float) -- got %r" % (where, value))

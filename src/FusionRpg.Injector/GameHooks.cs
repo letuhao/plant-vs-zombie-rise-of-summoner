@@ -18,6 +18,13 @@ public static class GameHooks
 {
     public static Board? Board;
     public static string? MatchKey;
+
+    /// <summary>lawn-combat-wire L-N31: the server run's key for the whole life of the board. <see cref="MatchKey"/> is the
+    /// RPG match's key and <c>MatchHost</c> clears it on <c>match.result</c>; events after that (end-of-level deaths, the
+    /// board's own <c>board.end</c>) still belong to this board's run, so the wire falls back to this key. Set in
+    /// <c>Board.Awake</c>, cleared after <c>board.end</c> is emitted.</summary>
+    static string? _runKey;
+
     public static int LastWave = -1;
     public static int CatalogPlantCount;
     public static readonly HashSet<IntPtr> Applied = new();
@@ -55,6 +62,9 @@ public static class GameHooks
         // lawn-combat-wire T12b: drop this match's regen-telemetry baseline -- the pools themselves
         // are already dropped by InjectorEntityRegistry.Clear() below.
         try { Effects.LawnBasicAttackCostCharger.ClearMatchState(); } catch { }
+        // Pins on entities still alive at match end would otherwise leak onto next match's reused ptrs.
+        try { Stats.InjectorSpawnHpPin.Clear(); } catch { }
+        try { Match.SpawnOriginTags.Clear(); } catch { }
         Effects.InjectorEntityRegistry.Clear();
         Effects.InjectorBoardSnapshot.Invalidate();
         Applied.Clear();
@@ -109,7 +119,20 @@ public static class GameHooks
                 // the occurrence while constructing the terminal payload.
                 dict["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence);
             }
+        }
+        catch (Exception ex)
+        {
+            try { CheatState.Error("emit stamp: " + ex.Message); } catch { }
+        }
 
+        // lawn-combat-wire L-N31: enqueue before the capture side effects. MatchHost.Apply and EffectRuntime.OnCapture
+        // emit their own events (cheat.apply, debug.effect.cleared on board.start) and clear MatchKey on match.result and
+        // board.end; enqueuing afterwards put effects on the wire ahead of their cause and sent match.result/board.end
+        // without a key, so no live run was ever closed or given a result.
+        RpgHost.Client?.Enqueue(kind, payload, MatchKey ?? _runKey);
+
+        try
+        {
             using var _perf = PerfProbe.Measure(PerfSection.MatchApply);
             Match.MatchHost.Apply(kind, dict);
         }
@@ -127,8 +150,6 @@ public static class GameHooks
         {
             try { CheatState.Error("effect capture: " + ex.Message); } catch { }
         }
-
-        RpgHost.Client?.Enqueue(kind, payload, MatchKey);
     }
 
     static bool IsProgressionLifecycle(string kind) =>
@@ -536,6 +557,7 @@ public static class GameHooks
             Board = __instance;
             ClearMatch();
             MatchKey = Guid.NewGuid().ToString();
+            _runKey = MatchKey;
             try { LastWave = __instance.theWave; }
             catch { LastWave = -1; }
             Dictionary<string, object> modifiers;
@@ -597,6 +619,7 @@ public static class GameHooks
             });
             try { Hud.OverlaySwitch.OnMatchEnd(); } catch { }
             MatchKey = null;
+            _runKey = null;
             ClearMatch();
             try { Fx.VfxDirector.ClearAll(); } catch { }
         }
@@ -638,6 +661,8 @@ public static class GameHooks
         public static void Postfix(Plant __instance)
         {
             if (__instance == null) return;
+            // L-N16: a real spawn clears a dead mark left by an earlier entity at this native address.
+            Effects.EventDrainHost.MarkSpawned(__instance.Pointer);
             Effects.InjectorEntityRegistry.Add(__instance);
             Effects.InjectorBoardSnapshot.Invalidate();
             if (!Ready()) return;
@@ -686,7 +711,9 @@ public static class GameHooks
                 ["ptr"] = GameDumps.Ptr(__instance),
                 ["reason"] = (int)reason,
                 ["reasonName"] = GameDumps.EnumName(reason),
-                ["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence)
+                ["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence),
+                // live-probe Task 18: game | debug | cheat — rides onto the PlantLost fact.
+                ["spawnOrigin"] = Match.SpawnOriginTags.TakeOnDeath(ptr)
             };
             AddFatalKiller(diePayload, TakeFatalKiller(ptr));
             Emit("plant.die", diePayload);
@@ -829,6 +856,7 @@ public static class GameHooks
         public static void Postfix(Zombie __instance)
         {
             if (__instance == null) return;
+            NoteZombieSpawned(__instance.Pointer);
             Effects.InjectorEntityRegistry.Add(__instance);
             Effects.InjectorBoardSnapshot.Invalidate();
             if (!Ready() || __instance.theZombieType == ZombieType.Nothing) return;
@@ -841,6 +869,7 @@ public static class GameHooks
     {
         public static void Postfix(Zombie __instance)
         {
+            if (__instance != null) NoteZombieSpawned(__instance.Pointer);
             Effects.InjectorEntityRegistry.Add(__instance);
             Effects.InjectorBoardSnapshot.Invalidate();
             if (!Ready() || __instance == null || __instance.theZombieType == ZombieType.Nothing) return;
@@ -877,6 +906,8 @@ public static class GameHooks
     {
         public static void Prefix(Zombie __instance, ref int theDamage, IDamageMaker damageFrom, DamageType theDamageType, PlantType reportType, bool fix)
         {
+            if (Effects.FsmTrace.Enabled)
+                CheatState.Note($"fsm-trace ZombieTakeDamage.Prefix RAW theDamage={theDamage} zombiePtr={__instance?.Pointer:X} zGod={CheatState.On("Z-GOD")}");
             BeginDamageSource(__instance?.Pointer ?? IntPtr.Zero, damageFrom);
             using var _perf = PerfProbe.Measure(PerfSection.TakeDamagePrefix);
             if (CheatState.On("Z-GOD")) { theDamage = 0; return; }
@@ -1318,7 +1349,46 @@ public static class GameHooks
                     var p = __instance.from;
                     if (p != null) { shooterPtr = p.Pointer; try { shooterTypeId = (int)p.thePlantType; } catch { } }
                 }
+                // 2026-09-15 fifth defect (live-proven): `from`/`from_zombie` is proven UNSET even at
+                // this exact spawn instant, not merely stale by hit time -- confirmed live via a
+                // dedicated trace, every fire, for a lab-overlay debug-spawned Peashooter (a
+                // debug.spawn-plant creature never goes through whatever vanilla firing-code path
+                // assigns the real field; the direct read above is a correct idea for a REAL
+                // player-placed plant, just not sufficient alone). Position fallback: `theBulletRow`
+                // is a real field (confirmed via metadata dump) and always set regardless of spawn
+                // path, so resolve the firing side's living occupant of that row from the SAME board
+                // snapshot InjectorCombatBridge/InjectorStatusBridge already share (E27) -- no second
+                // scan. A row holds many same-side entities (Sunflower, Wall-nut, shooter), so row alone
+                // is not an identity: InitData runs at the bullet's spawn point, i.e. the shooter's own
+                // cell, so match the nearest same-side entity by column (<= 1 away). No column, no
+                // candidate, or a tie ⇒ leave shooterPtr zero (no RPG record) rather than credit a guess.
+                // Known residual: a multi-lane shot (Threepeater side peas) can still match an adjacent-
+                // lane occupant at the same column -- tracked in lawn-combat-wire-todo next-run tasks.
+                // L-N22 observability: which source named the shooter (the direct field, the position fallback, or none).
+                var shooterVia = shooterPtr != IntPtr.Zero ? "from" : "none";
+                if (shooterPtr == IntPtr.Zero)
+                {
+                    try
+                    {
+                        var side = __instance.shootByZombie ? "zombie" : "plant";
+                        var row = __instance.theBulletRow;
+                        var bulletCol = FusionRpg.Injector.Lawn.LawnCoords.ColFromX(__instance.transform.position.x);
+                        var best = FusionRpg.Core.Combat.BulletShooterMatch.Resolve(
+                            Effects.InjectorBoardSnapshot.Capture().Entities, side, row, bulletCol);
+                        if (best != null &&
+                            ulong.TryParse(best.Ptr, System.Globalization.NumberStyles.HexNumber,
+                                System.Globalization.CultureInfo.InvariantCulture, out var raw))
+                        {
+                            shooterPtr = unchecked((IntPtr)raw);
+                            shooterTypeId = best.TypeId;
+                            shooterVia = "fallback";
+                        }
+                    }
+                    catch { }
+                }
                 Effects.EventDrainHost.CacheBulletShooter(__instance.Pointer, shooterPtr, shooterTypeId);
+                if (Effects.FsmTrace.Enabled)
+                    CheatState.Note($"fsm-trace BulletInit.Postfix bulletPtr={__instance.Pointer:X} shooterPtr={shooterPtr:X} shooterTypeId={shooterTypeId} via={shooterVia}");
             }
             catch { }
             // Highest-rate kind (~per pea). Emit only when something consumes it: an OnSpawn
@@ -1345,6 +1415,17 @@ public static class GameHooks
         }
     }
 
+    /// <summary>L-N16: a real zombie spawn edge (Start / InitHealth postfix) — clears the once-per-ptr
+    /// death latch and the drain liveness mark left by an earlier zombie at this native address, so
+    /// the new zombie takes RPG hits and its own death is flushed and forgotten. Never called from a
+    /// registry resync, which also re-adds dying-but-not-destroyed objects.</summary>
+    static void NoteZombieSpawned(IntPtr p)
+    {
+        if (p == IntPtr.Zero) return;
+        DeadZombies.Remove(p);
+        Effects.EventDrainHost.MarkSpawned(p);
+    }
+
     static void NoteZombieDead(Zombie z, int reason)
     {
         if (z == null) return;
@@ -1365,7 +1446,10 @@ public static class GameHooks
             ["typeName"] = GameDumps.EnumName(z.theZombieType),
             ["ptr"] = p.ToString("X"),
             ["reason"] = reason,
-            ["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence)
+            ["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence),
+            // live-probe Task 18: game | debug | cheat — rides onto the ZombieKilled fact, which the
+            // soul ledger's kill rows reference, so a debug-funded balance is attributable.
+            ["spawnOrigin"] = Match.SpawnOriginTags.TakeOnDeath(p)
         };
         AddFatalKiller(diePayload, TakeFatalKiller(p));
         DebugRuntime.Stamp(diePayload);
@@ -1513,6 +1597,10 @@ public static class GameHooks
         try { Effects.LawnElementResolverHost.Invalidate(ptr.ToString("X")); } catch { }
         try { Hud.ActorHudCache.Remove(ptr.ToString("X")); } catch { }
         try { Hud.ActorHudPool.ReleaseOwner(ptr.ToString("X")); } catch { }
+        // Same ptr-reuse hazard as LawnElementResolverHost.Invalidate above, same fix shape —
+        // see InjectorSpawnHpPin.Remove's own doc comment (confirmed live, not theoretical).
+        try { Stats.InjectorSpawnHpPin.Remove(ptr.ToString("X")); } catch { }
+        try { Match.SpawnOriginTags.Forget(ptr); } catch { }
     }
 
     internal static void RecapturePlant(Plant p, string source)

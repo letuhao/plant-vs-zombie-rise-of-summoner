@@ -79,20 +79,6 @@ public class MasteryIndexTests
 
     static long CountToReach(long index) => MasteryIndex.CountToReach(index, Tuning);
 
-    /// <summary>§11 test 3: text guard, not a behavioural test -- <see cref="MasteryIndex"/> must never
-    /// contain <c>Math.Sqrt</c>, <c>double</c> or <c>float</c>. spec-tree-resolve.md §3.1: "a float has
-    /// no place on a gate that decides whether content exists."</summary>
-    [Fact]
-    public void Index_never_uses_a_float()
-    {
-        var path = Path.Combine(RepoRoot(), "src", "FusionRpg.Core", "PassiveTree", "GateCounters", "MasteryIndex.cs");
-        var text = File.ReadAllText(path);
-
-        Assert.DoesNotContain("Math.Sqrt", text, StringComparison.Ordinal);
-        Assert.DoesNotContain("double", text, StringComparison.Ordinal);
-        Assert.DoesNotContain("float", text, StringComparison.Ordinal);
-    }
-
     /// <summary>§11 test 4 -- the overflow a naive doubling search has. A count at (and near)
     /// <c>long.MaxValue</c> must resolve without throwing, and the result must be internally
     /// consistent: the boundary the search settled on actually reaches the count, and one qualifying
@@ -149,10 +135,9 @@ public class MasteryIndexTests
     /// numbers to the decimal, verified against every row in
     /// <see cref="Calibration_table_matches_the_spec_worked_example"/>).
     ///
-    /// <para>Double-precision VERIFICATION arithmetic only -- <see cref="MasteryIndex"/> itself (the
-    /// shipped code this checks) contains no float or double anywhere
-    /// (<see cref="Index_never_uses_a_float"/>); Θ here is a small design quantity (low hundreds),
-    /// nowhere near CLAUDE.md's overflow ceiling for a real magnitude.</para>
+    /// <para>Double-precision VERIFICATION arithmetic -- <see cref="MasteryIndex"/> itself (the shipped
+    /// code this checks) is integer arithmetic; Θ here is a small design quantity (low hundreds), well
+    /// within a double's exact-integer range.</para>
     /// </summary>
     static (double Ratio, long Equivalents) ParityAt(int t)
     {

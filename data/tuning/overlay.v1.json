@@ -26,5 +26,12 @@
   "settingsGui": {
     "panelW": 280.0,
     "panelH": 196.0
+  },
+  "riftMenu": {
+    "anchorCenterX": 0.5,
+    "anchorCenterY": 0.62,
+    "widthFraction": 0.11,
+    "heightFraction": 0.16,
+    "minDevicePx": 44.0
   }
 }

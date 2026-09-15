@@ -127,6 +127,22 @@ public class MigrationParityTests
                 Assert.Equal("col=3,gridItemType=7,row=2", gotCanon);       // live: targets the cell
                 continue;
             }
+            // lawn-combat-wire (2026-09-15): a third genuine, deliberate content correction. The
+            // frozen oracle's `fx.overlay_damage` never carried an "amount" at all -- ResolveAmount
+            // (DamagePacketBuilder.cs) silently defaulted every direct hit through this atom to a
+            // SignedAmount of 0, regardless of the real incoming vanilla damage. Fixed live by
+            // authoring the already-built (never-used) event-linked ValueSpec marker
+            // ({"eventField":"damage","multiplierMilli":1000}) so the atom actually reads the real
+            // hit amount -- a wiring gap, not a new mechanism. Never mirrored into EffectSeedCatalog,
+            // same as the two exceptions above.
+            if (effectId == "fx.overlay_damage")
+            {
+                Assert.Equal("channel=\"hp\"", wantCanon); // frozen: no amount source at all
+                Assert.Equal(
+                    "amount={\"eventField\":\"damage\",\"multiplierMilli\":-1000},channel=\"hp\"",
+                    gotCanon); // live: reads the real event damage
+                continue;
+            }
 
             Assert.Equal(wantCanon, gotCanon);
         }

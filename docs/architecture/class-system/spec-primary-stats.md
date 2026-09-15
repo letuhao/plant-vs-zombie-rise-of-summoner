@@ -317,7 +317,7 @@ made and expensive once shipped: a default share, a scope-combination order, and
 - Store a posture on an actor (§2.2).
 - Put a balance number in this module (§5) — it belongs in `aptitude-tuning`.
 - Default an empty allocation to an even spread (§6 rule 3).
-- `int` or `float` for points (§6 rule 1).
+- `int` for points (§6 rule 1).
 - Treat `element_mastery` as a thirteenth aptitude (§3.3).
 
 ---

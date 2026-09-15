@@ -324,7 +324,7 @@ claims) and corrected all of them with code citations. 8 new tests (`AllStatusGo
 verified against the spec's exact acceptance criteria and all three named tests
 (`EffectivenessCannotBypassDefense`, `CooldownReductionUncapped`, `EnvelopeReferencesCatalog`)
 confirmed passing — but `CooldownMath.cs` turned out to violate the Timeline kernel's determinism
-guard (`double reductionRatio` in a directory that bans floating point outright,
+guard (`double reductionRatio` in a directory that bans floating point outright *(superseded 2026-09-15: floating-point allowed)*,
 `TimelinePurityGuardTests.Kernel_sources_contain_no_wall_clock_rng_or_floating_point`, never actually
 run against this file before). Converted to `long` per-mille arithmetic mirroring `ShieldMath`'s
 existing signed-permille-division pattern. A second, unrelated regression from the same rewrite pass

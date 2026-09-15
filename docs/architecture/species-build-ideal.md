@@ -99,8 +99,8 @@ proposal below is legal, stated in full so nobody has to go and find them.
    `data/tuning/<domain>.v{n}.json`, never as a `const`. A structural constant stays in code **and says
    why it is not tunable**. A missing tunable is a load rejection naming it, never a silent default.
 6. **Magnitudes are `long`.** Widen before multiplying, divide by 1000 last and exactly once, let
-   overflow throw. `float` stops being integer-exact at `Θ`=232 and per-mille `int` at 3,213 — both
-   inside real play.
+   integer overflow throw. Per-mille `int` exceeds its range at `Θ`=3,213 — inside real play. Floating-point
+   is allowed (owner ruling 2026-09-15 — precision is not overflow).
 7. **Save inputs, never computed totals** (`stat-system.md`): persist the *allocation*, never the stats
    it composes to.
 8. **An aptitude is a SOURCE, not a registered channel** (`decisions.md`, *Class system* row). An

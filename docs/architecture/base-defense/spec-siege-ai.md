@@ -205,8 +205,9 @@ If a tie survives every scoring term, break by **ordinal actor key** — `ReachM
 so there is nothing to roll. This is what satisfies Gate B's *"every new RNG stream is structurally
 unreachable when the feature is absent"* for free: absent streams cannot leak.
 
-**No `float`.** Every score is an integer per-mille sum. A `float` score reorders candidates
-differently on different runtimes, which is a replay divergence that reproduces nowhere.
+**Integer per-mille scores** (shipped). *(Superseded 2026-09-15: floating-point allowed — the former
+"No `float`" ban is removed; a floating score that feeds a hashed replay records the platform stamp,
+`ssot-power-scale.md` §10.7.)*
 
 ### 7. R6 — readability, and `Consideration.cs` is its first real caller
 
@@ -427,7 +428,7 @@ AI that reliably picks the *worst* option — the hardest possible bug to attrib
 **Ask first:** a seventh scoring term · changing `IBattleView` (its doc comment explains what that
 costs later).
 
-**Never:** RNG of any kind in the AI · `float` scores · recompute acting order mid-round · a
+**Never:** RNG of any kind in the AI · recompute acting order mid-round · a
 multiplicative score · a random move as a fallback · read `BattleRunState` directly instead of through
 `IBattleView` · a rule that can return "no preference" (§5.20 rule 1) · an override applied **on top
 of** the priority order rather than inside it (Isla) · a targeting UI (§5.20's ⛔ — statability, not
@@ -442,7 +443,7 @@ where to stop, and nothing more.
 |---|---|
 | `Same_board_same_decisions_10000_times` | **R5**, and it is the module's central claim |
 | `No_rng_is_reachable_from_the_ai` | source scan over the AI namespace for `Random`/`SeededRng` — structural, not empirical |
-| `No_float_in_the_scoring_path` | the same scan, for `float`/`double` |
+| `No_float_in_the_scoring_path` | the same scan, for `float`/`double` — *superseded 2026-09-15: floating-point allowed; this scan is void* |
 | `A_hold_stance_garrison_does_not_chase_bait` | **§5.16 R2's ⭐ finding** — the dragon-fly trick, prevented |
 | `Stance_and_aggression_are_independent_axes` | a taunt cannot pull a `Hold` actor off the objective |
 | `Hit_chance_outweighs_lethality_seventy_to_fifteen` | **XCOM's ordering**, asserted — the anti-suicidal invariant |
@@ -481,7 +482,7 @@ where to stop, and nothing more.
 ## Success criteria
 
 1. Identical decisions over 10,000 runs.
-2. No RNG and no `float` reachable from the AI — proven structurally, by scan.
+2. No RNG reachable from the AI — proven structurally, by scan. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 3. R1–R6 each have a named test.
 4. `SiegeAiPolicy` contains zero bare literals; `audit-magic-numbers.py` clean.
 5. A full siege auto-resolves with no human input and no FE.

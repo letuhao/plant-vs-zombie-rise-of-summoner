@@ -490,7 +490,7 @@ Today's shipped material vocabulary is `essence.{element}` (6 concrete elements)
 (`rpg_soul_balances` / `rpg_soul_ledger`, `src/FusionRpg.Data/Sqlite/RpgStore.cs:440`). Costs are
 expressed in those three today and move to whatever I9 lands.
 
-The table is **authored data**, not a formula — SC4 bans floats in content. These authoring guidelines
+The table is **authored data**, not a formula. *(The former "SC4 bans floats in content" reason is superseded 2026-09-15: floating-point allowed.)* These authoring guidelines
 generated it: `shard = ceil(L^1.6 / 2)`, `essence = ceil(ilvl × L / 40)`, `souls = 50 × L`.
 
 For an **Epic** item at **ilvl 64**:

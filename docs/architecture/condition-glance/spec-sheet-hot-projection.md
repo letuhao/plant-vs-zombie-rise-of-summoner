@@ -93,7 +93,7 @@ Shield **tab** empty wells: Hot + N&lt;3 dashed OK — **not** Q3 omit of the wh
 ## ActorHub gate
 
 - Consume Hub / effect / shield runtime via live bag.
-- Magnitudes: **`long`** for shield HP; overflow throws; no float.
+- Magnitudes: **`long`** for shield HP; overflow throws.
 
 ---
 

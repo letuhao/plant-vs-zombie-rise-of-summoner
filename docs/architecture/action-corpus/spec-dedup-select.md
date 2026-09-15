@@ -72,7 +72,7 @@ bag of the candidate's `name` and `rationale`, in per-mille integer arithmetic**
 `similarityMilli = 1000 * |A ∩ B| / |A ∪ B|`, with tokens produced by lowercasing, splitting Latin runs
 on non-alphanumerics, and splitting CJK **per character** — the corpus is bilingual and motifs are CJK
 (`motifsUsed: ["铁头功"]`), so a whitespace split would make every CJK field one token and every pair
-of them distance 1. No float anywhere: per-mille integers, divided once, per the repo's numeric rule.
+of them distance 1. Per-mille integers, divided once (this module's representation; floating-point is allowed per owner ruling 2026-09-15).
 
 **Threshold: 700‰, the default in `data/tuning/action-dedup.v1.json`.** At 700‰ two candidates share
 more than two thirds of their prose vocabulary — the point at which a reader would call them

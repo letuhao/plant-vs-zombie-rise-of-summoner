@@ -6,8 +6,8 @@ namespace FusionRpg.Core.Tests.Actions;
 
 /// <summary>
 /// P0.1 (action-todo.md): the purity scan extended to <c>Core/Actions/</c> before the first line of
-/// action code lands. Purity rules (wall clock, ambient RNG, floating point, dictionary enumeration)
-/// are ON with no exceptions; tick-path rules (LINQ, scene scans) are OFF for the whole directory —
+/// action code lands. Purity rules (wall clock, ambient RNG, dictionary enumeration) are ON with no
+/// exceptions — floating point is not a purity rule since the 2026-09-15 owner ruling; tick-path rules (LINQ, scene scans) are OFF for the whole directory —
 /// <c>TargetResolver</c> and the runtime generator (A13) need LINQ, and their allocation is asserted
 /// directly by their own tests rather than by this blunt static ban.
 ///
@@ -24,7 +24,7 @@ public class ActionsPurityGuardTests
     }
 
     [Fact]
-    public void Action_sources_contain_no_wall_clock_ambient_rng_or_floating_point()
+    public void Action_sources_contain_no_wall_clock_ambient_rng_or_dictionary_enumeration()
     {
         var dir = ActionsDir();
         Assert.True(Directory.Exists(dir), $"action source dir not found: {dir}");
@@ -33,7 +33,7 @@ public class ActionsPurityGuardTests
 
         var offences = KernelPurityScan.Scan(dir);
         Assert.True(offences.Count == 0,
-            "action-layer purity violated (no wall clock, no ambient RNG, no floating point, " +
+            "action-layer purity violated (no wall clock, no ambient RNG, " +
             "no dictionary enumeration):\n" + string.Join("\n", offences));
     }
 
@@ -42,8 +42,6 @@ public class ActionsPurityGuardTests
     [InlineData("readonly Random _rng = new();", "Random")]
     [InlineData("var g = Guid.NewGuid();", "Guid.NewGuid")]
     [InlineData("var h = key.GetHashCode();", ".GetHashCode(")]
-    [InlineData("double ratio = 0.5;", "double ")]
-    [InlineData("float dt = 0.016f;", "float ")]
     public void A_planted_violation_still_fails_inside_Actions(string badLine, string expectedToken)
     {
         // A guard that cannot fail is decoration (P0.1 acceptance). Proves purity is still ON for

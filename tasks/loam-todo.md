@@ -334,7 +334,7 @@ done, hand over a commit message and the paths touched.
   verified by inspection — see L15's note on the pre-existing test gap for this generic path).
 - [x] **Two golden moves total** (L2, L15), both with reasons. No third — confirmed no other stored
   hash literal exists in the suite.
-- [x] All four guard scripts green; no new float, clock or RNG violation (`WorldDeterminismGuardTests`
+- [x] All four guard scripts green; no new clock or RNG violation *(reworded 2026-09-15 per owner ruling: floating-point allowed)* (`WorldDeterminismGuardTests`
   passing within the full Core.Tests green run).
 
 ---

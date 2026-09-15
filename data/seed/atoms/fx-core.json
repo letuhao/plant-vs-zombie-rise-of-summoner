@@ -36,7 +36,8 @@
       "name": "Overlay HP delta",
       "icdKey": "fx.overlay_damage",
       "params": {
-        "channel": "hp"
+        "channel": "hp",
+        "amount": { "eventField": "damage", "multiplierMilli": -1000 }
       },
       "when": {
         "trigger": "OnDamageDealt"

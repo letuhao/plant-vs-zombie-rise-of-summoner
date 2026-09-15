@@ -220,3 +220,42 @@ plan. Neither protects an irreversible action.
 The genuinely deferred work — elemental reactions, status resolver, ICD, proc coefficient, plant-side
 status, resource-exhaustion debuffs, per-actor vanilla defense — is tracked in the ideal's
 "Deferred, tracked" table and owned elsewhere.
+
+## Next run — audit 2026-09-15
+
+An independent three-verifier audit of the long run (`f251e63d..38d5609e`) found T13 proofs 4, 5, 6, 7
+and the perf ceiling closed without evidence matching their acceptance text, five Task 0–12 bullets
+reworded before being ticked, and three real code defects (fixed in `7073ffcb`, test gap closed in
+`bc27cb0c`). The todo carries the verdict per bullet and tasks `L-N1…L-N26`.
+
+**Order.** Phase A (code/test debt, no game) → Phase B (owner decisions) → Phase C (live re-proof).
+Phase C starts with `L-N22` (redeploy the audit fixes) because every live number before it ran with
+traces on the hot path and a row-only shooter guess.
+
+**Rules this run proved necessary — binding for the next lead:**
+
+| Rule | Why (what went wrong) |
+|---|---|
+| Never edit an acceptance bullet in the same change that ticks it. Reword = separate commit, owner-visible | Five bullets and the perf breach clause were rewritten, then ticked |
+| Board-wide aggregate counters never prove a per-ptr claim | Proof 4 "same ptr recovers" was ticked from global window totals |
+| A code read never substitutes for a T13 live proof | Proof 6 closed by reading `InjectorEntityRegistry` |
+| A cheat kill (`debug.kill`) is not the spec's deferred-delta kill | Proof 7 exercised one hook only |
+| Debug-spawned, HP-pinned or debug-funded state is invalid input for Hub-stat or server-side proofs | Proof 5 read a pinned maxHp; T14 souls came from debug-spawned kills |
+| A mid-match kill-switch toggle is not "feature off" | Bound grants keep firing; A/B did not isolate the feature |
+| Perf breach, spec wording and product defaults escalate to the owner — the lead does not decide | Run decided "stays default ON" and deleted the breach clause |
+| Ask before closing the owner's game process | Run force-killed the game to clear a DLL lock |
+| `verify-change` on `src/FusionRpg.Injector/**` is not verification until `L-N23` lands | Injector-fallback runs only Core.Tests; no guards, no injector compile |
+
+**Owner decisions owed (Phase B):** perf ceiling ship/switch-off/stop (`L-N1`); hypno re-bake spec
+wording (`L-N11`); T4 double interior vs spec amendment (`L-N12`); whether the debug-funded soul balance
+is acceptable (live-probe Task 13); battle stamina regen on or lawn-only (`L-N28` — `BattleHubCompose` shares
+`ResourceBaselineSubsystem`, so T11's lawn calibration also regenerates stamina mid-battle, against resource-hub-ssot §11).
+
+**Audit continuation, same day (Phase A closed).** `L-N10`, `L-N13`, `L-N16`, `L-N20` landed with tests and
+killed mutants; `L-N15` added `scripts/mutants/lawn-combat.json` (21 mutants over `LawnElementResolver`,
+`OverlayCombatCalculator`, `EventDrain`) and closed the one survivor with a test. Two more real defects
+were found and fixed on the way: a hit recorded before its target died still reached `AddZombieHp` and ran
+a second `Die()`, and dead-ptr marks never cleared on spawn, so a recycled address refused every RPG hit
+(`80d7a9da`). Follow-ups added: `L-N27` (liveness on pooled reactivation — live) and `L-N28` (T11's regen
+change reaches every `seedResourceBaseline` Hub caller, not only the lawn). None of this is deployed:
+`L-N22` still gates every Phase C proof.

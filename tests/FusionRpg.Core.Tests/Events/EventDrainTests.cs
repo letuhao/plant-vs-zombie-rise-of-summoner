@@ -222,6 +222,29 @@ public class EventDrainTests
         Assert.Equal("C", h.Seen[2].TargetPtr);
     }
 
+    /// <summary>lawn-combat-wire L-N15 (mutant "records kept by a ptr flush re-enter the ring in reverse
+    /// order" survived): the records a flush leaves behind must drain in their original order. The test
+    /// above keeps only one, so a reversal could not show; a dealt/taken pair drained out of order escapes
+    /// the coalescer's pair suppression.</summary>
+    [Fact]
+    public void FlushForPtr_leaves_every_other_ptrs_records_in_their_original_order()
+    {
+        var h = new Harness();
+        h.Drain.SessionMode = true;
+        h.Drain.Record(h.Rec(target: 0xC));
+        h.Drain.Record(h.Rec(target: 0xB));
+        h.Drain.Record(h.Rec(target: 0xD));
+        h.Drain.Record(h.Rec(target: 0xE));
+        h.Drain.Record(h.Rec(target: 0xB, amount: -3));
+        h.Drain.Record(h.Rec(target: 0xF));
+
+        h.Drain.FlushForPtr(new IntPtr(0xB));
+        h.Seen.Clear();
+        h.Drain.Drain(long.MaxValue);
+
+        Assert.Equal(new[] { "C", "D", "E", "F" }, h.Seen.Select(d => d.TargetPtr).ToArray());
+    }
+
     [Fact]
     public void FlushAllAndReset_drains_everything_and_clears_interning()
     {

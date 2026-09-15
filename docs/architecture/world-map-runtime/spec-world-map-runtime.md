@@ -564,7 +564,7 @@ matrix lives on the descriptor tests. Do not keep two matrices that can drift.
 | Edge-scroll margin / speed | **Structural** until a feel pass promotes them | named const + comment |
 
 Magnitudes on the pin (net loam) stay `long` via `world-numbers`. This module does not introduce
-`float` HP or a per-mille camera.
+a per-mille camera.
 
 ---
 

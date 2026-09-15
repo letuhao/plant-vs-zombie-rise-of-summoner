@@ -294,7 +294,7 @@ are `long`, per `CLAUDE.md` "Numeric overflow" and this codebase's own establish
 other ‰ tunable (`spec-loot-pack.md` Numeric types: "Per-mille tunables are `long`") — even though the
 legal range is `[0,1000]`, matching house style rather than narrowing to `int` on a case-by-case basis.
 `seq` stays `int` (inherited from `corpse-cache`'s own schema, a structural bound on items per cache).
-No `float`, no `double`, no `System.Random` anywhere in this module — `SeededRng`/`NextPerMille()` only.
+No `System.Random` anywhere in this module — `SeededRng`/`NextPerMille()` only. *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 

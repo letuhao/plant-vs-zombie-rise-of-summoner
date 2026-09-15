@@ -65,4 +65,23 @@ public static class RiftMenuOverlayLayout
         var centerY = primary.Y + Math.Max(0f, primary.Height) * MiniAnchorYPercent;
         return new RiftOverlayRect(centerX - width / 2f, centerY - height / 2f, width, height);
     }
+
+    /// <summary>
+    /// The companion's rect expressed as 0..1 anchors of a parent that already occupies
+    /// <paramref name="parent"/> (Decision 18 places the art as a uGUI node, so its children must be
+    /// anchored in the parent's own normalized space rather than in screen pixels). Reuses
+    /// <see cref="MiniCompanion"/> so the reviewed composition stays the single source.
+    ///
+    /// uGUI <c>anchorMin</c>/<c>anchorMax</c> are **relative to the parent's rect**, so the parent's
+    /// origin must be subtracted before dividing by its size — otherwise a parent that does not start
+    /// at 0,0 (ours starts at ~0.445,0.54) pushes the child far outside itself.
+    /// </summary>
+    public static RiftOverlayRect MiniCompanionInParent(RiftOverlayRect parent)
+    {
+        if (parent.Width <= 0f || parent.Height <= 0f) return new RiftOverlayRect(0f, 0f, 0f, 0f);
+        var pixel = MiniCompanion(parent);
+        return new RiftOverlayRect(
+            (pixel.X - parent.X) / parent.Width, (pixel.Y - parent.Y) / parent.Height,
+            pixel.Width / parent.Width, pixel.Height / parent.Height);
+    }
 }

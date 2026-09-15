@@ -135,7 +135,7 @@ tests/FusionRpg.Core.Tests/Battle/Timeline/             (readiness math, monoton
 
 - **Always:** integer math with explicit rounding; readiness `>= 1` tick; speed clamped before division; `classic-round` ignores speed.
 - **Ask first:** which turn economy the interactive mode uses; giving `classic-round` a speed-driven readiness (that is a balance change on the order of the U10 re-tune and needs a win-rate sweep).
-- **Never:** element-splitting the speed channels; floating-point in the readiness path; a readiness result that can schedule at `now`.
+- **Never:** element-splitting the speed channels; a readiness result that can schedule at `now`.
 
 ## Success criteria
 

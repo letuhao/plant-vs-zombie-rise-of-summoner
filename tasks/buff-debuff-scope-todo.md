@@ -81,7 +81,7 @@ session.
 
 - [x] **T4: purity guard + architecture test for `Core/Scope/`** · **S**
   - Same shape as `ActionsPurityGuardTests` (P0.1's own precedent) — no wall clock, no ambient RNG, no
-    floating point, no dictionary enumeration, no tick-path exemption. Plus a source-scan test: nothing
+    floating point *(superseded 2026-09-15: floating-point allowed)*, no dictionary enumeration, no tick-path exemption. Plus a source-scan test: nothing
     under `Core/Scope/` references `FusionRpg.Core.Battle`, `FusionRpg.Core.World`, or
     `FusionRpg.Core.Effects` (referencing `FusionRpg.Contracts` is expected, not a violation).
   - Acceptance: 6 planted-violation cases fail (`DateTime`, `Random`, `Guid.NewGuid`, `.GetHashCode(`,

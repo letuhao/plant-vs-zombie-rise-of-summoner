@@ -37,12 +37,14 @@ namespace FusionRpg.Core.Tests.PassiveTree.Catalog;
 ///       `NodeAtom.SoulCurveId` had zero consumers that ever acted on its value — retired entirely
 ///       rather than extended. `SoulCurveIdPattern` and all four tests this gap's own closure added are
 ///       removed below, not left asserting a field that no longer exists.**
-///   4.  no reflection sweep existed proving every stored magnitude is `long`, nor one that would
-///       fail if a `float` field were added. Closed below, with an automated falsifiability proof —
-///       `The_float_or_double_sweep_actually_turns_red_on_a_planted_float_field` and
-///       `The_classification_sweep_actually_turns_red_on_an_unclassified_numeric_field` run the exact
-///       same helpers the production sweeps call, against decoy types built to fail them, rather than
-///       asserting by code comment that a manual edit was tried and reverted.
+///   4.  no reflection sweep existed proving every stored magnitude is `long`. Closed below, with an
+///       automated falsifiability proof —
+///       `The_classification_sweep_actually_turns_red_on_an_unclassified_numeric_field` runs the exact
+///       same helper the production sweep calls, against a decoy type built to fail it, rather than
+///       asserting by code comment that a manual edit was tried and reverted. (A companion sweep that
+///       refused any `float`/`double` record field was removed by the 2026-09-15 owner ruling lifting
+///       the project-wide floating-point ban; a new numeric field of any type still has to be
+///       classified by the sweep that remains.)
 /// </summary>
 public class CatalogHardeningTests
 {
@@ -110,54 +112,8 @@ public class CatalogHardeningTests
         t == typeof(int) || t == typeof(long) || t == typeof(short) || t == typeof(byte)
         || t == typeof(float) || t == typeof(double) || t == typeof(decimal);
 
-    /// <summary>The actual scan logic, extracted so it can be run against a real catalog record type
-    /// (the production tests below) AND against a throwaway decoy type (the falsifiability tests) —
-    /// the same code path, not a re-implementation of it, is what proves the sweep can fail.</summary>
-    static IEnumerable<string> FloatOrDoubleViolations(Type recordType) =>
-        recordType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p =>
-            {
-                var underlying = Nullable.GetUnderlyingType(p.PropertyType) ?? p.PropertyType;
-                return underlying == typeof(float) || underlying == typeof(double);
-            })
-            .Select(p => $"{recordType.Name}.{p.Name} is {p.PropertyType.Name} — no catalog record " +
-                        "field may be float or double (CLAUDE.md rule 2; spec-tree-catalog.md §2.3).");
-
-    [Fact]
-    public void No_record_field_is_float_or_double_a_deliberately_added_one_fails_this()
-    {
-        // CLAUDE.md rule 2: "Never float for a magnitude." A `double` is refused for the same reason
-        // this module's own doc comment gives for `long` over `int`: the catalog is committed,
-        // byte-identical, diffable content (§5) — a floating type is non-deterministic across
-        // runtimes and has no place in a hashed/persisted path either.
-        foreach (var recordType in CatalogRecordTypes)
-        {
-            var violations = FloatOrDoubleViolations(recordType).ToList();
-            Assert.True(violations.Count == 0, string.Join("; ", violations));
-        }
-    }
-
-    /// <summary>A decoy type — never referenced by production code — that plants exactly the defect
-    /// class §2.3/CLAUDE.md rule 2 forbids. Not a catalog record; exists only so the falsifiability
-    /// test below can prove <see cref="FloatOrDoubleViolations"/> actually turns red on a `float`
-    /// field, the same way `AtomCatalogSsotDriftTests.ChannelAndVocabularyCountsMatchCode_failsOnAPlantedDrift`
-    /// proves its own drift check is not vacuous elsewhere in this program.</summary>
-    sealed record PlantedFloatFieldDefect(long Fine, float Bogus);
-
-    [Fact]
-    public void The_float_or_double_sweep_actually_turns_red_on_a_planted_float_field()
-    {
-        // Runs the IDENTICAL helper the production test above calls, against a type built to fail it
-        // — this is the "reflection sweep fails when a float field is added on purpose" proof the
-        // todo's own Verification line names, made automated rather than asserted by a code comment.
-        var violations = FloatOrDoubleViolations(typeof(PlantedFloatFieldDefect)).ToList();
-
-        Assert.Contains(violations, v => v.Contains(nameof(PlantedFloatFieldDefect.Bogus)) && v.Contains("float"));
-    }
-
-    /// <summary>The classification-sweep logic, extracted for the same reason
-    /// <see cref="FloatOrDoubleViolations"/> is: so the falsifiability test below runs the identical
-    /// code path against a decoy type instead of re-implementing the check.</summary>
+    /// <summary>The classification-sweep logic, extracted so the falsifiability test below runs the
+    /// identical code path against a decoy type instead of re-implementing the check.</summary>
     static IEnumerable<string> UnclassifiedOrMisclassifiedNumericFields(Type recordType)
     {
         foreach (var prop in ScalarNumericProperties(recordType))

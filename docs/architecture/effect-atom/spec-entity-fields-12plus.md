@@ -266,12 +266,14 @@ for the direction that is *not* obvious — a **raise**, not only the reduction 
 
 ## 3. What it must NOT do
 
-- **`long` for every magnitude, never `float`.** `plantShield`, `plantLevel` and `shootingLevel` are
+- **`long` for every integer magnitude.** `plantShield`, `plantLevel` and `shootingLevel` are
   magnitudes: `long` end to end, clamped to `int` only at the Unity write boundary, exactly as
-  `EntityStatWriter.cs:43-50` already does. A `float` magnitude stops being integer-exact at index 232.
-- **`double` only where the field is a ratio or a timer**, matching the interval precedent
-  (`EntityBaseline.cs:19-21`) — and **never in a hashed or persisted path**, which is non-deterministic
-  across runtimes.
+  `EntityStatWriter.cs:43-50` already does. Floating-point is allowed (owner ruling 2026-09-15 — precision
+  is not overflow).
+- **`double` where the field is a ratio or a timer**, matching the interval precedent
+  (`EntityBaseline.cs:19-21`); a `double` in a hashed or persisted path records the platform stamp
+  (`ssot-power-scale.md` §10.7). *(Reworded 2026-09-15 per owner ruling: floating-point allowed — was
+  "only … never in a hashed or persisted path".)*
 - **Widen before multiplying**, and **divide by 1000 exactly once, last.** **Overflow throws.**
 - **No hard progression ceiling.** No cap on `plantShield` or the levels. The interval floor E16
   enforces is **structural** (a zero interval is a divide-by-zero or an infinite fire rate) and must

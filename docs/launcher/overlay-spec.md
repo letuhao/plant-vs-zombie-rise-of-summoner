@@ -55,8 +55,18 @@ src/FusionRpg.Injector/
   Hud/OverlaySettingsGui.cs       -> "Web UI button" row in the F7 panel
   Host/InjectorLoop.cs            -> OverlaySwitch.Tick() beside OverlayInput.Tick()
   GameHooks.cs                    -> OverlaySwitch.OnMatchStart() after board.start
-src/FusionRpg.Injector.BepInEx/Plugin.cs             -> RpgLoop.OnGUI  (one added draw line)
-src/FusionRpg.Injector.MelonLoader/MelonFusionRpgMod.cs -> OnGUI       (one added draw line)
+src/FusionRpg.Injector.BepInEx/Plugin.cs             -> RpgLoop.OnGUI  (in-match button line only)
+src/FusionRpg.Injector.MelonLoader/MelonFusionRpgMod.cs -> OnGUI       (in-match button line only)
+src/FusionRpg.Core/Overlay/OverlayCommandNames.cs -> "overlay.hide", the page-close command name (new, rift-gate)
+src/FusionRpg.Core/Overlay/OverlayEmbedMarker.cs  -> the ?embed=1 marker both hosts append   (new, rift-gate)
+src/FusionRpg.Server/OverlayEndpoints.cs          -> POST /api/overlay/leave -> the command seam (new, rift-gate)
+src/FusionRpg.Server/InjectorCommandSender.cs     -> the one enqueue-and-send implementation      (new, rift-gate)
+web/fusion-rpg-web/src/shell/OverlayLeave.tsx     -> the page's Leave control (embedded visits only) (new, rift-gate)
+web/fusion-rpg-web/src/shell/overlayEmbed.ts      -> reads the marker; Leave is absent without it (new, rift-gate)
+tests/FusionRpg.Server.Tests/
+  OverlayLeaveEndpointsTests.cs   -> leave sends overlay.hide and never acks the story       (new, rift-gate)
+tests/FusionRpg.Guard.Tests/
+  RiftGateEmbedLeaveGuardTests.cs -> the three marker copies agree; leaving is not an ack     (new, rift-gate)
 tests/FusionRpg.Launcher.Tests/
   GameWindowInteropTests.cs       -> ParseOverlayKey table tests
   OverlayPipeServerTests.cs       -> command-line parse table tests                            (new, wave 1)
@@ -83,6 +93,19 @@ On the injector side, match the VFX overlay code: static class, cached `GUIStyle
 4. **Hotkey config** — `overlayHotKey` in `%AppData%\FusionRpg\launcher.json` (any WPF `Key` name; unknown/modifier-only names fall back to F10). Registration failure (key owned by another app) logs and leaves the button as the path.
 5. **WebView2 Runtime missing** — overlay shows install instructions (developer.microsoft.com link) instead of a blank window; "Open RPG UI" in a normal browser remains the fallback. User data dir: `%LocalAppData%\FusionRpg\webview2` (never next to the exe).
 6. **Esc** and the in-overlay "Back to game" button behave exactly like the hotkey's hide path.
+6b. **Page-initiated close (rift-gate `overlay-hide`).** The web FE's **Leave** control asks the host to
+    close the window over the *server→injector command seam* — the same one every other host command
+    uses — and the injector then hides locally (injector host) or relays one pipe verb (launcher host).
+    So this is **one more route to the same hide**, not a second behaviour: it converges on the same
+    hide as Esc, exactly like the three toggle entry points converge on one toggle method (rule 1).
+    Two contracts ride with it:
+    - **Hiding is not acknowledging the story.** Closing the window must never write the onboarding /
+      story ledger — the prologue dialog's own dismiss path is what records `completed|skipped`, and a
+      close that reached it would let one Esc burn the prologue.
+    - **The embed marker.** Both hosts append `?embed=1` to the URL they navigate to, so the page knows
+      it is embedded and that Leave can work. It is a **query flag, not a hash fragment** (the SPA uses a
+      HashRouter, so the hash is the router's domain). A plain browser visit carries no marker, and the
+      page must behave correctly without one — the Leave control is simply not offered.
 7. **Exclusive fullscreen fallback** — if the game is the foreground window in exclusive-fullscreen D3D mode (`SHQueryUserNotificationState` = `QUNS_RUNNING_D3D_FULL_SCREEN`), topmost windows can't cover it: the launcher minimizes the game and the overlay opens maximized as a normal window switch. Toggling back restores + refocuses the game (minimized-window rects are ignored by the positioner). Logged with a hint that borderless mode gives the seamless toggle.
 
 ## In-game switch button
@@ -105,7 +128,7 @@ The Launcher is not a hub client, and the button must not depend on the server b
 | Pipe | `\\.\pipe\FusionRpg.Overlay`, local machine only (`NamedPipeClientStream(".", …)`) |
 | Direction | One-way, injector → launcher |
 | Server | Launcher: async accept loop, one message per connection |
-| Protocol | One ASCII line: `toggle` or `ping`. Unknown line → log + ignore, never throw. Only what the injector actually sends — unreachable verbs are untested surface, so wave 2 adds its own when something calls them |
+| Protocol | One ASCII line: `toggle`, `ping` or `hide`. Unknown line → log + ignore, never throw. Only what the injector actually sends — unreachable verbs are untested surface, so wave 2 adds its own when something calls them. `hide` is rift-gate `overlay-hide`'s page→host close (rule 6b) and routes to the same hide Esc uses |
 | ACL | Windows default for named pipes: full control to the creator, LocalSystem and administrators; **read** to Everyone. The pipe is `PipeDirection.In`, so read access alone cannot send a command — only a same-user process can write. No remote clients (`NamedPipeClientStream(".", ...)`), no impersonation |
 
 Rules:
@@ -115,7 +138,7 @@ Rules:
 - **Debounce 300 ms.** A held or double click sends one message. The **in-flight gate comes first**: a connect can take 250 ms, so a send may outlive the window, and a click landing during one is refused *without* being recorded as a send — otherwise a click that never reached the pipe would silently push the window forward and lock the player out for another 300 ms.
 - **Availability probe** — `ping` on match start and every 30 s, off-thread. The cached result drives button visibility. Never probe per frame.
 - **Log on transition only** — one line when the host becomes reachable or unreachable, never per attempt.
-- **One code path on the launcher side** — the pipe handler marshals to the UI thread and calls the same toggle method as `WM_HOTKEY`. The pipe must not grow its own show/hide logic.
+- **One code path on the launcher side** — the pipe handler marshals to the UI thread and calls the same toggle method as `WM_HOTKEY`. The pipe must not grow its own show/hide logic. The `hide` verb (rule 6b) obeys the same rule: it calls the same hide path Esc uses, and is not a third behaviour.
 - **Client timeout.** A connected client gets 2 s to send its line. With a single server instance, a client that connects and never writes would otherwise park the listener for the rest of the session and silently kill the button.
 - **One owner per machine.** The pipe allows a single server instance, so a second launcher cannot claim it. Claiming the name and serving a connection therefore fail for different reasons and are handled differently: a launcher that cannot claim it says so **once** and re-checks every 5 s quietly, then logs again only when it takes over. Treating that as an ordinary connection error logs twice a second for as long as both launchers run.
 
@@ -138,8 +161,12 @@ Wave 2 moves the view into the game process so the overlay exists however the ga
 - **Payload.** Only `Microsoft.Web.WebView2.Core.dll` + the x64 loader reach the player (~752 KB). The package’s WPF/WinForms wrappers, XML docs and arm64/x86 natives are trimmed by MSBuild targets and guard-pinned — everything referenced lands in the player’s game folder.
 - **Own user-data folder.** The in-game view uses `%LocalAppData%\FusionRpg\webview2-game`, **not** the Launcher’s `\webview2`. A WebView2 user-data folder cannot be shared by two processes, and both hosts can be running at once (a player who launched through the Launcher but set `overlayHost=injector`) — sharing it fails init.
 - **Stays on our origin.** `NavigationStarting` cancels anything that is not the server’s own scheme+host+port, and `NewWindowRequested` never opens a second in-process window. Off-origin links are handed to the player’s real browser instead — and only `http(s)` ever reaches the shell, since `Process.Start` with `UseShellExecute` would otherwise invoke whatever handler is registered for `file:`, `javascript:` or an app scheme. Both rules are pure and unit-tested in `OverlayViewPolicy`.
-- **Started only when wanted.** The view is not created while the button toggle is off — in this mode there is no other way to open it, so a browser process would be pure waste.
-- **Getting out.** The view covers the game, so the button that opened it is underneath — wave 1’s three exits (Esc, WPF chrome, launcher hotkey) do not exist here. **Esc and F10 close it** via `AcceleratorKeyPressed`, and the window **auto-hides when the game stops being the foreground process**: it is topmost and `WS_EX_TOOLWINDOW`, so left up over another application it would be unreachable by alt-tab. Both rules live in `OverlayViewPolicy` (unit-tested) and are guard-pinned.
+- **Started only when wanted.** In the launcher host the view is created on first toggle. In the
+  **injector** host the view is started on init rather than waiting for the button preference: the menu
+  tombstone (rift-gate) is an independent entry to the overlay, so "with the button off there is no other
+  way to open it in this mode" stopped being true. The button preference still suppresses only the
+  **in-match button** — it no longer gates the view's existence.
+- **Getting out.** The view covers the game, so the button that opened it is underneath — wave 1’s three exits (Esc, WPF chrome, launcher hotkey) do not exist here. **Esc and F10 close it** via `AcceleratorKeyPressed`, **the page's own Leave control closes it** (rule 6b), and the window **auto-hides when the game stops being the foreground process**: it is topmost and `WS_EX_TOOLWINDOW`, so left up over another application it would be unreachable by alt-tab. Both rules live in `OverlayViewPolicy` (unit-tested) and are guard-pinned.
 - **Loading.** Init runs at game start, which can beat the server to listening, so a failed load is retried on the next open; a page that loaded is never re-navigated (that would throw away SPA state, which hide-not-destroy exists to preserve).
 - **Teardown.** Both hosts call `OverlaySwitch.Shutdown()` from `OnApplicationQuit`, which enqueues *and joins* the host thread for up to 2 s — the thread is a background thread, so without the join the process can exit before teardown runs, which is exactly how an orphan happens. An orphaned `msedgewebview2.exe` is the spike’s stated no-go — check it by command line (`*FusionRpg*`), never by process name: a normal desktop runs a dozen unrelated WebView2 processes from Edge.
 - **Degradation.** No Evergreen runtime, no loader, or any init failure → logged once, `Available` stays false, the button hides. Never a crash, never a hang.
@@ -231,7 +258,7 @@ on purpose requires `FUSIONRPG_ALLOW_NO_MELON=1` — deliberate, not silent. Cov
 
 - **Always:** run launcher unit tests before handing back; keep all Win32 inside `GameWindowInterop`; keep the overlay hide-not-destroy invariant; keep every toggle entry point on one code path; keep pipe I/O off the Unity main thread; log every failure path (no silent no-ops).
 - **Ask first:** changing the default hotkey; adding a settings UI; bundling/auto-installing the WebView2 Runtime; making the overlay pause or send input to the game; adding any second action to the in-game button; flipping `overlayHost` to `injector` by default; new NuGet dependencies.
-- **Never:** touch the game process/window beyond focus + rect reads; route gameplay input or gameplay state through the overlay pipe; make the in-game button a second cheats surface; render the web UI inside Unity as a texture; ship an embedded browser inside the game folder in wave 1; auto-close the game.
+- **Never:** touch the game process/window beyond focus + rect reads; route gameplay input or gameplay state through the overlay pipe; make the in-game button a second cheats surface; render the web UI inside Unity as a texture; ship an embedded browser inside the game folder in wave 1; auto-close the game; **let a page-initiated close write the story/onboarding ledger** (rule 6b).
 
 ## Success criteria
 
@@ -274,7 +301,7 @@ on purpose requires `FUSIONRPG_ALLOW_NO_MELON=1` — deliberate, not silent. Cov
 6. **Transport** → local named pipe, injector → launcher; server relay and synthetic keystrokes rejected.
 7. **Button is in-match chrome** → hidden outside a live board. Its corner was picked against the seed bank and shovel, not menu screens, and the global hotkey covers the menus.
 8. **Button scales with display height** → 1× at 1080p, capped 3×, never below 1×. Geometry is pure and lives in Core.
-9. **Wire protocol is `toggle` + `ping` only** → `show` / `hide` dropped; nothing sent them, and wave 2 adds what it calls.
+9. **Wire protocol is `toggle` + `ping` + `hide`** → the original `show` was dropped (nothing sent it; hide-not-destroy means a separate show is a toggle). `hide` was added later by rift-gate `overlay-hide` so the page's Leave control can close the window over the same pipe, routing to the same hide Esc uses (rule 6b) — it is not a second behaviour.
 
 ## Open questions
 

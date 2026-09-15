@@ -768,7 +768,7 @@ time, per `wonder-structure`'s own design.
     precedent); the existence cap is read from `WonderPolicy.ExistenceCapFor`, never a literal.
 [x] No hard progression ceilings: the existence cap is tunable, never hard-coded to `1`; `Common`
     rarity is explicitly uncapped by construction (`WonderExistenceScan` returns 0 immediately).
-[x] `long` for magnitudes, never `float`: `RelicCost`, `WonderExistenceScan.CountExisting`'s return,
+[x] *(reworded 2026-09-15 per owner ruling: floating-point allowed)* `long` for integer magnitudes: `RelicCost`, `WonderExistenceScan.CountExisting`'s return,
     and every reused `ConstructionCost` field are all `long` (§Numeric types).
 [x] One ActorHub compose / one read: not applicable — this module produces and consumes no actor
     combat/derived magnitude of any kind.

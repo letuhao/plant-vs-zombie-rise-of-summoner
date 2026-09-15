@@ -112,7 +112,9 @@ public static class CheatSchema
         // feature-flag contract). The `true` below stays accurate for THIS registry's own display/
         // migration semantics (what an unset toggle here should read as if something else ever asks),
         // it is simply no longer load-bearing for the lawn combat feature's default.
-        T("LAWN-BASIC-ATTACK", true);
+        // 2026-09-15 owner decision (lawn-combat-wire L-N1): the feature ships default OFF, so this
+        // registry's display default follows it.
+        T("LAWN-BASIC-ATTACK", false);
 
         Cfg("D-DMG-%", 1, "slider");
         Extra("D-DMG-SET"); Extra("D-TYPE-SWAP");

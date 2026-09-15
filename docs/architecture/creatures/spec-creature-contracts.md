@@ -150,7 +150,7 @@ tests/                                → Core policy, Data transactions/gates, 
 
 ## Code style
 
-Core policy pure and integer (no floats, no `DateTime.Now`); store partial gate-serialized with revision bumps and `DateTimeOffset? utcNow = null` injection like `RpgStore.Expeditions`; every Soul movement goes through the existing ledger with a dedupe key; refusals write nothing. No SQL outside `FusionRpg.Data`, no Unity anywhere.
+Core policy pure (no `DateTime.Now`); store partial gate-serialized with revision bumps and `DateTimeOffset? utcNow = null` injection like `RpgStore.Expeditions`; every Soul movement goes through the existing ledger with a dedupe key; refusals write nothing. No SQL outside `FusionRpg.Data`, no Unity anywhere.
 
 ## Testing strategy
 

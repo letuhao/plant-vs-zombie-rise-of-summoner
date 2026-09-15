@@ -183,7 +183,7 @@ pure integer function.
 | Missing file | `TuningMissing`. **No fallback constants exist** — asserted by reflection over `Core/Power` for numeric literals |
 | Changed fixed constant | `FixedConstantChanged` when `cMilli`/`pinIndex`/`pinValue` differ from `80000/20/680` |
 | Purity | same index, 1000 calls, identical result; no allocation on the hot path |
-| Determinism | no `Math.Pow`, `Math.Exp`, `double`, or `decimal` anywhere in `Core/Power` — asserted by source scan, matching `PowerReads.cs`'s reasoning |
+| Determinism | no `Math.Pow`, `Math.Exp`, `double`, or `decimal` anywhere in `Core/Power` — asserted by source scan, matching `PowerReads.cs`'s reasoning — *`double` part superseded 2026-09-15: floating-point allowed; a hashed `double` records the platform stamp* |
 
 **Not tested here:** anything about `Θ`'s composition (that is `power-index`) or any consumer
 (waves 2–3). A test in this module that needs a battle actor is in the wrong module.
@@ -205,7 +205,7 @@ pure integer function.
 
 **Never**
 - A numeric curve literal outside the loader.
-- `double`, `decimal`, `Math.Pow`, or `Math.Exp` in `Core/Power` — the output is hashed.
+- `decimal`, `Math.Pow`, or `Math.Exp` in `Core/Power` — the output is hashed. *(`double` removed from this list 2026-09-15 per owner ruling: floating-point allowed; a hashed `double` records the platform stamp.)*
 - A caller. This module ships inert; wiring is waves 2–3.
 - A fallback constant for a missing or invalid tuning file.
 
@@ -218,7 +218,7 @@ pure integer function.
 3. Odd `B` rejected; no silent rounding of `A`.
 4. Closed form and iterated sum agree exactly to `Θ = 2000`.
 5. Full `FusionRpg.Core.Tests` green, **no golden re-blessed** — trivially true, since nothing calls it.
-6. Source scan: zero numeric literals outside the loader, zero floating-point types in `Core/Power`.
+6. Source scan: zero numeric literals outside the loader. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 
 ---
 

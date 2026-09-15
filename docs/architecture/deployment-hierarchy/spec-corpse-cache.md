@@ -250,7 +250,7 @@ closed enum, not a balance number.
 `qty` (stack count) is `long` — a haul stack can, in principle, exceed `int` range under a large drop
 volume multiplier (per `CLAUDE.md` "Numeric overflow," any magnitude is `long`, never assumed small).
 `seq` is `int` (bounded by a single cache's realistic item count, well under the `int` ceiling — a
-structural bound, not a magnitude). No `float`/`double` anywhere in this module.
+structural bound, not a magnitude). *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 

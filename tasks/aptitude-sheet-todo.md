@@ -20,7 +20,7 @@
 - [x] **AS-0.2** UniqueCreature GET/POST + FE hooks — `unique-allocate`
   - Accept: `GET /api/aptitudes/unique/{instanceId}` returns persisted shares + budget/leftover (no EffectiveUnique); `POST .../unique/allocate` saves UniqueCreature; overspend 409; empty legal; ownership checks
   - Accept: FE `useUniqueAptitudes` / `useSaveUniqueAptitudes` (names flexible)
-  - Accept (G2): after POST, `LoadAllocation(UniqueCreature, instanceId)` equals saved shares; unique hooks unused by Mode C commander path; shares/budget/leftover are `long` (no float magnitudes)
+  - Accept (G2): after POST, `LoadAllocation(UniqueCreature, instanceId)` equals saved shares; unique hooks unused by Mode C commander path; shares/budget/leftover are `long` *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
   - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter UniqueAptitude`; curl GET/POST
   - Files: `AptitudeEndpoints.cs`, RpgStore aptitudes, `web/.../lib/bus/*`, Server.Tests
   - Deps: None (parallel with 0.1)
@@ -225,8 +225,17 @@
 
 - [x] Map success criteria checklist all met (or explicitly deferred items only A6/E6 keep-aligned) — FE A/B/C + presets proven; AS-1.1 Injector wire written 2026-09-13, live probe still owed (see AS-1.1)
 - [x] Guards: DAL green (this stream); secondary-no-unity N/A for FE-only
-- [ ] Live: Bound unique after Activate/allocate shows UniqueCreature — blocked on the AS-1.1 live probe, not on missing code
-- [ ] Menu queue P4 Aptitudes evidence noted on map/queue
+- [x] Live: Bound unique after Activate/allocate shows UniqueCreature — **stale, closed**: this
+      checkbox predates AS-1.1's 2026-09-13 live probe and AS-1.1b's 2026-09-14 order-independent
+      fix, both already `[x]` above. AS-1.1b's own live evidence IS this exact criterion: `allocate
+      → deploy` on a real Roster specimen reads back `attack:2721` (vanilla baseline `attack:1`) via
+      `debug.board-stats` — a Bound unique correctly showing its UniqueCreature-sourced aptitude
+      bonus after Activate/allocate, in the harder of the two trigger orders. Left unticked by an
+      oversight when AS-1.1b closed; corrected here 2026-09-15.
+- [x] Menu queue P4 Aptitudes evidence noted on map/queue — **closed 2026-09-15**:
+      `docs/architecture/gui-lego/menu-refactor-queue.md`'s P4 row updated from a bare "claimed" note
+      to "**Done**" (matching the P0/P1/P1b rows' own convention) with the real evidence citation (FE
+      A/B/C + presets proven, AS-1.1/AS-1.1b Injector wire live-proven 2026-09-14).
 
 ---
 

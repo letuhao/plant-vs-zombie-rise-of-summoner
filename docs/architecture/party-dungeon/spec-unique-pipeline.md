@@ -225,7 +225,7 @@ the boss group is pure over `(domain, themes, corpus, tuning)`, rerun byte-ident
 
 Magnitudes (frozen values, AE×100, `contentScaleMilli`): **`long`** (`ContentScale.Apply` is `long → long`,
 `ContentScale.cs:31-40`; `BudgetAeHundredths` is `long`). The gate compares a `long` `micro` against
-`(long)NextUInt(1_000_000)` — widened, never cast down. Rung ordinals, tiers, seq, slot counts: **`int`**. No `float`/`double`.
+`(long)NextUInt(1_000_000)` — widened, never cast down. Rung ordinals, tiers, seq, slot counts: **`int`**. *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 
@@ -324,7 +324,7 @@ is **mean ordinal non-decreasing in the rung's floor column and count > 0 on eve
   exclusivity tag on the affix schema; `firstClearRef` on the domain anchor (filed); a `unique` group on `cache`/`elite`
   tables; a `deterministic` unique in any table.
 - **Never:** a set item or any set stem on a unique; a magnitude, weight or chance from a model; a second roll beside
-  `Instantiator`; a categorical unique grant (`role`/`frame` on a `unique` entry); a `float`/`double`; a private `f(Θ)` or a
+  `Instantiator`; a categorical unique grant (`role`/`frame` on a `unique` entry); a private `f(Θ)` or a
   rarity multiplier on a magnitude; a unique below ordinal 80; a unique pity counter; more than `+1` slot per wearer; a
   seventeenth atom kind while `stat.derived` serves.
 

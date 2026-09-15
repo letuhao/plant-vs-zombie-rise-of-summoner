@@ -267,8 +267,8 @@ That is the contract; a tunable that could reorder them would be a different fea
   `(long)(max * milli)` — the cast binds to the *result*, so the multiply has already overflowed), and
   **divides by 1000 last, exactly once**.
 - **Overflow throws, never wraps.** No silent `unchecked` on this path.
-- Never `float`: `P(Θ)` is quadratic and a `float` magnitude stops being integer-exact at `Θ` = 232,
-  inside normal play; a per-mille `int` breaks at `Θ` = 3,213 (`CLAUDE.md` "Numeric overflow").
+- `P(Θ)` is quadratic; a per-mille `int` exceeds its range at `Θ` = 3,213 (`CLAUDE.md` "Numeric types").
+  Floating-point is allowed (owner ruling 2026-09-15 — precision is not overflow).
 - `craftWearPerAttemptMilli` is a **bounded ratio** in `[0, 1000]`, bounds-checked at load — exempt
   from the magnitude rules and required to say so in a comment.
 

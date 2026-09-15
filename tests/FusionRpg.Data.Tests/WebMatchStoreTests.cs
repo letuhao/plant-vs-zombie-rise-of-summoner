@@ -228,7 +228,9 @@ public class WebMatchStoreTests : IDisposable
         var matchKey = "web-atomic-1";
         Append(1, "corr-atomic", matchKey);
         var events = StampedEvents(matchKey, 42);
-        events.Add(events[0]); // second board.start → unique match_key violation at the tail
+        // A tail event that cannot be stored (System.Text.Json refuses NaN). This used to be a second board.start, which
+        // violated the unique match_key; since lawn-combat-wire L-N29 a repeated board.start fills the existing run instead.
+        events.Add(new EventEnvelope { T = DateTime.UtcNow.ToString("o"), Game = events[0].Game, Kind = "web.poison", MatchKey = matchKey, Payload = new { n = double.NaN } });
 
         Assert.ThrowsAny<Exception>(() => _store.InsertWebMatchEvents(1, matchKey, events));
         Assert.DoesNotContain(_store.ListRuns(), r => r.MatchKey == matchKey);

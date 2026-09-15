@@ -37,7 +37,6 @@ public class Plugin : BasePlugin
         void OnGUI()
         {
             VfxDirector.Draw();
-            RiftMenuOverlay.Draw();
             OverlaySettingsGui.Draw();
             OverlaySwitchGui.Draw();
         }

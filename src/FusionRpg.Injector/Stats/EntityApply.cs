@@ -67,7 +67,9 @@ public static class EntityApply
             var prevHp = p.thePlantHealth;
             var prevMax = p.thePlantMaxHealth;
             var preserveRatio = StatSystem.PreserveLiveCurrentHp(source);
-            var abs = includeAbsolute ? CheatState.BuildPlantAbsolute() : null;
+            // L-N20: a debug-spawn max-HP pin rides into the Hub as an absolute input on EVERY resolve
+            // (includeAbsolute or not), so Hub max-HP bonuses still compose on top of it.
+            var abs = InjectorSpawnHpPin.Store.ApplyTo(key, includeAbsolute ? CheatState.BuildPlantAbsolute() : null);
             var applyScales = s.ApplyStats && !CheatState.On("D-PROBE-BULLET");
             var hasScaleMods = applyScales && CheatState.HasPlantScaleMods();
             var hasPvz = CheatState.HasPvzStatsMods();
@@ -199,7 +201,8 @@ public static class EntityApply
             var prevHp = ZombieCombatFields.GetHp(z);
             var prevMax = ZombieCombatFields.GetMaxHp(z);
             var preserveRatio = StatSystem.PreserveLiveCurrentHp(source);
-            var abs = includeAbsolute ? CheatState.BuildZombieAbsolute() : null;
+            // L-N20: same pin-as-Hub-input as RunPlant.
+            var abs = InjectorSpawnHpPin.Store.ApplyTo(key, includeAbsolute ? CheatState.BuildZombieAbsolute() : null);
             var applyScales = s.ApplyStats;
             var hasScaleMods = applyScales && CheatState.HasZombieScaleMods();
             var hasPvz = CheatState.HasPvzStatsMods();

@@ -171,3 +171,5 @@ tools/sprite-debug/assets/*.png
 tools/sprite-debug/assets/*/*.png
 web/fusion-rpg-web/package-lock.json
 .artifacts/
+
+.vs/

@@ -21,8 +21,8 @@ public readonly record struct DurationClampResult(int ClampedVictimTurns, long I
 ///
 /// <para>Fixed-point throughout — <c>resolvedVictimTurnsMilli</c> is the already-scaled turn count in
 /// per-mille units (1000 = one whole turn), matching this program's established milli-`long`
-/// convention rather than a float, and keeping this file clean of the purity scan's blanket
-/// <c>double</c>/<c>float</c> ban for anything under <c>Actions/</c>.</para>
+/// convention. (Not driven by a floating-point ban — the purity scan's former <c>double</c>/<c>float</c>
+/// ban was removed by the 2026-09-15 owner ruling.)</para>
 /// </summary>
 public static class DurationClamp
 {

@@ -15,8 +15,8 @@ added 2026-08-28 and 2026-09-06. Scope: **S** ≈ under an hour · **M** ≈ a f
 >
 > **2. Every balance number ships as a tunable with a working value.** PS-7: *"being wrong costs a config
 > version, not a refactor."* **Do not wait for data to choose a number — ship a defensible one and record
-> the metric that will move it.** What must be right first time is the number's *shape*: `long` not `float`,
-> per-mille not fractional, tunable not `const`.
+> the metric that will move it.** What must be right first time is the number's *shape*: a type whose range holds it,
+> tunable not `const`. *(Former "`long` not `float`, per-mille not fractional" superseded 2026-09-15: floating-point allowed.)*
 
 ---
 
@@ -24,7 +24,7 @@ added 2026-08-28 and 2026-09-06. Scope: **S** ≈ under an hour · **M** ≈ a f
 
 - [x] **P0.1: extend the purity scan to `Core/Actions/`** *(before the first line of action code)* · **S**
   - Purity rules **on** (wall clock, ambient `Random`, `Guid.NewGuid`, `.GetHashCode(`, floating point,
-    dictionary enumeration); tick-path rules **off** — `TargetResolver` needs LINQ.
+    dictionary enumeration) *(floating-point rule superseded 2026-09-15: floating-point allowed)*; tick-path rules **off** — `TargetResolver` needs LINQ.
   - Reuses `DiagnosticsExemptFromTickPath`'s shape: a directory plus an exemption entry, not new machinery.
   - Acceptance: a planted `DateTime.UtcNow` **fails**; a planted ambient `Random` **fails**; a planted
     `.Where(` does **not**. **A guard that cannot fail is decoration.**
@@ -932,7 +932,7 @@ external blockers — see each item's own evidence below. No external blocker re
     pointer, so this matches that convention instead of inventing the missing type. `DurationClamp.
     ClampAndConvert` runs entirely in per-mille `long` fixed-point (no `double`/`float` — the
     program's established milli-scale convention, and required anyway since the purity scan bans
-    `double`/`float` tokens unconditionally, everywhere under `Actions/`), and carries the PS-8
+    `double`/`float` tokens unconditionally, everywhere under `Actions/` — that ban superseded 2026-09-15: floating-point allowed), and carries the PS-8
     bounded-ratio exemption directly in its own doc comment (spec §1: "the declaration must say so").
     **Clamp position proved as a counter-example, not asserted**:
     `ClampPositionAPlantedAuthoringTimeClampFailsToBoundAStackingBuild` plants exactly §3.1's named
@@ -959,7 +959,7 @@ external blockers — see each item's own evidence below. No external blocker re
 
 - [x] **T29: `BattleDurationResolver`** *(after `P0.5`)* · **S**
   - Acceptance: two actors differing 2× in `turn.speed` resolve the same authored "2 turns" to **different
-    tick counts**; `Θ`=20 vs `Θ`=5,000 resolve **identical** turns; no float crosses `ToTicks`.
+    tick counts**; `Θ`=20 vs `Θ`=5,000 resolve **identical** turns; the seconds-to-ticks narrowing is checked. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
   - Verify: `--filter ~DurationResolver`
   - **Done 2026-08-28, unblocked by building P0.5 across the program boundary under explicit owner
     authorization** (a stop-hook rejected leaving `P0.2`–`P0.5` as external blockers; the owner chose

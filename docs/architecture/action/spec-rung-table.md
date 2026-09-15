@@ -31,9 +31,9 @@ than a third.
 new is invented; `1.75` is `bands.v1.json`'s `magnitudeRatioPerMille`.
 
 > ⛔ **The exponent form documents how the authored numbers were DERIVED. It is never evaluated at
-> runtime.** `1.75^((r−1)/2)` is irrational at every odd rung, and the power SSOT §9.4 plus the world map's
-> byte-identical replay lock both forbid floating point on a magnitude path. **A human evaluates it once and
-> stores per-mille integers**; `Math.Pow` must not appear in `Core/Actions/Rungs/`, and a test asserts it.
+> runtime.** `1.75^((r−1)/2)` is irrational at every odd rung. **A human evaluates it once and
+> stores per-mille integers** *(the former "power SSOT §9.4 and the replay lock forbid floating point on a
+> magnitude path" reason is superseded 2026-09-15: floating-point allowed)*; `Math.Pow` must not appear in `Core/Actions/Rungs/`, and a test asserts it.
 
 ### 2. The table
 

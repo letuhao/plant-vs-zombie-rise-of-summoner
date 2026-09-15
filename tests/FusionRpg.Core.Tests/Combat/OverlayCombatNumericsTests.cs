@@ -20,27 +20,12 @@ namespace FusionRpg.Core.Tests.Combat;
 /// <item>D1 (folded into this task's acceptance): <c>ActorHub.MergeAppliedCombat</c> still folds ONLY
 /// <c>progression.bonus.*</c>, never a <c>combat.*</c> channel
 /// (<see cref="MergeAppliedCombat_ignores_a_combat_channel"/>);</item>
-/// <item>a documented, closed allowlist of the <c>double</c>/<c>float</c> that legitimately remain in
-/// each file, and everything outside it (<see cref="OverlayCombatMath_hasNoDoubleOrFloatInCode"/>,
-/// <see cref="ElementHub_doubleFloat_isLimitedToTheInterfaceBoundary"/>,
-/// <see cref="OverlayCombatCalculator_doubleFloat_isLimitedToTheDocumentedAllowlist"/>).</item>
 /// </list>
 ///
-/// <para><b>Why an allowlist, not a bare "no double/float remains" assertion.</b> This task's own
-/// acceptance criterion asks for the latter, verbatim. Read against the actual code, that absolute
-/// claim does not hold for <c>OverlayCombatCalculator.cs</c> and <c>ElementHub.cs</c> — see each file's
-/// own class-doc comment for the full citation trail (in short: <c>IElementHub.cs</c> fixes
-/// <c>ElementHub</c>'s public methods to <c>double</c>; <c>CombatDerivedReader.cs</c> /
-/// <c>CombatPolicy.cs</c> / <c>CombatProbability.cs</c> are <c>double</c>-typed, out-of-scope
-/// dependencies with an existing accepted-exception precedent
-/// (<c>MitigationChainTests.LongThroughout</c>, <c>audit-overflow.py</c>'s own <c>FLOAT_OK_PATH</c>);
-/// and <c>Actions/BasicAttack.cs</c> is a live production caller of
-/// <c>OverlayCombatRequest.EffectivenessMultiplier</c>/<c>MultiplierFromPerMille</c>'s <c>double</c>
-/// shape). None of those three files are on this task's permitted file list. So instead of a claim
-/// that does not survive reading the code, this suite pins the actual, closed set of remaining
-/// double/float sites with a named reason for each — which is the guardrail this repo's own hard rule
-/// asks for ("validate the CONTRACT ... never a population count or generated text"): a NEW,
-/// undocumented double/float anywhere in these files fails this suite immediately.</para>
+/// <para><b>No floating-point ban (owner ruling 2026-09-15, lawn-combat-wire L-N12).</b> This file used
+/// to carry source-scan tests forbidding <c>double</c>/<c>float</c> outside an allowlist; they were removed
+/// because floating-point is allowed inside the calculation. What stays guarded is the magnitude contract:
+/// the Funnel-bound result is a checked <c>long</c> and integer per-mille math divides last.</para>
 /// </summary>
 public class OverlayCombatNumericsTests
 {
@@ -145,88 +130,6 @@ public class OverlayCombatNumericsTests
         public int Order => 999;
         public void ContributeDerived(StatContext ctx, System.Collections.Generic.ICollection<DerivedModifier> mods) =>
             mods.Add(new DerivedModifier(DerivedStatChannels.CombatPowerOmni, DerivedModifierOp.Flat, 999_999, SourceId: "test"));
-    }
-
-    // ── Source scan: the closed allowlist of remaining double/float, per file ───────────────────────
-
-    [Fact]
-    public void OverlayCombatMath_hasNoDoubleOrFloatInCode()
-    {
-        var code = StripComments(ReadCoreFile("Combat", "OverlayCombatMath.cs"));
-        AssertNoDoubleOrFloat(code, "OverlayCombatMath.cs");
-    }
-
-    [Fact]
-    public void ElementHub_doubleFloat_isLimitedToTheInterfaceBoundary()
-    {
-        var code = StripComments(ReadCoreFile("Combat", "Element", "ElementHub.cs"));
-        // IElementHub.cs (out of this task's scope) fixes both method signatures to double in/out --
-        // see ElementHub.cs's own class doc for the full citation.
-        code = Regex.Replace(code,
-            @"public double ResolveComponentBonus\(.*?double baseOverlayDamage\)", "", RegexOptions.Singleline);
-        code = Regex.Replace(code,
-            @"public double ResolvePayloadBonus\(.*?double baseOverlayDamage\)", "", RegexOptions.Singleline);
-        AssertNoDoubleOrFloat(code, "ElementHub.cs (outside the two IElementHub-mandated method signatures)");
-    }
-
-    [Fact]
-    public void OverlayCombatCalculator_doubleFloat_isLimitedToTheDocumentedAllowlist()
-    {
-        var code = StripComments(ReadCoreFile("Combat", "OverlayCombatCalculator.cs"));
-
-        // Every remaining double/float code site, verbatim, each with its own reason recorded in the
-        // file's own class-doc / member-doc comments:
-        //  - EffectivenessMultiplier / MultiplierFromPerMille: a live production caller
-        //    (Actions/BasicAttack.cs, out of scope) depends on the double shape.
-        //  - "double finalDamage": assigned across three branches -- two produce exact-integral
-        //    doubles from long computations, the crit/amp branch is genuinely continuous.
-        //  - ResolveBand / CapAvoidanceBand / PierceFactor / AmpFactor / AmpFactorReciprocal /
-        //    DivisiveMitigation: the continuous mitigation-chain math, reading double-typed
-        //    CombatDerivedReader/CombatPolicy/CombatProbability channels (out of scope, already an
-        //    accepted exception -- see the class doc above).
-        var allowed = new[]
-        {
-            "public double EffectivenessMultiplier { get; init; } = 1.0;",
-            "public static double MultiplierFromPerMille(long perMille) => 1.0 + perMille / 1000.0;",
-            "double finalDamage;",
-            "public static (bool Miss, bool Parried, bool Blocked) ResolveBand(double r, double pHitFinal, double pParry, double pBlock)",
-            "public static (double Parry, double Block) CapAvoidanceBand(double pHitFinal, double pParryRaw, double pBlockRaw, double avoidanceBandCap)",
-            "public static double PierceFactor(double penDelta, double pierceScale) =>",
-            "public static double AmpFactor(double ampDelta, double ampScale) =>",
-            "public static double AmpFactorReciprocal(double ampDelta, double ampScale)",
-            "public static double DivisiveMitigation(double offense, double defense, double k, double ladderScale)",
-        };
-
-        foreach (var snippet in allowed)
-        {
-            // Fails loudly (not silently) if a declaration in the allowlist no longer matches the
-            // shipped source verbatim -- e.g. after a reformat -- rather than let the removal below
-            // silently no-op and the test pass vacuously.
-            Assert.Contains(snippet, code, System.StringComparison.Ordinal);
-            code = code.Replace(snippet, "");
-        }
-
-        AssertNoDoubleOrFloat(code, "OverlayCombatCalculator.cs (outside the documented allowlist above)");
-    }
-
-    static void AssertNoDoubleOrFloat(string code, string label)
-    {
-        var matches = Regex.Matches(code, @"\bdouble\b|\bfloat\b");
-        Assert.True(matches.Count == 0,
-            $"{label}: found {matches.Count} double/float token(s) outside the documented allowlist -- " +
-            "either the allowlist is stale (a declaration reformatted) or a new floating-point " +
-            "magnitude crept in and needs its own justification or a long/per-mille rewrite.");
-    }
-
-    /// <summary>Strips <c>//</c> / <c>///</c> line comments and <c>/* */</c> block comments before a
-    /// token scan, so this task's own explanatory prose (which necessarily uses the words "double" and
-    /// "float" many times) is never mistaken for a code-level declaration. None of these three files
-    /// put <c>//</c> or <c>/*</c> inside a string literal, so this is exact for them.</summary>
-    static string StripComments(string src)
-    {
-        src = Regex.Replace(src, @"/\*.*?\*/", "", RegexOptions.Singleline);
-        src = Regex.Replace(src, "//.*", "");
-        return src;
     }
 
     static string ReadCoreFile(params string[] relativeUnderCore)

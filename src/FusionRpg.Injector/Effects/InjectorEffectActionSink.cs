@@ -170,6 +170,15 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
             return true;
         }
 
+        // lawn-hit-entry T9 / L-N16: a dead or dying target absorbs no delta. The record-time gate in
+        // EventDrainHost cannot see a hit recorded BEFORE death that drains after it; without this
+        // check that hit reaches AddZombieHp/AddPlantHp at HP <= 0 and ForceKill runs Die() again.
+        if (!EventDrainHost.Liveness.AdmitsDelta(targetPtr))
+        {
+            skipped = true;
+            return true;
+        }
+
         var source = "effect.fa10:" + item.GrantId;
 
         if (string.Equals(channel, "hp", StringComparison.Ordinal))

@@ -146,7 +146,7 @@ A checkpoint is a **stop-and-verify**, not a status update. Six.
 | **CP0** | Gate 0 | Guard extended; `EffectBag.cs:180` finding recorded and fixed; full suite green |
 | **CP1** | Level 2 | Seam widened, board exists, pathing deterministic — **zero goldens moved anywhere** |
 | **CP2** | Gate A (after 3b) | The one golden landing is in; world goldens byte-identical **unblessed**; win condition and field cap exist |
-| **CP3** | Level 6 | Cover, construction, economy and AI green; AI provably RNG-free and float-free |
+| **CP3** | Level 6 | Cover, construction, economy and AI green; AI provably RNG-free *(reworded 2026-09-15 per owner ruling: floating-point allowed)* |
 | **CP4** | Gate B (after 7b) | ⭐ **A siege plays and resolves in CI with no FE.** Both call sites wired; multi-turn loop works |
 | **CP5** | Level 8b | Both stages ship; lawn byte-identical after five extractions; entry chunk unchanged; **zero declared-but-unbuilt stage ids** |
 | **CPc** | c5 | Corpus generated, idempotent by hash, metrics declare closed/open, no numeric field anywhere |
@@ -247,7 +247,7 @@ Binding, from `AGENTS.md` / `CLAUDE.md` — restated because a downstream sessio
   question with a yes/no answer). An approval, a coordination check, or "raise this with another team"
   is a **tracked, non-blocking follow-up**, not a stop condition on the whole plan.
 - **No git writes.** Ever. Draft a message; the owner commits.
-- **`long` for every magnitude**, never `float`, widen before multiplying, divide by 1000 last exactly
+- **`long` for every integer magnitude** (floating-point allowed — owner ruling 2026-09-15), widen before multiplying, divide by 1000 last exactly
   once, overflow **throws**.
 - **No balance number in code.** `data/tuning/<domain>.v{n}.json`.
 - **No hard progression ceilings.** A board/runtime cap is exempt **and must say so in a comment.**

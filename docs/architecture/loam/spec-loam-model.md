@@ -191,8 +191,9 @@ tests/                                          → Core.Tests, Data.Tests, Guar
 
 ## Code style
 
-Integer only — `WorldDeterminismGuardTests.Game_affecting_world_state_carries_no_floating_point`
-enumerates every world source file, so a new folder is covered without touching the guard. Per-mille
+`WorldDeterminismGuardTests` enumerates every world source file, so a new folder is covered without
+touching the guard. *(Its `Game_affecting_world_state_carries_no_floating_point` ban is superseded
+2026-09-15: floating-point allowed.)* Per-mille
 for multipliers, plain ints for counts. Records with `init` accessors, `net6`/C# 10 — **no `required`,
 no C# 11+ syntax.** Stable ordering everywhere; `WorldValidation` rejects loudly with the offending id
 in the message.
@@ -220,7 +221,7 @@ assertion still passes across it. That replay is the assertion that actually mat
 - **Ask first:** adding a fourth field to `WorldSector` (the model is hashed and hot — two is the
   budget this module asked for); changing `SlotKind` ordering; anything that would move a golden a
   second time.
-- **Never:** floats in world state; SQL outside `FusionRpg.Data`; leaking `LoamStock` to a
+- **Never:** SQL outside `FusionRpg.Data`; leaking `LoamStock` to a
   non-owner; giving loam any behaviour in this module — production, upkeep and fade all belong to
   `loam-calc` and `loam-turn`, and a "small" helper here is how a module becomes two.
 

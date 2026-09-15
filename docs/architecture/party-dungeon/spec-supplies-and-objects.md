@@ -257,7 +257,7 @@ one owner each. **No price literal anywhere** — prices are `dungeon-loot`'s de
 Amounts — a refill, a revive heal, a Structure's hp, a price from `dungeon-loot` — are `long`. Per-mille
 tunables are `long`, applied by `ContentScale.Apply(rolledValue, milli)` (`ContentScale.cs:31`) inside the SDK
 — widen before multiply, divide by 1000 last, never here. Counts — activations, stock, stack, cells — are
-`int`. Seeds are `ulong`; `rollSeed` into `TryInstantiate` is `long` (`Instantiator.cs:102`). No `float`.
+`int`. Seeds are `ulong`; `rollSeed` into `TryInstantiate` is `long` (`Instantiator.cs:102`).
 
 ## Commands
 

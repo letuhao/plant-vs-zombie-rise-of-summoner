@@ -288,7 +288,7 @@ not zero.** `RulesetVersion` stays **4**; this phase re-blesses nothing.
       formula (`× BaseOverlayDamage`, before the power/defense delta); all three of its construction
       sites left it at 1.0. **S3 is that one site being set**, not new math.
     - **A layering constraint drove the design, and B31's own guard enforced it.** The multiplier is a
-      `double`, but `Actions/` bans floating point — and as of B31 the guard catches the literal, so
+      `double`, but `Actions/` bans floating point *(superseded 2026-09-15: floating-point allowed)* — and as of B31 the guard catches the literal, so
       `1.0 + pm / 1000.0` in `BasicAttack.cs` is a purity violation the build would reject. The
       conversion therefore lives in `Combat/` as `OverlayCombatRequest.MultiplierFromPerMille`, and the
       seam across the boundary is **`long` per-mille in, `double` multiplier out**.

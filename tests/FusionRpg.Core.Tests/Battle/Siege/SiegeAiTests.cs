@@ -29,7 +29,7 @@ public class SiegeAiTests
         new(key, baseTier, aggression, hitChanceMilli, objectiveClassMilli, isKillingBlow,
             targetMissingHpMilli, targetCanCounter, incomingThreatMilli);
 
-    // -- R5: determinism, no RNG, no float --
+    // -- R5: determinism, no RNG --
 
     [Fact]
     public void Same_board_same_decisions_10000_times()
@@ -51,14 +51,6 @@ public class SiegeAiTests
     {
         var text = File.ReadAllText(FindSourceFile("SiegeAi.cs"));
         Assert.DoesNotContain("Random", text, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void No_float_in_the_scoring_path()
-    {
-        var text = File.ReadAllText(FindSourceFile("SiegeAi.cs"));
-        Assert.DoesNotContain("float", text, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("double", text, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

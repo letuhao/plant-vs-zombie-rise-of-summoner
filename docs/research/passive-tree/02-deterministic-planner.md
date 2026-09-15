@@ -891,7 +891,7 @@ regenerating, the same role `_provenance.dumpHash` already plays in the species 
   reasonable implementations otherwise disagree in the last per-mille.
 - **Key order.** Canonical JSON, sorted keys, `\n` endings, no trailing whitespace — otherwise the
   hash moves on a Windows/Linux round trip.
-- **No `double` anywhere in the planner.** `PowerVector` is `int` throughout for exactly this reason
+- **No `double` anywhere in the planner.** *(superseded 2026-09-15: floating-point allowed)* `PowerVector` is `int` throughout for exactly this reason
   (`PowerVector.cs:14-16`: *"a double would make two runs of the same catalog disagree in the last
   bit and move a content hash for nothing"*). Per-mille integers everywhere.
 - **`long` for anything a `contentScale` can touch.** The plan emits shares, so the planner's own

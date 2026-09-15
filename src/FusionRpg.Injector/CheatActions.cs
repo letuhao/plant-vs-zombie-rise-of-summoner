@@ -333,6 +333,7 @@ public static class CheatActions
                 return;
             }
             SpawnCatalog.MarkSpawn("plant", type, true);
+            Match.SpawnOriginTags.Mark(plant.Pointer, Match.SpawnOriginTags.Cheat);
             CheatState.Select(plant.Pointer, "plant");
             CheatState.Note($"spawn plant {type}");
         }
@@ -362,6 +363,7 @@ public static class CheatActions
                 return;
             }
             SpawnCatalog.MarkSpawn("zombie", type, true);
+            Match.SpawnOriginTags.Mark(z.Pointer, Match.SpawnOriginTags.Cheat);
             CheatState.Select(z.Pointer, "zombie");
             CheatState.Note($"spawn zombie {type} mc={mindControl}");
         }

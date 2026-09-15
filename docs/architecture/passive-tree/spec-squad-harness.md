@@ -276,7 +276,7 @@ standard error is √2 times each arm's.
 | Θ | `long` in, `int` at the engine boundary | `BattleActorSetup.Level` is `int`; the harness rejects a Θ above `int.MaxValue` loudly at parse rather than casting |
 | `F`, `H`, `share` | `double` | Bounded ratios in a **reported, non-persisted, non-hashed** model value. The determinism hash covers per-mille integers only (§9.1), so no `double` reaches a hashed path |
 
-**No `float` anywhere.** No `unchecked` on any counting path. Overflow throws.
+No `unchecked` on any counting path. Overflow throws. *(Former "No `float` anywhere" superseded 2026-09-15: floating-point allowed.)*
 
 **No caps introduced.** Two numbers look like ceilings and are not: squad size **6 is structural** — it
 mirrors the shipped game rule in `WebMatchService.BuildSquad`, so changing it would change what is being
@@ -776,8 +776,8 @@ changes what "a squad" means.
       constructing them, not by asserting the number 91.
 - [ ] Every squad has exactly six actors, tied by test to `WebMatchService.BuildSquad`'s `maxSquad`.
 - [ ] Stalemates never enter a denominator; a high-stalemate cell is refused, not scored.
-- [ ] No `float` on any path; no `double` in the hash input; `scripts/audit-overflow.py` reports no
-      critical finding.
+- [ ] Any `double` in the hash input records the platform stamp; `scripts/audit-overflow.py` reports no
+      critical finding. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 - [ ] `scripts/audit-magic-numbers.py --targets M1` names no new balance literal in the tool.
 - [ ] `scripts/guard-power.ps1` green, and the tool declares no `f(level)` of its own.
 - [ ] Zero files changed under `src/`, `data/` or `tests/` outside this module's own test project.

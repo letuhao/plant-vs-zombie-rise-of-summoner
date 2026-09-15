@@ -215,8 +215,8 @@ usually in tension; separating the reads is what dissolves it.
 ### 4.7 Integer safety
 
 `Θ(Θ−1)` is a product of consecutive integers and therefore always even, so `B_milli·Θ(Θ−1)/2` is
-**exact in integer arithmetic** — no rounding, no float, satisfying `P13`
-([economy-principles.md](../economy-principles.md)) and the world map's byte-identical replay lock.
+**exact in integer arithmetic** — no rounding, which keeps the world map's byte-identical replay lock
+([economy-principles.md](../economy-principles.md) `P13`) without a platform stamp.
 Per-mille `P` exceeds `int64` near `Θ ≈ 2×10⁸`; `contentScale` asserts representability.
 
 ---
@@ -287,8 +287,8 @@ an assertion with a metric behind it rather than a constant chosen once and trus
 
 ### 5.3 The weights — starting values
 
-**Owner decision 2026-08-23: pick numbers now, tune from play.** These are per-mille integers so
-fractional weights need no floats, matching `P13`. Every one lives in the tuning file (§9); none
+**Owner decision 2026-08-23: pick numbers now, tune from play.** These are stored as per-mille
+integers. Every one lives in the tuning file (§9); none
 appears in code.
 
 | Weight | Axis | Start (‰) | Rationale for the starting value |
@@ -572,8 +572,8 @@ unauthored channel share: *"a generator with no authored share must reject at im
 ### 9.4 Integer safety
 
 `Θ(Θ−1)` is a product of consecutive integers and therefore always even, so the triangular term is
-**exact in integer arithmetic** — no rounding, no float, satisfying `P13` and the world map's
-byte-identical replay lock. Per-mille `P` reaches `int64` near `Θ ≈ 2×10⁸`; `PowerLadder.Value`
+**exact in integer arithmetic** — no rounding, which keeps the world map's byte-identical replay
+lock without a platform stamp. Per-mille `P` reaches `int64` near `Θ ≈ 2×10⁸`; `PowerLadder.Value`
 asserts representability. The draft's three-way overflow decision is **withdrawn as moot** — it was
 written for a geometric curve this SSOT does not use.
 
@@ -608,7 +608,7 @@ actually landed, the same "assigned at the moment they land" rule D8's own note 
 | 3 | `ProgressionPowerCurve.PowerFromLevel` | `2^min(L,12)` | `IProgressionPowerProvider.cs:19` | **Deleted.** Replaced by `Θ` — `status-contest` (§6) |
 | 4 | `RpgXpPowerScale.ForKill` | stub `1.0` | `RpgXpPowerScale.cs:9` | **Deleted.** Its documented future job ("scale kill XP by zombie power") is `Θ_content` |
 | 5 | `LoamPolicy.DevelopmentUpkeepPerLevel = 5` | linear | `LoamPolicy.cs:30` | **Economy magnitude — scales on `P(Θ)` only if its matching faucet does** (§10.4) |
-| 6 | `XpToNext = first + (L−1)·step` | arithmetic | `Progression/RpgProgression.cs:43` | **Kept, unchanged in SHAPE.** It is the *cost* ladder, not a power ladder — see §10.5. **Type corrected 2026-09-04:** `double` → `long` end to end (curve, awards, `RpgActorState.Xp`, DTOs, and the `xp`/`delta` columns) — XP is a persisted magnitude and CLAUDE.md's rule had never been applied to it ([progression-shape-audit-2026-09-04.md](../../research/progression-shape-audit-2026-09-04.md) §4.1) |
+| 6 | `XpToNext = first + (L−1)·step` | arithmetic | `Progression/RpgProgression.cs:43` | **Kept, unchanged in SHAPE.** It is the *cost* ladder, not a power ladder — see §10.5. **Type corrected 2026-09-04:** `double` → `long` end to end (curve, awards, `RpgActorState.Xp`, DTOs, and the `xp`/`delta` columns) — XP is a persisted magnitude and CLAUDE.md's rule had never been applied to it *(superseded 2026-09-15: floating-point allowed; the `long` choice stands on range, not on a float ban)* ([progression-shape-audit-2026-09-04.md](../../research/progression-shape-audit-2026-09-04.md) §4.1) |
 | 26 | `SpeciesXpCurve.XpToNext = first + (L−1)·step` | arithmetic, identical shape to row 6 | `Progression/SpeciesProgression.cs:53` | **Added 2026-09-05 (`species-build` T1.1, module 3 `species-xp`).** Same verdict as row 6, same reason: a *cost* ladder for how much XP a creature SPECIES' own per-player level needs, not a power ladder — only its ratio against `P(Θ)` matters (§10.5). A separate row rather than reusing row 6 because it reads its own tunable pair (`SpeciesProgressionTuning.CurveFirst/CurveStep`, `data/tuning/species-progression.v1.json`), not `RpgXpCurve`'s — a species' own pace is this program's own balance surface, deliberately not shared with plant/zombie/player type progression (`SpeciesActorState` is a parallel type to `RpgActorState` for the same reason, per the class's own doc comment). `long` end to end from the day it shipped, so it carries none of row 6's own pre-2026-09-04 `double` history. |
 | 27 | Specimen (unique-creature) level — the `xp`/`level` pair on `rpg_unique_actors` | arithmetic, identical shape to row 6 | `Sqlite/RpgStore.UniqueActors.cs` (`AwardUniqueActorXpUnlocked`), curve row `xpCurve.specimen` in `data/tuning/progression.v1.json` | **Added 2026-09-05 (effort-power reconciliation M1, [08-effort-power-reconciliation.md](../../research/passive-tree/08-effort-power-reconciliation.md) §2).** Same verdict as row 6: a *cost* ladder, not a power ladder — only its ratio against `P(Θ)` matters (§10.5). **Recorded because it was corrected, not because it was found compliant.** The level used to be drained by a hardcoded `while (xp >= 100.0)` loop — a flat 100 XP per level, no tuning row, no `RpgXpCurve` call — while the resulting `level` reached the shared ladder unchanged (`BattleModels.cs:169-175` treats it as `Θ` directly; ~~`WebMatchService.cs:339-352`~~ `WebMatchService.cs:396-403` — re-cited 2026-09-05, the lines drifted — feeds it `s.Actor.Level`). A flat cost against a quadratic reward makes specimen power quadratic **in effort**, where §10.5's whole promise is linear: cumulative cost `100L` against the player line's `≈22.5L²`, so at level 1,000 a specimen level bought the same `P(Θ)` for ~1/225th of the effort, and the ratio widened with every level rather than sitting at a constant a balance pass could absorb. It now reads `RpgXpCurve.XpToNext` with its own `(first, step)` row alongside `plant`/`zombie`/`player`; `first = 100` reproduces the old flat cost exactly at level 1, so early pace is unchanged and only the late-game divergence moved. **This is the only ladder in the repo the sweep found broken rather than merely unlisted** — it was invisible to `guard-power.ps1` because it lives in `FusionRpg.Data`, where the `f(level)` heuristic does not match a store method |
 
@@ -649,7 +649,7 @@ nobody "unifies" them into `Θ` by mistake.
 | 30 | `W(T) = b·T(T+1)/2` — the tier reward function `reward_per_skill_point` walks against `req(t)`'s cost ladder | arithmetic, triangular in TIER (never in `Θ`) | `tools/seedsmith/seedsmith/adapters/trees/plan/archetypes.py:86` (`w = t*(t+1)//2`, `b` cancels across archetypes at a fixed tier — spec-tree-plan.md §3.1) | **Added 2026-09-06 (task D8; row owed since task A1).** Indexed by the catalog's own authored TIER, exactly like row 7's affix ladder — never a level, never `Θ`. Exists only as an exact-integer ratio `(numerator, denominator)` against `cost(N_a(t))`, never materialised as a standalone magnitude anywhere, which is why R-A1 (task C1) walks the RATIO at every tier rather than a resolved `W(T)` value |
 | 31 | `TreeUnlockCost` — D36's rising unlock-cost wallet, `cost(N) = first + (N-1)*step`, `cumulative(N) = N*first + step*N*(N-1)/2` | arithmetic ladder, identical shape to row 6 | `PassiveTree/State/TreeUnlockCost.cs:18,29` (`PriceOfNth`, `Cumulative`; spec: `spec-tree-state.md` §2) | **Added 2026-09-06 (task D8; row owed since task A1).** A *cost* ladder for skill points spent across ALL of an actor's trees (never per-tree, §2.1's last row), not a power ladder — see §10.5. `N` is the count of VALID owned nodes (task C8's ownership rows), never a level. `long` end to end from the day it shipped (task B5), `checked`, divided by 1000 nowhere — this ladder carries no per-mille term at all |
 | 32 | `SoulTrack.ThetaNode` — `Θ_node = Θ_actor + (Ws·soulLevel)/1000`, `Ws = soulTrack.thetaPerSoulLevelMilli` | linear offset added to `Θ` before `P(Θ)` runs | `PassiveTree/Resolve/SoulTrack.cs:18` (spec: `spec-tree-binder.md` §5.1-§5.4; `spec-tree-resolve.md` §6.2; owed by `spec-tree-catalog.md` §2.3) | **Added 2026-09-06 (task D8; row owed since task A1).** Lives INSIDE `Θ` itself, additive, before `P(Θ)` ever runs — the same standing as row 18's `thetaOffset` (species threat rung), not a bounded display value scaled a second time. The catalog's stored `kMicro` never moves when a soul level changes — only `Θ_node` does (task D3's `soul_level_offsets_theta_never_the_coefficient`) — so this row calls the shared `PowerLadder` through the ladder's own `Θ` parameter and declares no private `f(soulLevel)`. `Ws = 1000` is one `Θ` per soul level; UNMEASURED per `data/tuning/passive-tree.v1.json`'s own note, shipped as a working placeholder (D42) |
-| 33 | `MasteryIndex.CountToReach`/`.Index` — the gate-counter mastery ladder, `count(m) = c·n(n+1)/2` where `n = m−1`, `c = masteryCurveFirstCount = masteryCurveStepCount` | arithmetic ladder, triangular in its own INDEX `m` (never `Θ`), identical shape to row 6 | `PassiveTree/GateCounters/MasteryIndex.cs:35,68` (spec: `spec-gate-counters.md` §3.2-§3.3, §9; owed by §6) | **Added 2026-09-06 (task G4).** A *cost* ladder for how many qualifying `status_applied`/`element_mastery` events a lifetime counter needs to reach mastery index `m` — row 6's precedent again, own tunable pair (`gateCounters.masteryCurveFirstCount/StepCount`), never `RpgXpCurve`'s. `Index` is the inverse read (integer binary search, no `Math.Sqrt`/`double`/`float` anywhere — spec-tree-resolve.md §3.1's rule applied here too), exact at every ladder boundary and safe at `count` up to `long.MaxValue` (halves whichever factor of the triangular product is even BEFORE multiplying, never after — the general "widen/divide-in-the-right-order" instance of CLAUDE.md's overflow rule, not `1000`-specific) |
+| 33 | `MasteryIndex.CountToReach`/`.Index` — the gate-counter mastery ladder, `count(m) = c·n(n+1)/2` where `n = m−1`, `c = masteryCurveFirstCount = masteryCurveStepCount` | arithmetic ladder, triangular in its own INDEX `m` (never `Θ`), identical shape to row 6 | `PassiveTree/GateCounters/MasteryIndex.cs:35,68` (spec: `spec-gate-counters.md` §3.2-§3.3, §9; owed by §6) | **Added 2026-09-06 (task G4).** A *cost* ladder for how many qualifying `status_applied`/`element_mastery` events a lifetime counter needs to reach mastery index `m` — row 6's precedent again, own tunable pair (`gateCounters.masteryCurveFirstCount/StepCount`), never `RpgXpCurve`'s. `Index` is the inverse read (integer binary search, no `Math.Sqrt`/`double`/`float` anywhere as shipped; the §3.1 float rule it followed is superseded 2026-09-15: floating-point allowed), exact at every ladder boundary and safe at `count` up to `long.MaxValue` (halves whichever factor of the triangular product is even BEFORE multiplying, never after — the general "widen/divide-in-the-right-order" instance of CLAUDE.md's overflow rule, not `1000`-specific) |
 | 34 | `MasteryIndex.Equivalents` — `(index−1)·ratePoints`, read through `StatusAppliedSource`/`ElementMasterySource` | linear READ of row 33's index, at the module's OWN rate keys | `PassiveTree/GateCounters/MasteryIndex.cs:110`, `StatusAppliedSource.cs`, `ElementMasterySource.cs` (spec: `spec-gate-counters.md` §5.2-§5.3, §9; owed by §6) | **Added 2026-09-06 (task G4).** The count→aptitude-point-**equivalents** conversion `tree-resolve` reads (§5.2) — a linear read of row 33's own index, the same "ratio/read of another row, not a new curve" standing row 22 (`ContentScale`) has over row 20. Two independent rate keys (`gateCounters.elementMasteryRatePoints`/`statusMasteryRatePoints`, D35/OQ2) — never `AllocationScope.Aspect`, never `PointBudget`'s per-scope table, which is the whole reason this counter-backed path needed its own row rather than reusing one of rows 6/26/27/31's |
 
 > **Rule PS-4. Rows 7–14 and row 16's `flatPart` are relative or bounded, and must never be multiplied by
@@ -676,8 +676,9 @@ nobody "unifies" them into `Θ` by mistake.
 The overflow audit's A7 bucket (14 sites) asks whether the stat system should move off `double`. Two
 concerns, and they resolve differently.
 
-**Range is not the problem.** `double` is exact to 2⁵³ ≈ 9×10¹⁵, which the ladder reaches at
-Θ ≈ 6.7 million. That is three orders past `int`'s per-mille limit and not the constraint.
+**Range is not the problem.** `double` holds values up to ≈1.8×10³⁰⁸, which the ladder never reaches.
+(It is integer-exact only to 2⁵³ ≈ 9×10¹⁵, reached at Θ ≈ 6.7 million — that is precision, i.e.
+rounding, not overflow, and not a constraint.)
 
 **Determinism is the real concern, and the repo already answers it.** Combat resolution runs
 `Math.Exp` in its sigmoid, whose last bit is not reproducible across architectures — and
@@ -693,8 +694,10 @@ in integers would be wrong, not merely awkward. `stat-system.md` chose `double` 
 > **produces**, not to the arithmetic that composes ratios. Where a `double` result reaches a hashed
 > output, the platform stamp is the shipped mitigation and stays.
 >
-> The one thing this does **not** license: a new `double` **magnitude** outside the composition path.
-> Those are A1, not A7, and the audit keeps flagging them.
+> **Amended 2026-09-15 (owner ruling):** floating-point is allowed for any quantity, magnitudes included.
+> The former restriction here ("does not license a new `double` magnitude outside the composition path")
+> is removed. The platform-stamp decision above is unchanged: a `double` that feeds a hashed or persisted
+> golden records the platform stamp.
 
 ---
 

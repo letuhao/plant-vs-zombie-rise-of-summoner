@@ -59,6 +59,16 @@ public sealed class RpgClient
         return new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(4) };
     }
 
+    /// <summary>Hello with the injector's debug-session state, so a restarted server's session mirror matches
+    /// the live game (2026-09-15: the mirror read inactive while a lab session was still running).</summary>
+    static HelloDto BuildHello() => new()
+    {
+        Game = RpgHost.GameProfileId,
+        Version = "1.0.0",
+        DebugSessionActive = DebugRuntime.SessionActive,
+        DebugScenarioId = DebugRuntime.SessionActive ? DebugRuntime.ScenarioId : null
+    };
+
     public async Task StartAsync()
     {
         await RefreshStatsAsync().ConfigureAwait(false);
@@ -139,7 +149,7 @@ public sealed class RpgClient
                 try
                 {
                     await _hub.InvokeAsync("Join", RpgConstants.InjectorGroup).ConfigureAwait(false);
-                    await _hub.InvokeAsync("Hello", new HelloDto { Game = RpgHost.GameProfileId, Version = "1.0.0" }).ConfigureAwait(false);
+                    await _hub.InvokeAsync("Hello", BuildHello()).ConfigureAwait(false);
                     // Found 2026-08-30 alongside the AptitudesUpdated group-mismatch fix
                     // (AptitudeEndpoints.cs): a reconnect (e.g. a server restart) re-joins the group
                     // but never re-syncs the two caches StartAsync populates at first connect, so any
@@ -160,7 +170,7 @@ public sealed class RpgClient
             };
             await _hub.StartAsync().ConfigureAwait(false);
             await _hub.InvokeAsync("Join", RpgConstants.InjectorGroup).ConfigureAwait(false);
-            await _hub.InvokeAsync("Hello", new HelloDto { Game = RpgHost.GameProfileId, Version = "1.0.0" }).ConfigureAwait(false);
+            await _hub.InvokeAsync("Hello", BuildHello()).ConfigureAwait(false);
             SignalROk = true;
             RpgHost.Log.Info("SignalR connected");
         }

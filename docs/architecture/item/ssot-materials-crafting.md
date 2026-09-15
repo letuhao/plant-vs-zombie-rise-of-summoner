@@ -775,7 +775,7 @@ Required by [DESIGN-GATE.md](../../DESIGN-GATE.md) §5. Not one of the contract'
     The salvage arithmetic in §7.5 and §8.2 is hand-computed, not executed. R2 (§5.2) is specified as a
     property test and is not yet written.
 [x] Nothing contradicts a §2 invariant of the enrichment contract — no new atom kind, no second
-    modifier mechanism, no float in content, SC5 mutation deferred to I6, every table names its consumer.
+    modifier mechanism, SC5 mutation deferred to I6, every table names its consumer. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 [ ] Corrections propagated to prose, Structure, Testing, Boundaries, map, and tasks.
     **Gap: no item map, plan, or task list exists yet.** Reconciliation into item-ideal.md happens in the
     single pass after all lanes land, per the contract's parent-intent rule.

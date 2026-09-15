@@ -58,7 +58,7 @@ twice in a delve; a domain whose deck cannot fill a room is refused at import wi
   — `1000 / 300 / 90 / 25 / 7` (`data/seed/items/_registry/bands.v1.json:453-459, :463-483`), *"a plain positive integer weight"* (`:462`).
 - **Attrition (`:183`):** *"a horror curio outcome (`event-deck`, `resource.delta` on `spirit`) | the outcome's amount |
   `stackPerCurio`"*; `:204-206`: *"the deck owns the draw … a `watch` action's status is read by its eligibility through `HasStatus`."*
-- **Determinism:** integer only, `SeededRng` never `System.Random`, no wall clock (`spec-turn-engine.md:76` via `spec-delve-graph-roll.md:41-43`).
+- **Determinism:** `SeededRng` never `System.Random`, no wall clock (`spec-turn-engine.md:76` via `spec-delve-graph-roll.md:41-43`).
 
 ## Design
 
@@ -307,7 +307,7 @@ there and through `publish.py`. Every value is a starting shape.
 | `WeightedOption.Weight` | `int` | the library's (`WeightedChoice.cs:6`); `1000/300/90/25/7` and the affinity ‰ fit |
 | `rollSeed` | `ulong` → `long` | `NextULong()` reinterpreted for `TryInstantiate` (`Instantiator.cs:102`) |
 
-No `float`/`double` here; `StatusApplyInput.BaseMagnitude` (`StatusRuntime.cs:69`) is the status layer's, never computed here.
+`StatusApplyInput.BaseMagnitude` (`StatusRuntime.cs:69`) is the status layer's, never computed here. *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 
@@ -402,7 +402,7 @@ public static EventResolution Resolve(EventDeck deck, DelveRoomFact room, PartyS
 - **Never:** a number chosen by the model — bands in, integers out; a private drop table or a drop outside
   `LootPipeline`; a direct `nerve.*` grant bypassing attrition's ladder; a wall clock or `System.Random`; a blank
   room on an empty pool; a stat write — an event grants; `weightBand` or any `*weight*`/`*chance*` stem on an
-  anchor; a `float` magnitude; SQL outside `FusionRpg.Data`; an in-fight HP change that bypasses FA10.
+  anchor; SQL outside `FusionRpg.Data`; an in-fight HP change that bypasses FA10.
 
 ## Success criteria
 

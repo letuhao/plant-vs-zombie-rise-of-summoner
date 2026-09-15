@@ -11,7 +11,7 @@ The simulation clock and the Future Event List — the two pieces that make turn
 ### The tick
 
 - **1 tick = 1 millisecond**, stored as `long`. Chosen because most durations the codebase persists are in ms (`RoundDurationMs`, status `PeriodMs`/`DurationMs`, shield `DurationMs` at the content boundary). `long` ms overflows in ~292 million years.
-- **Integer only.** No `double` reaches scheduling math — floating-point is the documented root cause of replay desync.
+- **Integer ticks.** Scheduling math runs on `long` ticks. *(Superseded 2026-09-15: floating-point allowed — the former "no `double` reaches scheduling math" ban is removed; a hashed `double` result records the platform stamp, `power/ssot-power-scale.md` §10.7.)*
 
 **Correction (audit):** 1 tick = 1 ms does **not** mean "no unit translation anywhere." Two subsystems this kernel drives speak other units, and adapters must translate:
 
@@ -39,7 +39,7 @@ Two advance mechanisms, the DES-standard pair:
 
 **Dilation is deleted** (audit D1). It lived in the clock while the ideal's own §4 says pacing is *"a playback decision, not a simulation one."* Server resolution is instantaneous and never needs it; slow-motion input windows belong to the session layer. This removes the rational arithmetic and its carry from the kernel entirely.
 
-**Frame→tick carry stays, and it is not optional.** At 60 fps a frame is 16.667 ms. With `Δ = 16` the clock loses 0.667 ms/frame — **40 ms per second, 2.4 seconds of drift per minute**. The conversion therefore carries its remainder *inside* the clock, and the signature takes **`long frames`** — never a float, and never a millisecond count derived from one.
+**Frame→tick carry stays, and it is not optional.** At 60 fps a frame is 16.667 ms. With `Δ = 16` the clock loses 0.667 ms/frame — **40 ms per second, 2.4 seconds of drift per minute**. The conversion therefore carries its remainder *inside* the clock, and the signature takes **`long frames`** — never a truncated millisecond count.
 
 ### The Future Event List
 
@@ -57,7 +57,7 @@ ScheduledEvent { long DueTick; long Seq; string OwnerKey; int Kind; long Tag; }
 
 ### Non-negotiables
 
-No `DateTime`, `Random`, `float`/`double`, or dictionary-order iteration. The purity guard is a reflection scan — **extended to callers**, because a float entering at the call site (`Advance((long)(deltaTime * 1000))`) left the guard green while enforcing the invariant exactly where it was not at risk.
+No `DateTime`, `Random`, or dictionary-order iteration. The purity guard is a reflection scan — **extended to callers**. *(Superseded 2026-09-15: floating-point allowed — `float`/`double` removed from this list; a `deltaTime` to tick conversion at the call site, `Advance((long)(deltaTime * 1000))`, is a narrowing that must be checked or reported, not a banned float.)*
 
 ## Commands
 
@@ -83,7 +83,7 @@ Clock: next-event jumps exactly to the next due tick; fixed-increment over 10 00
 
 - **Always:** integer ticks; total ordering by `(DueTick, Seq)`; caller-owned drain buffers; allocation-free schedule and drain.
 - **Ask first:** changing the tick unit from 1 ms — it re-units every stored duration.
-- **Never:** wall-clock reads, RNG, floating-point (including at call sites), or dictionary-order iteration; a queue whose ordering depends on cancellation or reschedule history; dilation in the kernel.
+- **Never:** wall-clock reads, RNG, or dictionary-order iteration (floating-point allowed — owner ruling 2026-09-15); a queue whose ordering depends on cancellation or reschedule history; dilation in the kernel.
 - **Out of scope, stated so nobody infers otherwise from `W = N`:** simultaneous resolution. The kernel is strictly sequential — total ordering means one actor always resolves first, so no profile can produce "both die." A `SimultaneousBatch` pop is a kernel feature, not a profile row, and is not in this program.
 
 ## Success criteria

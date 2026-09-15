@@ -167,7 +167,7 @@ Not aspirations — each has an audit or guard that already runs.
 
 | Standard | Check |
 |---|---|
-| **Magnitudes are `long`**; never `float`; widen before multiplying; divide by 1000 last; overflow throws | `python scripts/audit-overflow.py` · [CLAUDE.md](../../CLAUDE.md) |
+| **Integer magnitudes are `long`**; floating-point allowed (owner ruling 2026-09-15); widen before multiplying; divide by 1000 last; integer overflow throws | `python scripts/audit-overflow.py` · [CLAUDE.md](../../CLAUDE.md) |
 | **No hard progression ceilings** — a cap on a magnitude is a ceiling (PS-8). Bounded ratios are exempt **and must say so in a comment** | [power/ssot-power-scale.md](power/ssot-power-scale.md) §11 |
 | **Balance surface is config** — every new scale/rate in `data/tuning/<domain>.v{n}.json`, never a literal | `python scripts/audit-magic-numbers.py` · [tunables-ssot.md](tunables-ssot.md) |
 | **One power ladder** — contests read `Θ` (linear), magnitudes read `P(Θ)`. No private `f(level)` | `scripts/guard-power.ps1` |

@@ -213,8 +213,8 @@ One new key, filed on `dungeon-registries` (unit in the name, T6; required, T5):
 ## Numeric types
 
 `need`, `have`, `offeredAtEntry`, rung ordinals, `Θ_run`: **`int`** — bounded by the graph or the ladder. Every ‰: **`long`**,
-widened before the multiply: `need = (int)Math.Max(1, ((long)rooms * milli + 999) / 1000)`. Souls, if ever: `long`. No
-`float`/`double`; a fractional tuning value is a load rejection. Overflow throws, never wraps.
+widened before the multiply: `need = (int)Math.Max(1, ((long)rooms * milli + 999) / 1000)`. Souls, if ever: `long`. A
+fractional tuning value is a load rejection (this module's integer schema). Overflow throws, never wraps. *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 
@@ -319,7 +319,7 @@ public static QuestVerdict Evaluate(QuestRow q, DelveReport r)
 - **Never:** a quest that writes state (rooms, doors, lanes, pools, packs, bank); a mid-delve reward or a wipe
   consolation; a count, weight or soul number from a model or an anchor; a quest as victory condition or as a
   boss/door/rung gate; a private drop table; a template whose completion requires spending at a sink; a rarity
-  multiplier; `float`/`double`; a private `f(level)`; SQL outside `FusionRpg.Data`; `System.Random` or a clock.
+  multiplier; a private `f(level)`; SQL outside `FusionRpg.Data`; `System.Random` or a clock.
 
 ## Success criteria (G4, `party-dungeon-map.md:160`)
 

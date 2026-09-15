@@ -194,7 +194,7 @@ public class TimelinePurityGuardTests
     }
 
     [Fact]
-    public void Kernel_sources_contain_no_wall_clock_rng_or_floating_point()
+    public void Kernel_sources_contain_no_wall_clock_or_rng()
     {
         var dir = TimelineDir();
         Assert.True(Directory.Exists(dir), $"kernel source dir not found: {dir}");
@@ -202,35 +202,23 @@ public class TimelinePurityGuardTests
 
         var offences = KernelPurityScan.Scan(dir);
         Assert.True(offences.Count == 0,
-            "kernel purity violated (integer ticks only, no wall clock, no RNG):\n" + string.Join("\n", offences));
+            "kernel purity violated (no wall clock, no RNG, no dictionary enumeration):\n" + string.Join("\n", offences));
     }
 
     [Theory]
     [InlineData("var t = DateTime.UtcNow;", "DateTime")]
     [InlineData("readonly Random _rng = new();", "Random")]
-    [InlineData("double ratio = 0.5;", "double ")]
-    [InlineData("float dt = 0.016f;", "float ")]
-    // B31, 2026-09-04 — the hole. Every case above is caught by a DECLARATION or CAST token; none of
-    // them sees a bare literal behind `var`, which is how this codebase declares locals by default.
-    // These four were verified to slip through the pre-B31 scan entirely.
-    [InlineData("var x = 1.5f;", "floating-point literal")]
-    [InlineData("var x = 0.5;", "floating-point literal")]
-    [InlineData("var x = 5f;", "floating-point literal")]
-    [InlineData("var x = 1e5;", "floating-point literal")]
-    // ...and these must NOT trip it, or the guard cries wolf and gets suppressed.
+    // Floating point is not a purity violation (owner ruling 2026-09-15 removed the project-wide
+    // floating-point ban). These lines must stay clean — a guard that flags a legal construct cries
+    // wolf and gets suppressed.
+    [InlineData("double ratio = 0.5;", null)]
+    [InlineData("float dt = 0.016f;", null)]
+    [InlineData("var x = 1.5f;", null)]
+    [InlineData("var r = (double)a / b;", null)]
     [InlineData("var x = arr[1..5];", null)]
     [InlineData("var x = 0x1F;", null)]
     [InlineData("var x = 1_000L;", null)]
     [InlineData("throw new Exception(\"expected 1.5 here\");", null)]
-    [InlineData("var x = -1.5f;", "floating-point literal")]
-    [InlineData("BaseMagnitude = 1.0,", "floating-point literal")]
-    // ARGUMENT position stays legal, and deliberately so: the original token set always permitted it,
-    // because the action and status layers call APIs whose parameters are `double`. Widening the rule
-    // here would be a silent policy change for two other programs (see B31's evidence block).
-    [InlineData("new FixedStatusRng(0.0);", null)]
-    [InlineData("BaseMagnitude: 1.0,", null)]
-    [InlineData("if (x == 1.5) return;", null)]
-    [InlineData("Foo(a, 1.5, b);", null)]
     public void The_purity_scan_actually_detects_a_violation(string badLine, string? expectedToken)
     {
         // Tests the guard, not the kernel. A scan that stays green while the invariant is broken
@@ -391,8 +379,7 @@ public class TimelinePurityGuardTests
                      {
                          ("var g = Guid.NewGuid();", "Guid.NewGuid"),
                          ("var t = Environment.TickCount64;", "Environment.Tick"),
-                         ("var h = key.GetHashCode();", ".GetHashCode("),
-                         ("var r = (double)a / b;", "(double)")
+                         ("var h = key.GetHashCode();", ".GetHashCode(")
                      })
             {
                 File.WriteAllLines(Path.Combine(tmp, "Door.cs"),

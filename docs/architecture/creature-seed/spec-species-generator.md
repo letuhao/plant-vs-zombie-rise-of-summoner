@@ -82,8 +82,8 @@ so a later observation can correct it without guesswork.
 From `CLAUDE.md`, and they bind harder here than anywhere else in the program because this is where
 magnitudes are actually born:
 
-- **`long` for every magnitude.** `float` is banned outright — it stops being integer-exact at index
-  232, inside normal play.
+- **`long` for every integer magnitude.** Floating-point is allowed (owner ruling 2026-09-15 — precision
+  is not overflow).
 - **Widen before multiplying:** `(long)a * b`, never `(long)(a * b)`.
 - **Divide by 1000 last, exactly once.** Per-mille intermediates sit 1000× closer to the ceiling.
 - **Overflow throws.** No `unchecked`, no clamp. A clamp turns *"your gear stopped mattering"* into a
@@ -150,7 +150,7 @@ var pTheta = new PowerLadder(tuning).Value(theta);
 | Test | Asserts |
 |---|---|
 | `no_private_level_function_exists` | greps for `Math.Pow`/curve shapes outside the ladder call |
-| `every_magnitude_is_long` | reflection over the concrete row type; a `float` or `int` magnitude fails |
+| `every_magnitude_is_long` | reflection over the concrete row type; an `int` magnitude fails *("a `float` fails" clause superseded 2026-09-15: floating-point allowed)* |
 | `overflow_throws_never_clamps` | a deliberately enormous `Theta` |
 | `no_cap_on_any_magnitude` | greps for `Math.Min` on magnitude paths |
 | `regenerating_unchanged_seeds_is_byte_identical` | the `--check` gate |
@@ -172,7 +172,7 @@ deterministic and identical for every player. The per-player *effect* roll is `p
 (module 16), and the container it rolls is `species-effects` (module 15). **Only effects roll; stats
 never do.**
 
-**Never:** write a private `f(level)`; use `float` for a magnitude; cap a magnitude; reimplement
+**Never:** write a private `f(level)`; cap a magnitude; reimplement
 `Magnitude` in Python; let a model near this module.
 
 ## Success criteria

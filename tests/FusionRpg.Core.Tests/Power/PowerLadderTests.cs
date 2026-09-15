@@ -178,32 +178,11 @@ public class PowerLadderTests
             Assert.Equal(first, ladder.Value(777));
     }
 
-    // ---- §7.6/§5: determinism — source scan over the whole Core/Power namespace -----------------------
-
-    static readonly Regex ForbiddenToken = new(@"\b(double|decimal)\b|Math\.Pow|Math\.Exp", RegexOptions.Compiled);
-
-    [Fact]
-    public void CorePower_SourceContainsNoFloatingPointOrTranscendentalCalls()
-    {
-        // §6 Never: "double, decimal, Math.Pow, or Math.Exp in Core/Power - the output is hashed."
-        // A narrow, targeted scan (this module's own determinism clause), not a re-implementation of
-        // audit-magic-numbers.py/audit-overflow.py, which already cover the repo more generally.
-        var dir = Path.Combine(RepoRoot(), "src", "FusionRpg.Core", "Power");
-        Assert.True(Directory.Exists(dir), dir);
-
-        var offenders = new System.Collections.Generic.List<string>();
-        foreach (var file in Directory.GetFiles(dir, "*.cs", SearchOption.TopDirectoryOnly))
-        {
-            var lines = File.ReadAllLines(file);
-            for (int i = 0; i < lines.Length; i++)
-            {
-                var code = Regex.Replace(lines[i], "//.*$", "");
-                if (ForbiddenToken.IsMatch(code))
-                    offenders.Add($"{Path.GetFileName(file)}:{i + 1}: {lines[i].Trim()}");
-            }
-        }
-        Assert.True(offenders.Count == 0, string.Join(Environment.NewLine, offenders));
-    }
+    // ---- §7.6/§5: determinism ------------------------------------------------------------------------
+    // The former Core/Power source scan banning double/decimal/Math.Pow/Math.Exp was removed by the
+    // 2026-09-15 owner ruling (floating point is allowed for any quantity; determinism of a double in a
+    // hashed golden is a platform stamp, ssot-power-scale.md §10.7). Determinism stays proven by value:
+    // Purity_SameIndexRepeatedCalls_IdenticalResult above, and the exact-value/overflow tests.
 
     [Fact]
     public void PowerLadder_SourceContainsNoNumericLiteralOutsideTheLoader()

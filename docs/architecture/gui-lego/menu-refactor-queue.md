@@ -19,7 +19,7 @@ stream after P0’s piece contracts are accepted for React.
 | **P1b** | ActorSheet Shield | `ActorPanel` tab | `shield-console` + stack bar | **Done** — [shield-sheet-map.md](../shield-sheet-map.md) · layers on **`sheet.shieldLayers` (S1)** |
 | **P2** | Creatures layer | `PanelShell` | `tool-search`, `chip`, `phase-*` + Actor ERM rows | Filter chrome first; keep `ActorCard`/`ActorRow` |
 | **P3** | Relics · Commanders | `PanelShell` | search, chips, Card/Row rungs | Card via ERM — not a new density |
-| **P4** | Other rail layers + remaining Actor tabs | `PanelShell` / `ActorPanel` | Shared chrome | Fusion, Pacts, Expeditions, Almanac, Chronicle; Status, Elements, Kit, Paths — **one surface per stream** (**Shield removed** — see P1b). **Aptitudes claimed** by [`aptitude-sheet-map.md`](../aptitude-sheet-map.md) (not a generic P4 grab-bag) |
+| **P4** | Other rail layers + remaining Actor tabs | `PanelShell` / `ActorPanel` | Shared chrome | Fusion, Pacts, Expeditions, Almanac, Chronicle; Status, Elements, Kit, Paths — **one surface per stream** (**Shield removed** — see P1b). **Aptitudes: Done** — [`aptitude-sheet-map.md`](../aptitude-sheet-map.md), FE A/B/C + presets proven, Injector wire (AS-1.1/AS-1.1b) live-proven 2026-09-14 (not a generic P4 grab-bag) |
 | **Later** | Delve / Siege / World inspectors | Stage hosts | Composition grammar | Not rail v1 |
 
 ---

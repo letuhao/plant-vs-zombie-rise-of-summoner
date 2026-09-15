@@ -1,0 +1,17 @@
+{
+  "session": "rift-gate-idea-20260915-b7e4",
+  "program": "rift-gate",
+  "problem": "Rift Gate: a PVZ-game sprite (cracked tombstone) that opens the web FE. Idea phase (ideal doc + 14 owner decisions) complete 2026-09-15; now Phase 0 capability map, then module specs.",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "docs/architecture/rift-gate-ideal.md",
+    "docs/architecture/rift-gate-map.md",
+    "docs/architecture/rift-gate/**",
+    "tasks/sessions/rift-gate-idea-20260915-b7e4.json"
+  ],
+  "started": "2026-09-15T00:00:00Z",
+  "status": "merged",
+  "problem_note": "Idea phase complete: docs/architecture/rift-gate-ideal.md + rift-gate-map.md committed in ea4d58a7. Marked merged 2026-09-15 so the follow-on spec session (rift-gate-spec-20260915-c41a, worktree) can own docs/architecture/rift-gate/** without an active-fence overlap."
+}

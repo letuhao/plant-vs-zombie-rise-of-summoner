@@ -207,7 +207,7 @@ source-kind vocabulary — closed lists the code owns.
   ⚠ Note the unit is **per-million**, matching `drop-rate-floor.v1.json`, **not** per-mille like the
   socket and cost tables. Mixing the two is the most likely bug in this module.
 - Yield **quantities** are `long`. They are magnitudes that scale with content.
-- **Widen before multiplying; divide last, exactly once; overflow throws.** Never `float`.
+- **Widen before multiplying; divide last, exactly once; integer overflow throws.** Floating-point is allowed (owner ruling 2026-09-15).
 
 ## ActorHub gate
 

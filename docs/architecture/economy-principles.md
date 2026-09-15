@@ -235,9 +235,11 @@ the single thing making territory choice and future trade partners meaningful.
 The world map's first lock: *a save is `(seed, template, command log)` and replay must be
 byte-identical*. That constrains the economy's mathematics directly.
 
-> **Rule P13.** Yields, prices, and rates are **integer per-mille**, computed inside `step`, from
-> state. No floating rates, no wall-clock accrual, no lazy "compute on read" that the state hash
-> cannot see.
+> **Rule P13.** Yields, prices, and rates are computed inside `step`, from state. No wall-clock
+> accrual, no lazy "compute on read" that the state hash cannot see. *(Amended 2026-09-15 per owner
+> ruling: floating-point is allowed — the former "integer per-mille / no floating rates" clause is
+> removed. A floating value that feeds the replay hash records the platform stamp,
+> [power/ssot-power-scale.md](power/ssot-power-scale.md) §10.7.)*
 
 Note this contradicts [world-graph-ideal.md](world-graph-ideal.md) §7.2, which proposes on-read
 accrual with "no ticking, no scheduler". That was written for the expedition system. The turn engine

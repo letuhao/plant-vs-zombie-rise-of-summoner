@@ -134,7 +134,7 @@ Injector injects the same `status-catalog` / `resource-catalog`. Renderers resol
 ### Magnitudes
 
 Catalogs carry presentation and identity only. Any magnitude remains `long` where composition
-already uses it; this module does not introduce float magnitudes.
+already uses it.
 
 ---
 

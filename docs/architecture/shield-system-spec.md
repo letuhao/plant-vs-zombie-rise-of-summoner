@@ -229,7 +229,7 @@ Match `StatusRuntime` / `OverlayCombatCalculator` idiom — sealed classes, expl
 
 - **Always:** absorb strictly above the Funnel; Funnel stays hp-only add-only FA10; permille `long` math with the locked rounding rule; additive flat-sum channels with additive omni; regression-lock the no-shield path; guard naming discipline (§6); update decisions.md + element-hub-ssot.md in the same change; run all four guards.
 - **Ask first:** reflection/immunity shield types; percent penetration; a `bypassShield` damage flag; `OnShieldBroken` proc triggers; changing `ShieldMatchupShareKPm`/`ShieldChipFloorKPm`/`ShieldPenCapKPm`, the cap of 3, or drain order; diverging `ShieldElementMatrix` from the ring seed; protected innate slots; regen after-hit delay; radius shape or ally-relative side in `TargetResolver`; shield kinds in the v2 ring enum; any non-additive web/payload change.
-- **Never:** absorb vanilla PVZ damage (locked by owner — we extend our combat, we don't change the game); write Unity HP or `theShieldHealth`; reuse the `theShieldHealth`/`theShieldMaxHealth` payload keys; a new Funnel channel; YAML/runtime shield registry; `System.Random`; float in game-affecting shield math.
+- **Never:** absorb vanilla PVZ damage (locked by owner — we extend our combat, we don't change the game); write Unity HP or `theShieldHealth`; reuse the `theShieldHealth`/`theShieldMaxHealth` payload keys; a new Funnel channel; YAML/runtime shield registry; `System.Random`.
 
 ## 9. Rejected Chaos paths (v1)
 

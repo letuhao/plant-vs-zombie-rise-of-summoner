@@ -49,7 +49,7 @@ until `CloseDelve(Extracted)` mints it, forfeited on a wipe; every battle, exped
   `SeededRng.DeriveStream` + `WeightedChoice`; *"Never a second roll implementation."* **Decision 13 (`:1699-1708`; seed
   contract `:124`):** *"granted by id … never categorically"* — a cage occupant and an altar pool are drawn by the shipped roller.
 - **Ideal §11.6 (`:1381-1425`):** *"a talk, not a coin"*; *"the answer raises a band, never sets the outcome"*; capture is *"an
-  action in the corpus, not a verb on the engine"*, *"integer per-mille … No exponent, no float"*, *"a per-target ramp"*,
+  action in the corpus, not a verb on the engine"*, *"integer per-mille … No exponent"*, *"a per-target ramp"*,
   *"no cross-delve pity"*; *"pity shared with the Sanctum altar."* **Map row 13:** `Θ_party` is *"the commander's composed
   `Θ_actor` … never a mean"* (audit N9, `:237`).
 
@@ -281,7 +281,7 @@ creature}` (`craves · accepts · scorns` → −1/0/+1; keys = `contracts.v1.js
 `NextPerMille()`'s `int` widened; `WeightedOption.Weight` narrows to `int` after a range check (`WeightedChoice.cs:6`).
 `Θ_room`, `θ_enemy`, `Θ_party`, `Θ_caster`, Δ, band indices, `seq`, `n`, steps, attempts, `Level`: **`int`**, `checked`
 (`Level` widens at the `rpg_unique_actors.level` write). Loyalty and slots `int` (`ContractPolicy.cs:80-83`); seeds `ulong`
-(`SeededRng.cs:15`). No `float`/`double`; `FocusWeightMultiplier` (`double`, `SummoningTuning.cs:5`) is the roller's, never read here.
+(`SeededRng.cs:15`). `FocusWeightMultiplier` (`double`, `SummoningTuning.cs:5`) is the roller's, never read here. *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 
@@ -383,7 +383,7 @@ public static bool CaptureSucceeds(CaptureFacts f, CaptureTuning t, SeededRng ca
   bind that bypasses `AutoBindNewSpecimenUnlocked`; a battle-engine special case for capture (no `actionId == "act.capture"`
   under `Core/Battle/`); `HypnoAlly` read for anything; a wall clock; a number from a model; a recruit in a pack cell or a
   party slot; `KillEarn` or XP for a captured or recruited creature; `wild.joinMilli`, `altar.pullPriceSouls` or any soul literal
-  in `dungeon.v1.json`; a `float` magnitude; SQL outside `FusionRpg.Data`.
+  in `dungeon.v1.json`; SQL outside `FusionRpg.Data`.
 
 ## Success criteria (G4, `party-dungeon-map.md:160`)
 

@@ -27,9 +27,14 @@ public sealed class LiveProbeClient : IDisposable
 
     readonly HttpClient _http;
 
-    public LiveProbeClient(string baseUrl)
+    public LiveProbeClient(string baseUrl) : this(baseUrl, new HttpClientHandler())
     {
-        _http = new HttpClient { BaseAddress = new Uri(baseUrl) };
+    }
+
+    /// <summary>Offline tests pass a handler that answers the Server's routes from memory.</summary>
+    public LiveProbeClient(string baseUrl, HttpMessageHandler handler)
+    {
+        _http = new HttpClient(handler) { BaseAddress = new Uri(baseUrl) };
         _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
@@ -97,6 +102,67 @@ public sealed class LiveProbeClient : IDisposable
                 $"step 1 refused: HTTP {status} {TryExtractReason(raw) ?? raw}"), null);
         return (new StepResult("1-acquire (debug shortcut)", StepOutcome.Ok,
             $"instanceId={body!.InstanceId} ptr={body.Ptr} (synthetic, debug-only)"), body);
+    }
+
+    // ---- step 0 (soul provenance, Mode B) ---------------------------------------------------------
+
+    /// <summary>live-probe Task 18. Plain RPG reads, no debug route: <c>GET /api/souls/{id}</c>, the
+    /// ledger pages behind it (<c>GET /api/souls/{id}/ledger</c>, newest first, <c>afterId</c> = smallest id
+    /// seen), and — per run that earned kill souls — that run's <c>ZombieKilled</c> facts
+    /// (<c>GET /api/pvz-activity/{id}/facts</c>), whose payload carries the victim's <c>spawnOrigin</c>.</summary>
+    public async Task<StepResult> GetSoulProvenanceAsync(long? playerId, int maxLedgerPages = 20)
+    {
+        if (playerId is not { } pid)
+            return new StepResult("0-soul-provenance", StepOutcome.Skipped,
+                "no -PlayerId given, so the balance the summon spends cannot be attributed");
+
+        var (balOk, balStatus, balance, balRaw) = await GetAsync<SoulBalanceDto>($"/api/souls/{pid}");
+        if (!balOk || balance is null)
+            return new StepResult("0-soul-provenance", StepOutcome.Refused,
+                $"soul balance read refused: HTTP {balStatus} {TryExtractReason(balRaw) ?? balRaw}");
+
+        const int pageSize = 500;
+        var ledger = new List<SoulLedgerEntryDto>();
+        var afterId = 0L;
+        var truncated = false;
+        for (var page = 0; ; page++)
+        {
+            if (page == maxLedgerPages) { truncated = true; break; }
+            var (ok, status, body, raw) = await GetAsync<SoulLedgerDto>($"/api/souls/{pid}/ledger?limit={pageSize}&afterId={afterId}");
+            if (!ok || body is null)
+                return new StepResult("0-soul-provenance", StepOutcome.Refused,
+                    $"soul ledger read refused: HTTP {status} {TryExtractReason(raw) ?? raw}");
+            ledger.AddRange(body.Items);
+            if (body.Items.Count < pageSize) break;
+            afterId = body.Items.Min(i => i.Id);
+        }
+
+        // live-probe Task 20: page each run's facts (newest first, afterId = smallest id seen) instead of stopping at
+        // the endpoint's 500-row cap, which left older kills reported as FactNotFound.
+        var facts = new List<PvzActivityFactDto>();
+        foreach (var runId in ledger.Where(SoulProvenance.IsKillEarn).Select(r => r.RunId).Distinct())
+        {
+            var factsAfter = 0L;
+            for (var page = 0; page < maxLedgerPages; page++)
+            {
+                var (ok, status, body, raw) = await GetAsync<PvzActivityFactsPageDto>(
+                    $"/api/pvz-activity/{pid}/facts?kind=ZombieKilled&runId={runId}&limit={pageSize}&afterId={factsAfter}");
+                if (!ok || body is null)
+                    return new StepResult("0-soul-provenance", StepOutcome.Refused,
+                        $"run {runId} facts read refused: HTTP {status} {TryExtractReason(raw) ?? raw}");
+                if (body.Items.Count == 0) break;
+                var oldest = body.Items.Min(i => i.Id);
+                // A Server that predates the cursor ignores afterId and answers the newest page again.
+                if (factsAfter > 0 && oldest >= factsAfter)
+                    return new StepResult("0-soul-provenance", StepOutcome.Refused,
+                        $"run {runId} facts endpoint ignored afterId={factsAfter}; restart the Server on a build with facts paging");
+                facts.AddRange(body.Items);
+                if (body.Items.Count < pageSize) break;
+                factsAfter = oldest;
+            }
+        }
+
+        return SoulProvenance.ToStep(SoulProvenance.Summarize(balance.Balance, ledger, truncated, facts));
     }
 
     /// <summary>Mode B's acquire — the only acquisition path that reaches a real Unity-spawned entity.

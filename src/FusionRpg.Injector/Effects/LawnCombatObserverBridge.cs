@@ -95,7 +95,8 @@ public static class LawnCombatObserverBridge
 
             LawnCombatObserver.RecordRpgDelta(
                 swingId, attackerPtr, targetPtr ?? "", breakdown.FinalSignedDelta,
-                attackerElement, victimElement, relation);
+                attackerElement, victimElement, relation,
+                LawnCombatObserver.Outcomes.Of(breakdown.Hit, breakdown.Parried, breakdown.Blocked, breakdown.Crit));
         }
         catch { }
     }
@@ -119,6 +120,8 @@ public static class LawnCombatObserverBridge
             ["regenAccrued"] = snap.RegenAccrued,
             ["exhaustionEvents"] = snap.ExhaustionEvents,
             ["rpgDeltaMergedHits"] = snap.RpgDeltaMergedHits,
+            ["rpgDeltaUnmergedRecords"] = snap.RpgDeltaUnmergedRecords,
+            ["rpgMisses"] = snap.RpgMisses,
             ["droppedRecords"] = snap.DroppedRecords,
             ["recentHits"] = snap.RecentHits.Select(h => new Dictionary<string, object>
             {
@@ -133,7 +136,8 @@ public static class LawnCombatObserverBridge
                 ["rpgDeltaObserved"] = h.RpgDeltaObserved,
                 ["attackerElement"] = h.AttackerElement?.ToString() ?? "",
                 ["victimElement"] = h.VictimElement?.ToString() ?? "",
-                ["matchupRelation"] = h.MatchupRelation?.ToString() ?? ""
+                ["matchupRelation"] = h.MatchupRelation?.ToString() ?? "",
+                ["rpgOutcome"] = h.RpgOutcome
             }).ToList()
         };
     }
@@ -158,8 +162,12 @@ public static class LawnCombatObserverBridge
             var bullet = obj.TryCast<Bullet>();
             if (bullet != null)
             {
+                // The swing stays the bullet (one pierce = one swing, D8). The attacker is the shooter the drain resolved
+                // at the bullet's spawn, so the RPG record for this hit (actor = shooter) can find this one (L-N35).
                 var ptr = GameDumps.Ptr(bullet);
-                return (ptr, ptr);
+                return EventDrainHost.TryPeekBulletShooter(bullet.Pointer, out var shooter)
+                    ? (shooter.ToString("X"), ptr)
+                    : (ptr, ptr);
             }
         }
         catch { }

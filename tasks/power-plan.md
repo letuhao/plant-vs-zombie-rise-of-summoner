@@ -108,8 +108,9 @@ economy stream may each revise a tuning weight they own — welcome, not owed.
 The ladder is quadratic, so type choices made when magnitudes were flat are now wrong. Widening
 *after* consumers migrate means doing it twice, the second time against goldens that have moved.
 
-Measured thresholds: `float` breaks at **Θ 232**, `int` per-mille at **3,213**, `int` whole at
-**103,557**, `long` at **214,748,300**.
+Measured range thresholds: `int` per-mille at **3,213**, `int` whole at **103,557**, `long` at
+**214,748,300**. *(The former "`float` breaks at Θ 232" entry was a precision point, not overflow —
+superseded 2026-09-15: floating-point allowed.)*
 
 Audit baseline: **0 critical, 92 A3** (`int` whole-unit magnitudes), 14 A7 (architectural `double`).
 The first tool run reported 121 critical findings, all false positives — the precision gate is the

@@ -283,7 +283,7 @@ UNTOUCHED: WorldState.cs, WorldCanonical.cs, TurnEngine.cs, SectorTypeCatalog.cs
 ## Code style
 
 Catalog discipline as the world catalogs (unknown → throw at startup); the store partial mirrors
-`RpgStore.World.cs` (gate-serialized, one transaction, revision bump); integer-only; no SQL outside Data.
+`RpgStore.World.cs` (gate-serialized, one transaction, revision bump); no SQL outside Data.
 
 ```csharp
 /// <summary>Which rules apply and which catalogs answer rules 1 and 6. `Map` is today's behaviour exactly.</summary>

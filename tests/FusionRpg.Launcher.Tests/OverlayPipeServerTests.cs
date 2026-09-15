@@ -9,7 +9,8 @@ public class OverlayPipeServerTests
     [Theory]
     [InlineData("toggle", OverlayPipeCommand.Toggle)]
     [InlineData("ping", OverlayPipeCommand.Ping)]
-    public void ParseCommand_accepts_the_two_verbs(string line, OverlayPipeCommand expected)
+    [InlineData("hide", OverlayPipeCommand.Hide)]
+    public void ParseCommand_accepts_every_shipped_verb(string line, OverlayPipeCommand expected)
     {
         Assert.Equal(expected, OverlayPipeServer.ParseCommand(line));
     }
@@ -26,6 +27,15 @@ public class OverlayPipeServerTests
     }
 
     [Theory]
+    [InlineData("HIDE")]
+    [InlineData("Hide")]
+    [InlineData("  hide  ")]
+    public void ParseCommand_is_case_and_whitespace_tolerant_for_hide(string line)
+    {
+        Assert.Equal(OverlayPipeCommand.Hide, OverlayPipeServer.ParseCommand(line));
+    }
+
+    [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
@@ -33,7 +43,6 @@ public class OverlayPipeServerTests
     [InlineData("toggle now")]
     [InlineData("toggle;ping")]
     [InlineData("show")]
-    [InlineData("hide")]
     [InlineData("../../etc/passwd")]
     public void ParseCommand_ignores_junk(string? line)
     {

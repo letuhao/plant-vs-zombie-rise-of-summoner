@@ -6,11 +6,13 @@ namespace FusionRpg.Injector.Effects;
 /// with it off, the lawn is byte-identical to today: no actor ever holds an `OnDamageDealt` grant, so
 /// `EffectRuntime.HasOnDamageDealtGrant()` stays false exactly as it is without this feature at all.
 ///
-/// <para>Default ON (mirrors <see cref="OverlayCombatFeature"/>'s own default-enabled toggle) — the
-/// risk this exists for is a MEASURED perf breach (T13's live re-measurement), not an a-priori doubt,
-/// so shipping default-off would just be reintroducing the wiring gap this program exists to close.
-/// The env var is a true kill switch: "0" forces off regardless of any debug override, for a host with
-/// no cheat document loaded (e.g. an automated probe).</para>
+/// <para><b>Default OFF — owner decision 2026-09-15 (lawn-combat-wire L-N1).</b> T13's 300-zombie wave
+/// breached the frame budget with the feature on; the owner chose "ship behind the switch, default off"
+/// until a measured perf pass clears it. The env var decides first and is read once at process start:
+/// <c>"0"</c> forces off, <c>"1"</c> forces on (the only way a live proof may enable it: a mid-match toggle on
+/// never binds actors that spawned while it was off). With the env var unset, an explicit debug/QA toggle
+/// may override the default; turning it off mid-match withdraws every bound basic-attack grant
+/// (<c>LawnBasicAttackGrantBinder.Tick</c>, L-N8).</para>
 ///
 /// <para><b>2026-09-14 correction (lawn-combat-wire T10/T12 live-inert investigation):</b> this used to
 /// read <c>CheatState.On(CheatToggleId)</c> directly, borrowing <c>CheatSchema.EffectiveToggle</c>'s
@@ -22,7 +24,7 @@ namespace FusionRpg.Injector.Effects;
 /// the fallback the way a real flag must. A real always-on-by-default production switch cannot borrow
 /// its default from a system whose own contract does not promise one — the SOLID-boundary hard rule
 /// this repo's CLAUDE.md states ("depend on registered abstractions, not a mode-local concrete
-/// composer," the identical shape one level down). <see cref="DefaultOn"/> below is now this module's
+/// composer," the identical shape one level down). <see cref="DefaultEnabled"/> below is now this module's
 /// OWN default, read first; <c>CheatState</c> is consulted only as an OPTIONAL, EXPLICIT debug/QA
 /// override — never as the thing that decides what "default" means. <c>OVERLAY-COMBAT</c> (this
 /// class's own sibling, referenced above) has the identical shape and is left alone here — same-class
@@ -33,15 +35,17 @@ public static class LawnBasicAttackFeature
     public const string CheatToggleId = "LAWN-BASIC-ATTACK";
     public const string EnvVar = "FUSIONRPG_LAWN_BASIC_ATTACK";
 
-    /// <summary>This module's own default — true, independent of CheatState/CheatSchema/CheatRegistry.
-    /// The single source of truth for "on unless something explicitly overrides it."</summary>
-    public const bool DefaultOn = true;
+    /// <summary>This module's own default — false (owner decision 2026-09-15, L-N1), independent of
+    /// CheatState/CheatSchema/CheatRegistry. The single source of truth for "off unless something
+    /// explicitly enables it."</summary>
+    public const bool DefaultEnabled = false;
 
     // Env is read once — this gate sits on the spawn/die path, same discipline as OverlayCombatFeature.
-    static readonly bool EnvForcedOff =
-        string.Equals(Environment.GetEnvironmentVariable(EnvVar), "0", StringComparison.Ordinal);
+    static readonly string? EnvValue = Environment.GetEnvironmentVariable(EnvVar);
+    static readonly bool EnvForcedOff = string.Equals(EnvValue, "0", StringComparison.Ordinal);
+    static readonly bool EnvForcedOn = string.Equals(EnvValue, "1", StringComparison.Ordinal);
 
-    /// <summary>An explicit debug/QA override ONLY — null (meaning "defer to <see cref="DefaultOn"/>")
+    /// <summary>An explicit debug/QA override ONLY — null (meaning "defer to <see cref="DefaultEnabled"/>")
     /// whenever nobody has ever toggled <see cref="CheatToggleId"/> this session
     /// (<c>CheatState.IsUserSet</c> false). Deliberately never reads <c>CheatState.On</c>'s own
     /// schema-fallback value as a default candidate — only a REAL, explicit user/script toggle counts
@@ -50,5 +54,5 @@ public static class LawnBasicAttackFeature
     /// depending on CheatState's rehydrate/reset timing.</summary>
     static bool? DebugOverride => CheatState.IsUserSet(CheatToggleId) ? CheatState.On(CheatToggleId) : null;
 
-    public static bool Enabled => !EnvForcedOff && (DebugOverride ?? DefaultOn);
+    public static bool Enabled => !EnvForcedOff && (EnvForcedOn || (DebugOverride ?? DefaultEnabled));
 }

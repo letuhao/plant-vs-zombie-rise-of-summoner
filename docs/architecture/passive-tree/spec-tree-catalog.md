@@ -483,7 +483,7 @@ already share — nothing new is invented.
 | `a_retired_node_keeps_its_id_and_is_never_reissued` | R1 + R2 |
 | `an_authored_id_disagreeing_with_its_coordinates_is_IdMismatch` | kept as authored, not rewritten |
 | `no_node_id_contains_a_dot_in_its_body` | the `container_id` grammar |
-| `every_stored_magnitude_field_is_long` | reflection over the record types; a `float` or `int` fails |
+| `every_stored_magnitude_field_is_long` | reflection over the record types; an `int` fails *("a `float` fails" superseded 2026-09-15: floating-point allowed)* |
 | `no_catalog_field_stores_a_resolved_magnitude` | reflection — the record carries `kMicro` and no absolute number |
 | `an_unregistered_channel_is_refused_at_load` | not silently written |
 | `scale_axis_matches_unit_class_for_every_atom` | §2.4's table, over the whole corpus |

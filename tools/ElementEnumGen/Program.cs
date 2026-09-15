@@ -9,6 +9,8 @@ using FusionRpg.Tools.ElementEnumGen;
 //        --emit <path>  write the generated ActorElementTypes source instead of checking
 //        --trait-check  TraitAtomSource.Shipped() vs the migrated trait containers
 //        --trait-emit   write the generated Shipped() body instead of checking
+//        --effect-emit <path>   write EffectAtomCatalog.Generated.cs from data/seed/atoms/fx-*.json
+//        --effect-check <path>  fail (exit 1) when the checked-in catalog is stale vs the seed
 //
 // Exit codes: 0 clean, 1 mismatch found, 2 could not start.
 
@@ -27,6 +29,7 @@ for (var i = 0; i < args.Length; i++)
     if (args[i] == "--emit" && i + 1 < args.Length) { mode = "emit"; emitPath = args[++i]; continue; }
     if (args[i] == "--trait-emit" && i + 1 < args.Length) { mode = "trait-emit"; emitPath = args[++i]; continue; }
     if (args[i] == "--effect-emit" && i + 1 < args.Length) { mode = "effect-emit"; emitPath = args[++i]; continue; }
+    if (args[i] == "--effect-check" && i + 1 < args.Length) { mode = "effect-check"; emitPath = args[++i]; continue; }
     positional.Add(args[i]);
 }
 
@@ -37,44 +40,29 @@ if (seedRoot is null || !Directory.Exists(seedRoot))
     return 2;
 }
 
-if (mode == "effect-emit")
+if (mode is "effect-emit" or "effect-check")
 {
-    var atomsDir = Path.Combine(seedRoot, "atoms");
-    // E43 (spec-family-expand.md §3.3): an AllDirectories glob on "fx-*.json" was a filename
-    // CONVENTION nothing enforced — E43's own generated output lives under atoms/generated/ and is
-    // never named fx-*, but nothing stopped a future file from being. An explicit allow-list is a
-    // named refusal at generation time instead of a glob that would have silently swept a 491st def
-    // into this catalog the day someone else picked a matching name. Update this list, not the glob,
-    // when a real fx-*.json ships.
-    var files = ShippedFxFiles
-        .Select(name => Path.Combine(atomsDir, name))
-        .Where(File.Exists)
-        .OrderBy(f => f, StringComparer.Ordinal)
-        .Select(f => (f, File.ReadAllText(f)))
-        .ToArray();
-
-    var collected = AtomSeedFile.Collect(files);
-    if (!collected.IsOk)
+    var gen = EffectCatalogGen.GenerateFromSeed(seedRoot, ShippedFxFiles);
+    if (gen.Code != 0)
     {
-        Console.Error.WriteLine("data/seed/atoms/fx-*.json did not parse:");
-        foreach (var e in collected.Errors) Console.Error.WriteLine("  " + e);
-        return 2;
+        Console.Error.WriteLine(gen.Message);
+        return gen.Code;
     }
 
-    var compiled = FusionRpg.Core.Effects.Atoms.AtomCompiler.Compile(
-        collected.Content.Atoms, FusionRpg.Core.Effects.Atoms.RuntimeId.Lawn, 1, hostIsPlanner: true);
-    if (compiled.Rejected.Count > 0 || compiled.Runtime.Count > 0)
+    if (mode == "effect-check")
     {
-        Console.Error.WriteLine(
-            $"refusing to emit: {compiled.Rejected.Count} rejected atom(s), {compiled.Runtime.Count} " +
-            "routed to the runner — the retired EffectSeedCatalog's replacement must compile whole");
-        return 1;
+        var checkedIn = File.Exists(emitPath!) ? File.ReadAllText(emitPath!) : "";
+        if (!EffectCatalogGen.Matches(gen.Source!, checkedIn))
+        {
+            Console.Error.WriteLine($"{emitPath} is stale vs data/seed/atoms — run --effect-emit and commit the diff");
+            return 1;
+        }
+        Console.WriteLine($"{emitPath} matches data/seed/atoms");
+        return 0;
     }
 
-    var defs = compiled.Defs.Select(FusionRpg.Core.Effects.Atoms.AtomPushCodec.ToDef).ToList();
-    var source = EffectCatalogGen.GenerateSource(defs);
-    File.WriteAllText(emitPath!, source);
-    Console.WriteLine($"wrote {emitPath} ({defs.Count} def(s))");
+    File.WriteAllText(emitPath!, gen.Source!);
+    Console.WriteLine($"wrote {emitPath} ({gen.Message})");
     return 0;
 }
 

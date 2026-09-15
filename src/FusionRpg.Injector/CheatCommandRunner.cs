@@ -4,6 +4,7 @@ using FusionRpg.CheatCore;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects;
+using FusionRpg.Core.Overlay;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
@@ -101,6 +102,16 @@ public static class CheatCommandRunner
         {
             if (RpgHost.Client != null)
                 _ = RpgHost.Client.RefreshPowerIndexAsync();
+            return;
+        }
+        // rift-gate overlay-hide: the web FE's Leave control closes the overlay window. This rides the
+        // same drain as the refresh commands above, which is why the vocabulary lives in
+        // OverlayCommandNames rather than as a bare literal. It is story-neutral: nothing here (or in
+        // OverlaySwitch.RequestHide) touches the onboarding/story ledger, so closing the window can
+        // never be recorded as finishing or skipping the prologue.
+        if (name is OverlayCommandNames.Hide)
+        {
+            OverlaySwitch.RequestHide();
             return;
         }
         if (name is "pvz.spawn.extra")
@@ -360,6 +371,9 @@ public static class CheatCommandRunner
                 break;
             case "debug.game-state":
                 DebugActions.GameState();
+                break;
+            case "debug.leave-board":
+                DebugLeaveBoard.Start();
                 break;
             case "debug.ui-nav":
                 DebugActions.UiNav(p);

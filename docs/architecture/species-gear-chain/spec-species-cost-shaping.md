@@ -164,8 +164,7 @@ test asserts the mirror.
   already price on `rung`, so a cost scales with the ladder.
 - **Widen before multiplying** — `(long)base * milli`, never `(long)(base * milli)`.
 - **Divide by 1000 last, exactly once** — here, once for two combined per-mille factors.
-- **Never `float`**: a `float` magnitude stops being integer-exact at `Θ` = 232, inside normal play;
-  a per-mille `int` breaks at `Θ` = 3,213 (`CLAUDE.md` "Numeric overflow").
+- A per-mille `int` exceeds its range at `Θ` = 3,213 (`CLAUDE.md` "Numeric types"). **Floating-point is allowed** (owner ruling 2026-09-15) — a `float` not being integer-exact past 2^24 is precision, not overflow.
 - **Overflow throws, never wraps.** `checked`, no silent `unchecked`.
 - The multipliers themselves are **bounded ratios** in per-mille, bounds-checked at load — exempt and
   commented as such.

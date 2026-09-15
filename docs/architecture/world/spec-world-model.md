@@ -93,7 +93,7 @@ tests/FusionRpg.Data.Tests/          → creation atomicity, round-trip fidelity
 
 ## Code style
 
-Catalog bootstrap mirrors `StatusCatalogBootstrap`; the store partial mirrors `RpgStore.UniqueActors.cs` (gate-serialized, revision bumps); DTOs in Contracts; integer-only state (per-mille where a fraction is needed); no Unity, no float, no SQL outside Data.
+Catalog bootstrap mirrors `StatusCatalogBootstrap`; the store partial mirrors `RpgStore.UniqueActors.cs` (gate-serialized, revision bumps); DTOs in Contracts; per-mille where a fraction is needed (shipped convention; floating-point allowed per owner ruling 2026-09-15); no Unity, no SQL outside Data.
 
 ## Testing strategy
 
@@ -105,7 +105,7 @@ Catalog bootstrap mirrors `StatusCatalogBootstrap`; the store partial mirrors `R
 
 - **Always:** one transaction for world creation; catalog discipline (unknown → reject); revision bump on every write; stable ordering on every read.
 - **Ask first:** adding tables beyond the seven; making catalogs DB-authored; more than one active world per player.
-- **Never:** SQL outside `FusionRpg.Data`; injector involvement; storing derived state that `step` can recompute; float in any stored game value.
+- **Never:** SQL outside `FusionRpg.Data`; injector involvement; storing derived state that `step` can recompute.
 
 ## Success criteria
 

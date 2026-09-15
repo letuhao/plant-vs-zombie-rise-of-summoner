@@ -213,9 +213,10 @@ without ever introducing a fraction — the same reason per-mille exists elsewhe
 - Movement costs: **`int`** per step, **`long`** for any accumulated path total. A path total is a sum
   over an unbounded number of steps in principle, and `CLAUDE.md`'s rule 1 applies to any accumulator
   that could grow — the widen is free and the alternative is an audit finding.
-- **No `float` anywhere.** Chebyshev is integer by construction; the moment a diagonal cost becomes
-  `1.414` this module has broken determinism. If a diagonal must cost more than an orthogonal step,
-  it costs `14` against `Open = 10` — integer, exact, and hashable.
+- **Integer costs** (shipped). Chebyshev is integer by construction. If a diagonal must cost more than
+  an orthogonal step, it costs `14` against `Open = 10`. *(The former "No `float` anywhere / `1.414`
+  breaks determinism" ban is superseded 2026-09-15: floating-point allowed; a hashed floating value
+  records the platform stamp.)*
 
 ## Boundaries
 
@@ -249,7 +250,7 @@ exactly"* · store `BoardState` in `WorldState` · put a movement cost in code.
 
 ## Success criteria
 
-1. `GridSpec` + `BoardState` exist, are integer-only, and hold no clock and no RNG.
+1. `GridSpec` + `BoardState` exist and hold no clock and no RNG. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 2. Every existing battle golden is byte-identical with no board supplied.
 3. `BattleRunState.PositionOf` returns real positions when a board is present and `null` when not,
    proven both ways.

@@ -1071,7 +1071,7 @@ def node_budget_milli(tier_budget: int, width: int) -> "list[int]":
 
 `_widen_mul` is imported from the shipped `distribution_planner/derive.py:57-63`, not re-implemented.
 
-**No `float` anywhere in the planner.** `PowerVector` is `int` throughout for exactly this reason
+**The planner ships integer-only** *(as a rule, superseded 2026-09-15: floating-point allowed)*. `PowerVector` is `int` throughout for this reason
 (`PowerVector.cs:13-16`: *"a double would make two runs of the same catalog disagree in the last bit
 and move a content hash for nothing"*). Per-mille integers everywhere; the one place a magnitude
 appears is the runtime multiply `share × P(Θ)`, which is `tree-resolve`'s and is `long`.
@@ -1114,7 +1114,7 @@ graph invariant.
 | `overridden_draws_return_to_the_pool` | §8 step 5 — force every elemental tree's element and assert the residual axis stays on target |
 | `no_conversion_node_carries_budget` | D16 stays at zero until `element.convert` lands (D56, `spec-element-conversion.md`) |
 | `exclusion_predicates_only_key_on_named_properties` | A key outside `propertyVocabulary` is a refusal |
-| `no_float_in_the_planner` | AST scan of this module's source for float literals and `/` on ints |
+| `no_float_in_the_planner` | AST scan of this module's source for float literals and `/` on ints — *float half superseded 2026-09-15: floating-point allowed* |
 | `widen_before_multiply_is_used` | `_widen_mul` is the only multiply path in the ladder and quota modules |
 
 **Two tests were DELETED, and the deletion is the finding.** ~~`no_node_exceeds_the_potency_ceiling`
@@ -1168,7 +1168,7 @@ this module is called done.
   `P(Θ)`.
 - **Hardcode a roster count.** Not 12, not 6, not 21, not 53, not 16/13/7. Twelve is a measured
   outcome, not a decision.
-- Use `float`, or any RNG. There is no sampling, seeding or shuffling in stage 1 at all.
+- Use any RNG. There is no sampling, seeding or shuffling in stage 1 at all.
 - Choose which atoms a node binds. The plan hands a **ceiling and a quota**;
   `ContentValidation.cs:58-60` is explicit that the budget is *"**never** a generation input"*.
 - Write a hand-set `nodeClass` flag. It is derived from the bound atoms and re-derived at emit; a
@@ -1379,7 +1379,7 @@ mistake is a refusal rather than a silent 35,280-node rename (D51: was 35,160).
   last node at the tier level. Both rules are in §3 and both are tested.
 - **Canonical JSON.** Sorted keys, 2-space indent, `\n` endings, UTF-8 without BOM, no trailing
   whitespace — otherwise the hash moves on a Windows/Linux round trip.
-- **No `double`, no `float`, anywhere.**
+- ~~**No `double`, no `float`, anywhere.**~~ *(superseded 2026-09-15: floating-point allowed)* A floating value in the plan hash records the platform stamp.
 - **`emittedUtc` is excluded from `planHash`**, or every run is drift.
 
 **The check gate** copies the shipped contract exactly (`tools/tuning/resource_ownership.py:20-23`):

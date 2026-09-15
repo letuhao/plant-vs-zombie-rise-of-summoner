@@ -188,7 +188,7 @@ bases, and the basic attack's token — and is **loaded by a host and injected**
 (`tunables-ssot.md` §7.2). A missing key is a **load rejection naming it**, never a default.
 
 ⚠️ **`long` for every tick field.** These are magnitudes the `Θ` ladder can drive
-(`CLAUDE.md`: `long` for any magnitude, never `float`, divide by 1000 last, overflow throws).
+(`CLAUDE.md` "Numeric types": a type whose range holds the value, divide by 1000 last, integer overflow throws; floating-point allowed).
 
 ### 2.4 What this module does NOT change
 

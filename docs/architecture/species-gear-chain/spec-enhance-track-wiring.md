@@ -269,9 +269,8 @@ An absolute bound anywhere on this path is **derived and throws**, never clamps.
 - Magnitudes are produced by `FamilyExpansion`, whose own contract is *"Every intermediate is `long`,
   widened before multiplying, divided by 1000 last, and overflow throws"* (`FamilyExpansion.cs:18-21`).
   **This module consumes that and introduces no second arithmetic.**
-- **Never `float`** for a magnitude: integer-exactness fails at `Θ` = 232, inside normal play, and
-  `float` is non-deterministic across runtimes — disqualifying on a hashed, persisted path, which
-  `MutationCanonical.StateHash` (`MutationOp.cs:273`) is.
+- **Floating-point is allowed** (owner ruling 2026-09-15) — a `float` not being integer-exact past 2^24 is precision, not overflow; a `double` feeding a hashed, persisted path — which `MutationCanonical.StateHash`
+  (`MutationOp.cs:273`) is — records the platform stamp (`ssot-power-scale.md` §10.7).
 - **Widen before multiplying** (`(long)a * b`, never `(long)(a * b)`); **divide by 1000 last, exactly
   once**; **overflow throws, never wraps** — `checked`, no silent `unchecked`.
 - `AtomAppend.Seq` and `atLevel` are small identity/ordinal `int`s — never magnitudes, never

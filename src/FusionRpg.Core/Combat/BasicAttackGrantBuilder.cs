@@ -68,5 +68,32 @@ public static class BasicAttackGrantBuilder
         };
     }
 
-    public static string GrantIdFor(string ptr) => GrantPrefix + "@" + ptr.Trim();
+    /// <summary>Keyed on the canonical ptr (<see cref="CombatPtr.Normalize"/>): "1A2B", "1a2b" and
+    /// "0x1a2b" are one entity and must upsert one grant, never hold two that both fire.</summary>
+    public static string GrantIdFor(string ptr) => GrantPrefix + "@" + CombatPtr.Normalize(ptr);
+
+    /// <summary>True for a grant this builder made — what the kill switch withdraws when it turns off mid-match
+    /// (lawn-combat-wire L-N8).</summary>
+    public static bool IsBasicAttackGrantId(string? grantId) =>
+        grantId is not null && grantId.StartsWith(GrantPrefix + "@", StringComparison.OrdinalIgnoreCase);
+}
+
+/// <summary>
+/// lawn-combat-wire L-N8: detects the kill switch turning off. With the switch off, <c>ShouldApplyRider</c> passes every
+/// <c>OnDamageDealt</c> record through, so grants bound while it was on kept applying riders with no cost. The binder
+/// withdraws them on the off edge; failing closed in <c>ShouldApplyRider</c> instead would also silence every other
+/// <c>OnDamageDealt</c> effect. The first observation is never an edge: a process that starts with the switch off has
+/// bound nothing.
+/// </summary>
+public sealed class FeatureSwitchEdge
+{
+    bool? _last;
+
+    /// <returns><c>true</c> exactly once per on→off transition.</returns>
+    public bool TurnedOff(bool enabled)
+    {
+        var turnedOff = _last == true && !enabled;
+        _last = enabled;
+        return turnedOff;
+    }
 }

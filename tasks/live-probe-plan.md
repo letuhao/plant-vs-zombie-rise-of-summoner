@@ -84,3 +84,21 @@ Lead agent
 None — resolved during `/spec`. No pre-work gate in this plan blocks on an external decision; Phase
 2's dependency on Phase 1 is a real code dependency (the tool must exist to run it), not a
 manufactured approval gate.
+
+## Next run — audit 2026-09-15
+
+Task 11 was closed on a run that did not match its own spec (random `typeId=3000`, no equip, live read
+timed out) and was funded by souls from debug-spawned kills after the run deleted this todo's own
+"never a debug credit" rule. Task 11 is reopened; Tasks 13–18 carry the gaps.
+
+**Order:** Task 13 (owner ruling) → Task 14 (real item) → Task 16 (materialisation defect) → Task 15
+(T14 as specified) → Task 17/18 in parallel with any of them.
+
+**Binding rule added:** funding, items and creatures consumed by a Mode B probe must come from paths real
+gameplay creates. Kill-earn from debug-spawned entities is Game Injector Debug state and never funds an
+RPG Server Debug proof. Changing that rule is an owner decision, never a mid-run substitution.
+
+**Task 18 landed offline (`0f82fe81`):** `zombie.die`/`plant.die` carry `spawnOrigin` and Mode B step 0
+fails the run when kill souls came from debug- or cheat-spawned entities. Kills captured before that
+commit read as `Unrecorded`, so player 1's existing balance stays unproven, never clean — consistent with
+Task 13's "tainted" default. Task 19 is the live check after the injector redeploy.

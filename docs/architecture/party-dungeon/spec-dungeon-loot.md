@@ -258,7 +258,7 @@ Souls, prices, item values, ‰ factors: **`long`** (`KillEarn`/`MatchEndEarn`/`
 `ContentScale.Apply` widens then divides once, `ContentScale.cs:31-40`; the markup step is one `checked`
 multiply of three `long`s then one `/ 1_000_000`). `Θ_room`, `Θ_actor`, `θ_enemy`, `theta_run`, ordinals, shift
 counts, grant indices: **`int`**. `souls_unbanked` is a SQLite INTEGER read as `long`. Overflow throws
-everywhere. No `float`/`double` under `Core/Delve/Loot/`.
+everywhere. *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 
@@ -372,7 +372,7 @@ contentScale`, recomputed from tuning.
 - **Never:** a private `f(level)` or `f(Θ)` — no `ssot-power-scale.md` §10 row is added; a rarity multiplier on a
   magnitude (`ssot-rarity.md` §3.6); a price literal or a `provision.price*`/`altar.pullPriceSouls` key; a second
   roll beside `Instantiator` (`Instantiator.cs:98` is the roll); a per-room `MatchEndEarn`; `DefeatDelta` on a wipe
-  or a bail; a flat cap on haul, count or souls; a per-day key; a `float`/`double` magnitude; a specimen level as
+  or a bail; a flat cap on haul, count or souls; a per-day key; a specimen level as
   `Θ_actor`; SQL outside `FusionRpg.Data`.
 
 ## Success criteria

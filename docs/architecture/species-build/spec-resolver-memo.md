@@ -110,7 +110,7 @@ structural, not a balance number, and gets a comment saying so.
   (`PointBudget.cs:6-10` records it).
 - `long` generation counter, `checked` increment.
 - The comment on the memo states **why it is not a tunable** (structural, per `tunables-ssot.md` §1).
-- No `float` anywhere; the memo stores what `Resolve` already returns and computes nothing.
+- The memo stores what `Resolve` already returns and computes nothing.
 
 ## Testing strategy
 

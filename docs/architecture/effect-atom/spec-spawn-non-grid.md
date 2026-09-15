@@ -122,8 +122,9 @@ So: E40 prices what it can and **flags the rest rather than guessing**.
 - **Do not touch `H-MOWER-INF`.** It is a separate, partial cheat toggle with its own probe owed.
 - **Do not extend `grid.spawn`.** `graveType` is E28's row (map §12); `GridItemType` stays that kind's
   domain. Two kinds placing the same item is a seam violation.
-- **`long` for any magnitude** (a coin's value, a spawn `count`) — **never `float`**; widen before
-  multiplying; **divide by 1000 last, exactly once**; overflow **throws**.
+- **`long` for any integer magnitude** (a coin's value, a spawn `count`); floating-point is allowed
+  (owner ruling 2026-09-15); widen before multiplying; **divide by 1000 last, exactly once**; integer
+  overflow **throws**.
 - **No hard progression ceiling.** No cap on spawn `count` or on how many pets may exist. The
   `LawnCoords` row/column clamps are **structural** (a cell outside the board is not a balance question)
   and must say so in a comment; `MatchCaps` limits such as `MaxLivingBullets`

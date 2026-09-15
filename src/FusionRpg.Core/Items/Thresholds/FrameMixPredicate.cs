@@ -74,10 +74,10 @@ public static class FrameMixPredicate
     /// <summary>
     /// The recovery curve, evaluated by exact integer piecewise-linear interpolation between knots.
     ///
-    /// <para><b>No float anywhere.</b> A magnitude read by a <c>float</c> stops being integer-exact at
-    /// index 232, which is inside normal play (CLAUDE.md). The interpolation widens before multiplying
-    /// and divides exactly once, last; between knots it floors, which is deterministic across runtimes
-    /// and exact at every knot.</para>
+    /// <para><b>Integer arithmetic, range-safe.</b> The interpolation is done in <c>long</c> per-mille:
+    /// it widens before multiplying and divides exactly once, last (integer division truncates, so it
+    /// must come last); between knots it floors, which is exact at every knot. This is a design choice
+    /// for exact per-mille results, not a floating-point ban (that ban was removed 2026-09-15).</para>
     ///
     /// <para><b><paramref name="minorityMilli"/> above parity throws and is never clamped.</b> It is
     /// impossible by construction — the twelve core roles sum to 800, so the smaller of two disjoint

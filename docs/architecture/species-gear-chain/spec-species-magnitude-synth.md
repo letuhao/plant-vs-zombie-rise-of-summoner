@@ -166,8 +166,7 @@ species magnitudes into the power ladder.
 
 - **`long` for every magnitude.** `creature_species_magnitude.value` is an `INTEGER` column;
   SQLite `INTEGER` is 64-bit, and the C# side must read it as `long`, never `int`.
-- **Never `float`.** `P(Θ)` is quadratic; a `float` magnitude stops being integer-exact at `Θ` = 232,
-  **inside normal play**, and it is non-deterministic across runtimes.
+- **Floating-point is allowed** (owner ruling 2026-09-15) — a `float` not being integer-exact past 2^24 is precision, not overflow; a `double` feeding a hashed or persisted value records the platform stamp (`ssot-power-scale.md` §10.7).
 - **Widen before multiplying** — `(long)a * b`, never `(long)(a * b)`.
 - **Divide by 1000 last, exactly once.** Per-mille intermediates are 1000× closer to the ceiling.
 - **Overflow throws, never wraps.** No `unchecked` on this path.
@@ -231,7 +230,6 @@ same source on both sides.
 - ⛔ Change the fail-closed early return at `RpgStore.UniqueActors.cs:1619-1620`. Honest
   incompleteness is the designed behaviour; a throw would make a legitimate state fatal.
 - ⛔ Add a second composer or a private ChannelMods combat writer.
-- Use `float` for any magnitude on this path.
 - Ship before `threat-band-fill` — 719 species' `Θ` is about to move.
 - Write a new `f(level)` curve. Contests read `Θ`; magnitudes read `P(Θ)`.
 - Assert a population count.

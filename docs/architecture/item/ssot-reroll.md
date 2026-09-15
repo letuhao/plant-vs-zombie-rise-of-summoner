@@ -277,8 +277,9 @@ FOCUS        = 3 when a Reforge target is restricted to its own group; else 1
 ESCALATION‰  = min(4000, 1000 + 250 × priorOps(instance, op_kind))
 ```
 
-**Units:** `souls` are ledger units. `ESCALATION‰` is integer per-mille, per SC4. `ANCHOR_MULT` and
-`FOCUS` are plain integer multipliers. No floats reach content.
+**Units:** `souls` are ledger units. `ESCALATION‰` is integer per-mille. `ANCHOR_MULT` and
+`FOCUS` are plain integer multipliers. *(Former "per SC4 / No floats reach content" wording superseded
+2026-09-15: floating-point allowed.)*
 
 ### 5.2 Escalation — rising, but to a ceiling
 

@@ -314,9 +314,8 @@ in the file.
   one the atom ladder already is — the exact defect `ssot-power-scale.md` §10 exists to prevent.
 - **The forge-gem cost is a magnitude and is `long`** — it prices on `rung`, so it scales. Widen
   before multiplying (`(long)a * b`, never `(long)(a * b)`); divide by 1000 **last, exactly once**;
-  **never `float`** (integer-exactness fails at `Θ` = 232, inside normal play, and `float` is
-  non-deterministic across runtimes — disqualifying on a persisted path); **overflow throws, never
-  wraps.** The existing cost path already does this; this module adds no new arithmetic to it.
+  floating-point is allowed (owner ruling 2026-09-15 — precision is not overflow; a `double` feeding a hashed or persisted value records the platform stamp (`ssot-power-scale.md` §10.7)); **integer
+  overflow throws, never wraps.** The existing cost path already does this; this module adds no new arithmetic to it.
 - `upcycleInputPerOutput` is a small `int` count of stock items, validated `>= 2` at load.
 
 ⛔ **No new `ssot-power-scale.md` §10 row is owed.** Nothing here derives a number from a level.

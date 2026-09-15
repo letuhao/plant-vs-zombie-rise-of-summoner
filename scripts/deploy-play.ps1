@@ -8,16 +8,23 @@
 #                                            # a stale wwwroot silently served an old FE build for a
 #                                            # whole session because this used to be opt-in and got
 #                                            # forgotten; opt-out is the only safe default)
-#   .\scripts\deploy-play.ps1 -QuickTest     # (2026-09-14) SKIPS the full test-fast.ps1 gate (13k+
-#                                            # tests, the slowest step by far) for a fast local
-#                                            # redeploy loop. Every boundary guard above it still
-#                                            # runs -- only the test-fast.ps1 call is skipped. Never
-#                                            # the default; never use it to call a build "verified,"
-#                                            # to gate a live proof, or before a commit/merge -- run a
-#                                            # plain `.\scripts\deploy-play.ps1` (or the targeted
-#                                            # `dotnet test` filters for what you touched) first. A
-#                                            # loud warning prints every time this flag is used so it
-#                                            # is never silently relied on.
+#   .\scripts\deploy-play.ps1 -QuickTest     # no-op alias for the default (see below) -- kept for
+#                                            # anyone who types it out of habit.
+#
+# TEST SCOPE (corrected 2026-09-15) -- deployment and verification are DIFFERENT concerns. This
+# script is not a release gate, and re-verifying an already-verified change on every redeploy/
+# relaunch-game cycle is pure waste. DEFAULT IS SKIP -- no flag needed. Opt in with exactly one of:
+#   -Paths <file1,file2,...> [-Session <id> | -AllowUnscoped]
+#       Scoped verification via verify-change.ps1 for the files THIS change actually touched. Use
+#       this ONCE after implementing a change, not on every subsequent redeploy of the same change.
+#   -FullTestSuite
+#       The whole 4-project suite (Data/Server/E2E/Core.Tests, ~9 minutes measured
+#       docs/contributing/test-burden-audit.md). Reserve for: finishing a large feature, a change
+#       that crosses program/module boundaries, or immediately before a live probe.
+# An earlier version of this gate made -Paths/-FullTestSuite/-QuickTest mandatory and threw if none
+# was given -- reverted the same day: that bundled verification into every deploy call, forcing a
+# change already verified once to be re-verified on every later redeploy. See
+# docs/architecture/test-verification-boundary-ideal.md.
 # FE landing (2026-09-09): vite writes src\FusionRpg.Server\wwwroot; the running server serves
 # dist\FusionRpg.Server\wwwroot (ContentRoot = exe dir). A running server skips `dotnet publish`
 # (DLL locks), which used to leave dist's FE stale even after a fresh vite build. This script always
@@ -34,12 +41,28 @@ param(
     [switch]$NoServer,
     [switch]$NoRebuildUi,
     [switch]$RestartServer,
-    [switch]$QuickTest
+    [switch]$QuickTest,
+    [string[]]$Paths = @(),
+    [switch]$FullTestSuite,
+    [string]$Session,
+    [switch]$AllowUnscoped
 )
 
 $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $Root
+
+# Test scope: deployment and verification are different concerns (2026-09-15 correction --
+# bundling a mandatory re-verify into every redeploy meant a change already verified once via
+# verify-change.ps1 got re-verified again on every subsequent redeploy/relaunch-game cycle, for no
+# reason -- this is not a release gate). Default is now SKIP (no flag needed -- matches the old
+# -QuickTest behavior, kept as an explicit no-op alias for anyone who types it out of habit).
+# Opt IN to bundling verification into this deploy call with exactly one of:
+#   -Paths <files>     scoped verify-change.ps1 for the files this change touched
+#   -FullTestSuite     the whole 4-project suite -- feature-complete / cross-boundary / pre-live-probe only
+if (($Paths.Count -gt 0) -and $FullTestSuite) {
+    throw "Pick at most ONE test scope -- -Paths and -FullTestSuite were given together."
+}
 
 $ServerProj = Join-Path $Root "src\FusionRpg.Server\FusionRpg.Server.csproj"
 $ServerOut = Join-Path $Root "dist\FusionRpg.Server"
@@ -213,20 +236,27 @@ if ($ClassSystemExit -ne 0) {
     }
 }
 
-# Default test profile: the store suite minus the file-bound (`DiskSemantics`) and long (`Heavy`)
-# cases — no SSD writes and no multi-minute test on the dev loop. One place owns the filter
-# (scripts/test-fast.ps1); the `full` profile runs unfiltered in CI/nightly/release. Standard:
-# docs/contributing/testing-standard.md.
-if ($QuickTest) {
-    Write-Warning "==> -QuickTest: SKIPPING test-fast.ps1 (13k+ tests) -- local iteration only."
-    Write-Warning "    This build is NOT verified. Every boundary guard above still ran, but no"
-    Write-Warning "    regression test did. Re-run without -QuickTest (or the targeted dotnet test"
-    Write-Warning "    filters for what you touched) before treating this as done, before a live"
-    Write-Warning "    proof, and before commit/merge."
-} else {
-    Write-Host "==> Default test profile (test-fast.ps1)"
+# Test scope: SKIP is the default (deployment ≠ verification -- see this script's header).
+# Opt in with -Paths (scoped verify-change.ps1) or -FullTestSuite (the whole suite, ~9 minutes,
+# feature-complete / cross-boundary / pre-live-probe only). -QuickTest is a no-op alias for the
+# default, kept for anyone who types it out of habit.
+if ($FullTestSuite) {
+    Write-Host "==> -FullTestSuite: running the whole test-fast.ps1 default profile (~9 minutes)"
+    Write-Host "    Reserved for feature completion / cross-boundary changes / pre-live-probe --"
+    Write-Host "    not for an ordinary few-file edit. Use -Paths for that instead."
     & (Join-Path $Root "scripts\test-fast.ps1") -AllDefault
-    if ($LASTEXITCODE -ne 0) { throw "default test profile failed — see output above" }
+    if ($LASTEXITCODE -ne 0) { throw "full test profile failed — see output above" }
+} elseif ($Paths.Count -gt 0) {
+    Write-Host "==> Scoped verification (verify-change.ps1) for: $($Paths -join ', ')"
+    $VerifyArgs = @{ Paths = $Paths }
+    if ($Session) { $VerifyArgs.Session = $Session }
+    elseif ($AllowUnscoped) { $VerifyArgs.AllowUnscoped = $true }
+    & (Join-Path $Root "scripts\verify-change.ps1") @VerifyArgs
+    if ($LASTEXITCODE -ne 0) { throw "scoped verification failed — see output above" }
+} else {
+    Write-Host "==> No test scope given -- deploying WITHOUT running any tests (the default; this is"
+    Write-Host "    not a release gate). Pass -Paths <files> to verify a change once, or"
+    Write-Host "    -FullTestSuite before a live probe / merge / feature completion."
 }
 
 Write-Host "==> Building $LoaderHost injector ($GameProfile) into $PluginDir"

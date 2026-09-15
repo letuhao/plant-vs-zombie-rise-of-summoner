@@ -211,7 +211,7 @@ tests/FusionRpg.Core.Tests/Items/DropRateFloorTests.cs   new
 ## Code style
 
 `long` throughout (CLAUDE.md numeric rules — this is a ratio computation over potentially large
-weights, never `int`/`float`). Widen before multiplying (`checked(entry.Weight * 1_000_000L)`, never
+weights, never `int` — its range is too small). Widen before multiplying (`checked(entry.Weight * 1_000_000L)`, never
 `(entry.Weight * 1_000_000)` cast after). No bare literal `1_000_000` outside the one place that names
 the unit conversion — everywhere else reads `tuning.MinRatePerMillion`, itself never defaulted (T5).
 

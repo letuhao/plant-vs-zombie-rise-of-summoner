@@ -658,7 +658,7 @@ does nothing.
 - [x] A reflection sweep proves every stored magnitude field is `long` and that no **resolved**
       magnitude is stored anywhere on the record
 **Verification:** `a_plan_category_token_outside_the_five_is_refused_naming_it`; the axis fixture
-refuses; the reflection sweep fails when a `float` field is added on purpose.
+refuses; the reflection sweep fails when a `float` field is added on purpose *(superseded 2026-09-15: floating-point allowed)*.
 **Depends on:** B2. **Scope:** M. **Files:** `src/FusionRpg.Core/PassiveTree/`.
 
 **Evidence — a "stale checkbox" case, the opposite direction of this session's usual finding.** The
@@ -1943,8 +1943,7 @@ roster (12 + 66 + 12 + 1) and the 23-squad roster from **one** shared corner-sha
       never by asserting the number 91; `Every_squad_has_exactly_six_actors` holds
 - [x] `A_second_process_reproduces_the_hash` — SHA-256 with provenance blanked; shuffling the roster
       moves no surviving cell; parallel and serial agree by hash
-- [x] Seeded as `seed(a,d,k)` with common random numbers; counts are `long` and `checked`; no `float`
-      anywhere and no `double` in the hash
+- [x] Seeded as `seed(a,d,k)` with common random numbers; counts are `long` and `checked` *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 - [x] Zero files changed under `src/`, `data/` or `tests/` outside its own test project
 **Verification:** `dotnet test tests/FusionRpg.SquadHarness.Tests`; `verify --seed …` run twice.
 **Depends on:** none (parallel with A–E). **Scope:** M. **Files:** `tools/SquadHarness/` (new),
@@ -2726,8 +2725,8 @@ G1's evidence note rather than left as reported.
 **Acceptance:**
 - [x] `IGateQuantitySource` + `GateQuantityRegistry` answer in aptitude-point-equivalents; no
       `AptitudeAllocation` row is constructed
-- [x] The index is the square-root transform with `c = 23`, **integer-only** — no `Math.Sqrt`, no
-      `double`, a division-based predicate — and survives a count at `long.MaxValue` (§11 tests 3, 4)
+- [x] The index is the square-root transform with `c = 23`, shipped integer-only — no `Math.Sqrt`, a
+      division-based predicate *(reworded 2026-09-15 per owner ruling: floating-point allowed)* — and survives a count at `long.MaxValue` (§11 tests 3, 4)
 - [x] Tier 10 opens within 5% of the primary tree's Θ **— true as literally stated for tier 10 itself;
       the "from tier 4 up" qualifier does not survive full-precision recomputation, see Evidence**
 - [x] `Total()` / `GrandTotal()` / `Share()` are provably untouched by crediting — an executable test,

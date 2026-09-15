@@ -75,7 +75,7 @@ type BoardActorRecord = {
   row: number;
   col: number;
   kind: string;
-  hp: bigint; // magnitude — long/bigint on FE contract; never float
+  hp: bigint; // magnitude — long/bigint on FE contract (exact integer transport)
   isStructure: boolean;
   showInitiative: boolean;
 };
@@ -180,7 +180,7 @@ npm test -- src/game/board/noClientPrediction.test.ts
 
 | Field | Type rule |
 |---|---|
-| `hp` on `BoardActorRecord` | `bigint` (or documented long-equivalent) — never `float` magnitude |
+| `hp` on `BoardActorRecord` | `bigint` (or documented long-equivalent) — exact integer transport *("never `float`" wording removed 2026-09-15 per owner ruling: floating-point allowed)* |
 | Cell pixels / depths | Visual-design structural consts in board modules |
 
 No `data/tuning/phaser-kernel.v*.json` in this module.

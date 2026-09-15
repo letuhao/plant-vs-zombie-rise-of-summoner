@@ -157,14 +157,16 @@ placeholder.** Two independent reasons:
 1. **The SSOT already says so.** §11: *"Pools persist across a run and refill **at rest**. They are
    not per-encounter."* A battle is not a rest. A pool that refills mid-battle is the per-encounter
    model the hub explicitly rejects.
-2. **The cliff makes any non-zero value wrong.** Not "needs tuning" — *unrepresentable*. There is no
+2. **The cliff makes any non-zero value wrong.** Not "needs tuning" — *unrepresentable* in the shipped
+   whole-`long` read. There is no
    value between "nothing" and "three counters a round."
 
 ⚠️ **`hp` regen is 0 for the same reason and one more:** a non-zero `resource.regen.hp` would heal
 every actor mid-battle, which is a combat-model change wearing a resource-seeding costume.
 
 ⭐ **The follow-up is named, not hidden (§10):** if a balance pass later wants real in-battle regen,
-it needs a sub-tick unit — a per-mille-per-tick read, or accrual against a coarser clock. That is a
+it needs a sub-tick unit — a per-mille-per-tick read, a fractional floating-point rate (allowed per
+owner ruling 2026-09-15), or accrual against a coarser clock. That is a
 change to `ResourceChannelReader`, which the lawn path also uses, so it is **cross-cutting and its own
 module**. Seeding regen at 0 today does not foreclose it.
 

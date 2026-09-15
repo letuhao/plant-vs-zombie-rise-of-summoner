@@ -33,7 +33,7 @@ A downstream session reads this document, not its links.
    (the author names it, a frozen registry owns it). *"Naming a value and owning a value are different
    rights."*
 5. **One power ladder.** Contests read `Θ` linearly; magnitudes read `P(Θ)`. No private `f(level)`.
-6. **`long` for every magnitude, never `float`**, widen before multiplying, divide by 1000 last exactly
+6. **`long` for every integer magnitude** (floating-point allowed — owner ruling 2026-09-15), widen before multiplying, divide by 1000 last exactly
    once, overflow throws. **No hard progression ceilings.**
 7. **Ordinals, never numbers.** `threatBand`, `attackTempo`, `reach` are ordinals the deterministic
    layer turns into intervals. If a model is about to pick "1.5 seconds", stop.

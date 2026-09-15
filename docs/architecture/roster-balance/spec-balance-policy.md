@@ -42,9 +42,10 @@ exists to prevent.
 }
 ```
 
-**Per-mille integers, never floats.** `CLAUDE.md`'s numeric rule is binding here even though these
-are ratios rather than magnitudes: a threshold read as `0.8` in one place and `0.80000001` in another
-is a reproducibility bug in a gate, and this module's whole output is a gate verdict.
+**Per-mille integers** (this module's chosen representation): a threshold read as `0.8` in one place
+and `0.80000001` in another would be a reproducibility bug in a gate, and this module's whole output is a
+gate verdict. *(Reworded 2026-09-15 per owner ruling: floating-point is allowed; this is a local
+representation choice, not a `CLAUDE.md` float ban.)*
 
 ### Three axis roles, because not every axis should be balanced
 
@@ -128,7 +129,7 @@ tools/seedsmith/tests/test_balance_policy.py                  new
 ## Code style
 
 ```python
-# Per-mille integers, never floats (CLAUDE.md's numeric rule): a gate that reads 0.8 in one place and
+# Per-mille integers (this module's representation choice): a gate that reads 0.8 in one place and
 # 0.80000001 in another is a reproducibility bug, and this module's output IS a gate verdict.
 if evenness_milli < policy.min_evenness_milli:
     defects.append(AxisDefect(axis, "evenness", evenness_milli, policy.min_evenness_milli))
@@ -146,7 +147,7 @@ if evenness_milli < policy.min_evenness_milli:
 | `an_illegal_value_never_counts_toward_evenness` | evenness over a fixture with `unresolved` matches evenness over the same fixture without those rows |
 | `an_illegal_value_always_raises_a_defect` | and names the rows carrying it |
 | `density_out_of_band_is_a_defect_in_BOTH_directions` | too thin fails as loudly as too crowded |
-| `PLANTED_VIOLATION_a_float_threshold_in_the_tuning_file_is_refused` | per-mille integers only, enforced at load |
+| `PLANTED_VIOLATION_a_float_threshold_in_the_tuning_file_is_refused` | per-mille integers only, enforced at load — *(superseded 2026-09-15: floating-point allowed)* |
 | `the_shipped_tuning_file_validates_against_the_real_corpus` | the committed defaults are legal for today's axes |
 
 ## Boundaries
@@ -159,7 +160,7 @@ and reclassifying an axis between `load-bearing` and `cosmetic`, which changes w
 try to fix.
 
 **Never:** hard-code a threshold; let an illegal value contribute to a statistic; fail a `cosmetic`
-axis; use a float where a per-mille integer works.
+axis.
 
 ## Success criteria
 

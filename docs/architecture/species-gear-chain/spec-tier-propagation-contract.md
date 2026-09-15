@@ -179,8 +179,8 @@ file. **Corrected here: bump `version` inside the existing file.**
 No magnitude is produced or consumed. `thetaOffset` values are small signed integers added into `Θ`
 **before** `P(Θ)` — the widening rules bind at the `P(Θ)` site, which this module does not own.
 Stated so the next module does not assume this one settled it: **every magnitude downstream of a
-`thetaOffset` is `long`**, `P(Θ)` is quadratic, and a `float` magnitude stops being integer-exact at
-`Θ` = 232, inside normal play (`CLAUDE.md` "Numeric overflow").
+`thetaOffset` is `long`** when it is an integer magnitude: `P(Θ)` is quadratic, and per-mille `int` exceeds
+its range at `Θ` = 3,213 (`CLAUDE.md` "Numeric types"; floating-point is allowed).
 
 ## ActorHub gate
 

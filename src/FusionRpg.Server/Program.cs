@@ -2,6 +2,7 @@ using System.Text.Json;
 using FusionRpg.CheatCore;
 using FusionRpg.Contracts;
 using FusionRpg.Core;
+using FusionRpg.Core.Overlay;
 using FusionRpg.Data;
 using FusionRpg.Data.Abstractions;
 using FusionRpg.Data.Seed;
@@ -345,6 +346,7 @@ builder.Services.AddSingleton<IHotCompactor>(sp => new HotCompactor(sp.GetRequir
 builder.Services.AddSingleton<CompactionWorker>();
 builder.Services.AddSingleton<EventIngest>();
 builder.Services.AddSingleton<InjectorCommandInbox>();
+builder.Services.AddSingleton<InjectorCommandSender>();
 builder.Services.AddSingleton<FusionRpg.Core.Effects.EffectGrantSession>();
 builder.Services.AddSingleton<FusionRpg.Core.Effects.SimEffectHost>();
 builder.Services.AddSingleton<UniqueActorService>();
@@ -797,6 +799,7 @@ app.MapDerivedSurface();
 app.MapAuraRuntime();
 app.MapAuraCatalog();
 app.MapOnboarding();
+app.MapOverlay();
 // item module 20 (`item-surfaces`) — READ-ONLY. No MapPost lives in that file: equipping, socketing
 // and salvaging already have owners (modules 4, 16, 14), and a second write path through the
 // presentation layer is the "second surface" this module exists to prevent.
@@ -979,9 +982,9 @@ app.MapGet("/api/pvz-activity/{playerId:long}", (long playerId, RpgStore store) 
     var rollup = store.GetPvzActivityRollup(playerId);
     return rollup is null ? Results.NotFound() : Results.Ok(rollup);
 });
-app.MapGet("/api/pvz-activity/{playerId:long}/facts", (long playerId, RpgStore store, string? kind, long? runId, int limit = 100) =>
+app.MapGet("/api/pvz-activity/{playerId:long}/facts", (long playerId, RpgStore store, string? kind, long? runId, int limit = 100, long afterId = 0) =>
 {
-    var page = store.ListPvzActivityFacts(playerId, kind, runId, limit);
+    var page = store.ListPvzActivityFacts(playerId, kind, runId, limit, afterId);
     return page is null ? Results.NotFound() : Results.Ok(page);
 });
 app.MapPost("/api/pvz-activity/{playerId:long}/facts/append", async (long playerId, PvzActivityAppendRequest body, RpgStore store, IHubContext<RpgHub> hub) =>
@@ -1616,15 +1619,10 @@ app.Run();
 
 static async Task SendInjectorCommand(IHubContext<RpgHub> hub, InjectorCommandInbox inbox, CommandDto cmd)
 {
-    inbox.Enqueue(cmd);
-    try
-    {
-        await hub.Clients.Group(RpgConstants.InjectorGroup).SendAsync("Command", cmd);
-    }
-    catch
-    {
-        /* inbox poll is the reliable path */
-    }
+    // One implementation lives in InjectorCommandSender (rift-gate overlay-hide needed the same
+    // enqueue-and-send and the spec forbids a third copy). This thin shim keeps the ~17 existing
+    // call sites unchanged.
+    await new InjectorCommandSender(hub, inbox).SendAsync(cmd);
 }
 
 static async Task BroadcastCheats(RpgStore store, IHubContext<RpgHub> hub)

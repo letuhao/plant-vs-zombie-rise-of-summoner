@@ -124,7 +124,7 @@ That distinction is what makes the whole thing tractable: this is a generalizati
 Two consequences worth stating plainly:
 
 1. **Simulation and presentation are already separate, and must stay separate.** A resolved battle is a timeline of virtual events. Whether the player watches it unfold over 40 seconds or sees the result immediately is a *playback* decision, not a simulation one. Server-authoritative resolution — which the match-source contract already requires — survives every mode for free.
-2. **Replay is virtual-time replay.** Byte-identical reproduction means replaying the same integer ticks, which is exactly why §9 forbids floating-point in scheduling math. Wall-clock never enters the recording.
+2. **Replay is virtual-time replay.** Byte-identical reproduction means replaying the same integer ticks (§9; its former floating-point ban is superseded 2026-09-15 — a hashed `double` records the platform stamp). Wall-clock never enters the recording.
 
 ### The scheduler
 
@@ -243,7 +243,7 @@ So the owner's instinct is right, and sharper than "enrichment lacks an ideal": 
 
 The whole match-source contract is byte-identical replay, so the scheduler inherits the existing discipline:
 
-1. **Integer ticks only** in scheduling math. Floating-point is the documented root cause of desync and broken replays.
+1. **Integer ticks** in scheduling math (shipped choice). *(Superseded 2026-09-15: floating-point allowed — the former claim that floating-point is "the root cause of desync" and must be excluded is withdrawn; cross-platform last-bit divergence of a hashed `double` is handled by the platform stamp, rule 4.)*
 2. **Total ordering** — `(dueTick, stableSeq)` where `stableSeq` comes from spawn order. Never a dictionary's enumeration order. *(A live instance of exactly this was found and fixed on 2026-08-21: status host iteration was raw `Dictionary` order and it reached report event ordering.)*
 3. **One RNG stream per system**, derived from the seed — the existing `initiative`/`crit`/`essence`/`status` rule, and the reason riders get their own stream.
 4. **The platform stamp still applies.** Cross-architecture `Math.Exp` divergence doesn't care which mode scheduled the swing.

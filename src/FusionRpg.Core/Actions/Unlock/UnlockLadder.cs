@@ -20,9 +20,9 @@ public static class UnlockLadder
     /// loop: rounding at every one of up to ~50 steps compounds error and gives a wrong answer at
     /// higher earn counts (verified against the spec's own table, not assumed — a per-step version
     /// read earn 50 as 4‰, not the floor). <see cref="BigInteger"/> tracks the exact fraction
-    /// <c>p1 × deltaᶦ / 1000ᶦ</c> with no intermediate rounding at all — never <c>double</c>, which
-    /// the purity scan bans in this directory and which would be non-deterministic across
-    /// runtimes regardless.</para>
+    /// <c>p1 × deltaᶦ / 1000ᶦ</c> with no intermediate rounding at all — an exact fraction, which a
+    /// <c>double</c> product would only approximate (a precision choice for matching the spec table
+    /// exactly, not a floating-point ban; that ban was removed 2026-09-15).</para>
     ///
     /// <para>Terminates in a bounded number of steps for any <paramref name="earnCount"/>, however
     /// large: the sequence is monotonically decreasing (<c>0 &lt; deltaMilli &lt; 1000</c>, enforced

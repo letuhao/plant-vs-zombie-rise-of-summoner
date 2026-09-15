@@ -62,6 +62,17 @@ public static class EventDrainHost
         if (bulletPtr == IntPtr.Zero || shooterPtr == IntPtr.Zero) return;
         _bulletShooterCache[bulletPtr] = (shooterPtr, shooterTypeId);
     }
+    /// <summary>lawn-combat-wire L-N35: the shooter cached for <paramref name="bulletPtr"/>, without consuming it — the
+    /// observer records a hit before <see cref="TryRecordDealtFromBullet"/> takes the entry, and must name the same shooter
+    /// the RPG record will carry.</summary>
+    public static bool TryPeekBulletShooter(IntPtr bulletPtr, out IntPtr shooterPtr)
+    {
+        shooterPtr = IntPtr.Zero;
+        if (bulletPtr == IntPtr.Zero || !_bulletShooterCache.TryGetValue(bulletPtr, out var cached)) return false;
+        shooterPtr = cached.ShooterPtr;
+        return shooterPtr != IntPtr.Zero;
+    }
+
     static int _ambientMeleeAttackerFrame = -1;
 
     public static EventDrain Drain => _drain ??= new EventDrain(EffectRuntime.OnDrained);
@@ -76,19 +87,22 @@ public static class EventDrainHost
     // RECORD time (below) is simpler and cheaper than filtering at drain time, and needs no change
     // to DamagePacketBuilder/EntityStatWriter. Marked from GameHooks.ForgetEntity — the one shared
     // point both PlantDie and NoteZombieDead already funnel through, so both sides get this for
-    // free. Cleared per-ptr only at match end (FlushAllAndReset), same lifetime as every other
-    // per-match set this host owns; a ptr reused for a brand-new entity within the same match can
-    // very slightly over-suppress until the next match boundary, which is the safe direction for a
-    // liveness guard to err in (never under-suppress a genuinely dead target).
-    static readonly HashSet<IntPtr> _deadPtrs = new();
+    // free. Cleared at match end (FlushAllAndReset) and per-ptr on a genuine spawn edge
+    // (MarkSpawned, from the Plant.Start / Zombie.Start / Zombie.InitHealth postfixes) — L-N16:
+    // IL2CPP reuses native addresses inside a match, and a mark that outlived its entity used to make
+    // the next entity at that ptr refuse every RPG hit for the rest of the match. The same set also
+    // gates the APPLY side (Liveness.AdmitsDelta in InjectorEffectActionSink): a record queued before
+    // death that drains after it absorbs no delta and so cannot ForceKill — a second Die() — again.
+    public static readonly EntityLiveness Liveness = new();
 
-    /// <summary>See <see cref="_deadPtrs"/>.</summary>
-    public static void MarkDead(IntPtr ptr)
-    {
-        if (ptr != IntPtr.Zero) _deadPtrs.Add(ptr);
-    }
+    /// <summary>See <see cref="Liveness"/>.</summary>
+    public static void MarkDead(IntPtr ptr) => Liveness.MarkDead(ptr);
 
-    static bool IsDead(IntPtr ptr) => ptr != IntPtr.Zero && _deadPtrs.Contains(ptr);
+    /// <summary>See <see cref="Liveness"/>. Call only from a real spawn hook — never from a resync
+    /// re-add, which also sees dying-but-not-destroyed objects.</summary>
+    public static void MarkSpawned(IntPtr ptr) => Liveness.MarkSpawned(ptr);
+
+    static bool IsDead(IntPtr ptr) => Liveness.IsDead(ptr);
 
     static int SafeFrame()
     {
@@ -131,7 +145,8 @@ public static class EventDrainHost
         // Cache first (see _bulletShooterCache doc): bullet.from/from_zombie is proven stale by hit
         // time. Direct read stays as a fallback for a bullet whose spawn predates this cache (e.g.
         // one already in flight when the feature turned on mid-match).
-        if (_bulletShooterCache.TryGetValue(bullet.Pointer, out var cached))
+        var cacheHit = _bulletShooterCache.TryGetValue(bullet.Pointer, out var cached);
+        if (cacheHit)
         {
             shooterPtr = cached.ShooterPtr;
             shooterTypeId = cached.ShooterTypeId;
@@ -168,10 +183,15 @@ public static class EventDrainHost
         // silently reintroduce the stub-resolve bug this module removes. No RPG contribution; the
         // caller still treats this as "was a bullet" (wasBullet stays true above) so the vanilla
         // taken-side record stays suppressed, matching existing bullet policy.
-        if (shooterPtr == IntPtr.Zero) return false;
+        if (shooterPtr == IntPtr.Zero)
+        {
+            if (FsmTrace.Enabled)
+                CheatState.Note($"fsm-trace EventDrainHost.TryRecordDealtFromBullet DROPPED bulletPtr={bullet.Pointer:X} shooterPtr=0 (no shooter resolved)");
+            return false;
+        }
 
         var d = Drain;
-        return d.Record(new GameEventRec(
+        var recorded = d.Record(new GameEventRec(
             GameEventKind.CombatHit, SafeFrame(), d.NextSeq(),
             actorPtr: shooterPtr, targetPtr: targetPtr,
             typeId: shooterTypeId, targetTypeId: targetTypeId, side: targetSide,
@@ -179,6 +199,9 @@ public static class EventDrainHost
             chainDepth: d.RecordDepth, sourceGrantIdx: -1,
             matchKeyIdx: d.InternMatchKey(GameHooks.MatchKey), pairId: 0,
             swingPtr: bullet.Pointer, instakillShaped: instakillShaped));
+        if (FsmTrace.Enabled)
+            CheatState.Note($"fsm-trace EventDrainHost.TryRecordDealtFromBullet recorded={recorded} shooterPtr={shooterPtr:X} targetPtr={targetPtr:X} damage={damage}");
+        return recorded;
     }
 
     /// <summary>Melee dealt (zombie bite, or a plant-side area melee like Shulkflower's
@@ -345,16 +368,9 @@ public static class EventDrainHost
         // _drain.Drain(...) above returns, EventDrain's own nested-flush queue has already forced
         // through every ptr any nested FlushForPtr call queued during this pass, so it is now safe
         // to run the grant-withdraw callbacks that were deferred alongside them.
-        if (_pendingForgets.Count > 0)
-        {
-            var due = _pendingForgets.ToArray();
-            _pendingForgets.Clear();
-            foreach (var (ptr, onSafeToForget) in due)
-            {
-                FlushForPtr(ptr); // mop up anything that arrived since the ptr was queued
-                onSafeToForget();
-            }
-        }
+        // Each ptr is flushed once more (mop up anything that arrived since it was queued) before
+        // its forget runs — the ordering contract DeferredForgetQueueTests pins.
+        _pendingForgets.RunDue(ptr => FlushForPtr(ptr));
     }
 
     /// <summary>Perf-window stats for PerfReporter — returns and resets the rolling counters.</summary>
@@ -389,7 +405,7 @@ public static class EventDrainHost
     // after its own Drain() call returns — by which point EventDrain's own nested-flush queue (see
     // EventDrain.DrainPendingNestedFlushes) has already forced every one of these ptrs' records
     // through, so it is finally safe to withdraw their grants.
-    static readonly List<(IntPtr Ptr, Action OnSafeToForget)> _pendingForgets = new();
+    static readonly DeferredForgetQueue _pendingForgets = new();
 
     /// <summary>
     /// Death barrier — pending hits for a dying entity drain before grant-withdraw (SSOT §A2).
@@ -444,7 +460,7 @@ public static class EventDrainHost
     /// between), rather than the single combined <see cref="FlushForPtr(IntPtr, Action)"/> call.
     /// Runs from <see cref="Tick"/> exactly like every other deferred forget.
     /// </summary>
-    public static void DeferForget(IntPtr ptr, Action onSafeToForget) => _pendingForgets.Add((ptr, onSafeToForget));
+    public static void DeferForget(IntPtr ptr, Action onSafeToForget) => _pendingForgets.Defer(ptr, onSafeToForget);
 
     /// <summary>Match-edge barrier — drain everything, reset interning (board.end / match.result).</summary>
     public static void FlushAllAndReset()
@@ -455,7 +471,7 @@ public static class EventDrainHost
         _drain.FlushAllAndReset();
         _meleePairsByTarget.Clear();
         _meleePairsFrame = -1;
-        _deadPtrs.Clear();
+        Liveness.Clear();
         _pendingForgets.Clear(); // match is over — nothing queued for it may fire into the next one
         EndAmbientMeleeAttacker();
     }

@@ -788,7 +788,7 @@ static long CoefficientMicro(long treeShareMilli, long treeBudgetMilli, long bud
 | `per_mille_stores_zero_on_every_archetype` | at per-mille resolution: 12 dead nodes in `gated-deep`, 6 in `broad-and-flat`, 1 in `late-crown`, and tiers 1–2 indistinguishable on the atk anchor. **This test documents why `PowerLadderKMicro` exists and must not be deleted with it** |
 | `per_million_error_is_under_a_tenth_of_a_percent` | the same shares at per-million: no stored zero, worst relative error < 0.1% |
 | `node_share_is_compared_to_the_ceiling_in_one_unit` | `budgetShareMilli` vs `potency.maxNodeShareMilli`, both ‰ of one branch, no conversion on either side (R5) |
-| `every_input_is_long_and_widened` | reflection over the binder's signature; a `float` or `int` magnitude parameter fails |
+| `every_input_is_long_and_widened` | reflection over the binder's signature; an `int` magnitude parameter fails *("a `float`" clause superseded 2026-09-15: floating-point allowed)* |
 | `one_division_only` | source-shape assertion over `CoefficientBinder` — a second `/` on the magnitude path fails |
 | `overflow_throws_never_clamps` | a deliberately enormous `Θ_node`; assert `OverflowException`/`PowerIndexOverflow`, and assert **no** `Math.Min` on the path |
 | `no_cap_on_any_magnitude` | greps the binder for `Math.Min`/`Math.Clamp` on a magnitude path |
@@ -836,7 +836,7 @@ VERIFIED 2026-09-06 (todo B3)**; adding the one `ssot-power-scale.md` §10.2 row
 **Never:** write a private `f(level)` — every magnitude reads the one `PowerLadder`; **re-derive a
 node's budget share from a tier weight or a weight total** (R4 — the plan distributes, this module
 reads); bake a magnitude into the catalog instead of a coefficient; cap or clamp a magnitude (absolute bounds **throw**, and a
-bounded ratio must say in a comment that it is one); use `float` for a magnitude; scale a
+bounded ratio must say in a comment that it is one); scale a
 `PerMilleRatio`, `SigmoidPoints`, `SigmoidMultiplierPoints` or `StatusPotencyPoints` channel by
 `P(Θ)`; write `progression.power`, `progression.realm` or an aptitude id; allocate budget to a
 conversion node before `element.convert` is reviewed and built (spec-element-conversion.md, D56);

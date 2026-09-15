@@ -118,11 +118,17 @@ public sealed class EventIngest : BackgroundService
             var batch = new List<EventEnvelope>(WriterBatch) { first };
             while (batch.Count < WriterBatch && reader.TryRead(out var next))
                 batch.Add(next);
+            var queuedCount = batch.Count;
 
             var sw = Stopwatch.StartNew();
             try
             {
-                var notify = _store.InsertEvents(batch);
+                var (notify, stored) = InsertIsolatingFailures(_store, batch, (env, ex) =>
+                {
+                    Interlocked.Increment(ref _droppedEvents);
+                    Console.Error.WriteLine($"[ingest] dropped event {env.Kind} ({_droppedEvents} total): {ex.GetType().Name}: {ex.Message}");
+                });
+                batch = stored;
                 // UniqueActor recovery watches real PvZ matches only — web-battle die/end events
                 // must not recover an ActiveBound specimen mid-PvZ-match (audit 2026-08-21).
                 var pvzBatch = batch.Where(IsPvzGameEvent).ToList();
@@ -152,9 +158,51 @@ public sealed class EventIngest : BackgroundService
             }
             finally
             {
-                Interlocked.Add(ref _queued, -batch.Count);
+                Interlocked.Add(ref _queued, -queuedCount);
                 Volatile.Write(ref _writing, 0);
             }
+        }
+    }
+
+    long _droppedEvents;
+    public long DroppedEvents => Interlocked.Read(ref _droppedEvents);
+
+    /// <summary>
+    /// lawn-combat-wire L-N29: <see cref="RpgStore.InsertEvents"/> is one transaction, so one event that throws used to
+    /// roll back and drop every neighbour in the writer batch (live: a late <c>board.start</c> took
+    /// <c>debug.level.enter</c> and <c>board.modifiers</c> with it). On failure the batch is re-inserted one event at a
+    /// time; only the events that fail on their own are dropped and reported. Returns the merged notify sets and the
+    /// events that were stored, in their original order.
+    /// </summary>
+    public static (EventInsertNotify Notify, List<EventEnvelope> Stored) InsertIsolatingFailures(
+        RpgStore store, List<EventEnvelope> batch, Action<EventEnvelope, Exception> onDropped)
+    {
+        try
+        {
+            return (store.InsertEvents(batch), batch);
+        }
+        catch when (batch.Count > 1)
+        {
+            var activity = new HashSet<long>();
+            var progression = new List<RpgProgressionDirty>();
+            var closed = new HashSet<long>();
+            var stored = new List<EventEnvelope>(batch.Count);
+            foreach (var env in batch)
+            {
+                try
+                {
+                    var one = store.InsertEvents(new[] { env });
+                    activity.UnionWith(one.ActivityPlayers);
+                    progression.AddRange(one.Progression);
+                    closed.UnionWith(one.ClosedRunIds);
+                    stored.Add(env);
+                }
+                catch (Exception ex)
+                {
+                    onDropped(env, ex);
+                }
+            }
+            return (new EventInsertNotify(activity.ToList(), progression, closed.ToList()), stored);
         }
     }
 

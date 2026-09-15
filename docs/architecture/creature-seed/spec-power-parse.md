@@ -103,8 +103,9 @@ purely classified ordinal because `DerivedStatChannels` registers `move.range` a
 tempo. Two thirds of the sample state their interval in text. **A stated tempo beats a guessed one,
 and it costs one more capture group.** `classify-pipelines` only judges tempo where the parse is silent.
 
-Interval seconds are held as an **integer of milliseconds**, never a float — `1.5秒` becomes `1500`.
-The repo's numeric rule is not negotiable for a value that will later multiply into a magnitude.
+Interval seconds are held as an **integer of milliseconds** — `1.5秒` becomes `1500` (this module's
+chosen unit; the former "never a float / numeric rule not negotiable" wording is superseded 2026-09-15:
+floating-point allowed).
 
 ### 4. What this module does not do
 
@@ -170,8 +171,8 @@ captured strings as fixtures.
 
 **Ask first:** adding a new extraction pattern (it changes reported coverage, which other modules trust).
 
-**Never:** map a number to a band here; invent a number for a `blocked` species; use a float for any
-extracted magnitude; quote the 84-species coverage as a projection for 904.
+**Never:** map a number to a band here; invent a number for a `blocked` species; quote the 84-species
+coverage as a projection for 904.
 
 ## Success criteria
 

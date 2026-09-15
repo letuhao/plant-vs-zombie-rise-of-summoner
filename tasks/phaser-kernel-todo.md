@@ -143,7 +143,7 @@ Plan: [phaser-kernel-plan.md](phaser-kernel-plan.md) · Map:
   - **Acceptance:**
     - [x] Ideal Unpause bar imports resolve without opening `LawnWorldScene.ts`
     - [x] Guard ready for banned imports (`doNotImport.test.ts`)
-    - [x] `hp` is `bigint` — never float
+    - [x] `hp` is `bigint` — exact integer transport *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
     - [x] No `SiegeBoardScene`
 
 - [x] **T6b: Rewrite `noClientPrediction` tripwire (confirmed vs extrapolation)** · **S** · Spec: `spec-board-contract.md`

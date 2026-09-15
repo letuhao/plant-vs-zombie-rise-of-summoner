@@ -161,7 +161,7 @@ Cheap invariants, checked before any value is returned:
   > a file is not the same as reading the section that governs the line you are writing.
 - **Apportionment closure** — role shares resolve to integers summing exactly to the budget, via
   largest-remainder. Naive rounding drifts and every downstream check inherits the error.
-- **Integer-only output** — per-mille integers throughout; no float reaches a comparison.
+- **Per-mille integer output** — this module's representation. *(Former "no float reaches a comparison" clause superseded 2026-09-15: floating-point allowed.)*
 - **No silent defaults** — an unshared channel raises, per the registry's own instruction.
 
 ### 3.4 Explainability
