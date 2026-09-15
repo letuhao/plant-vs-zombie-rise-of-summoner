@@ -354,16 +354,54 @@ already references `UnityEngine.UI`, `Il2CppInterop.Runtime` and `Assembly-CShar
 (`FusionRpg.Injector.MelonLoader.39.csproj:84-93,128-129`), and our global usings already include
 `Il2Cpp` (`GlobalUsings.Il2Cpp.cs`) — so the reference pattern is expressible in our host today.
 
-**Not yet verified — flag, do not assume:**
-- The reference targets **3.8.1**; our MelonLoader host is **3.9**. That `MainMenu`'s entry method is
-  named `Start` and that the hierarchy paths (`Grave/GraveBackground/Flower1`, `LowerButtons`) are
-  identical in 3.9 must be checked against the real 3.9 interop at implementation.
-- Whether the **BepInEx** host's interop also exposes `MainMenu` (our two hosts differ; the BepInEx
-  folder here has only `plugins/`). If it does not, the tombstone is MelonLoader-only and the BepInEx
-  host keeps F10 — a scoped difference, not a blocker, and it must be stated rather than assumed.
-- `ClassInjector.RegisterTypeInIl2Cpp` is not used anywhere in our repo today; if the affordance can be
-  built without a custom `MonoBehaviour` (a plain uGUI `Button` with a listener is enough), prefer that
-  and avoid introducing class injection at all.
+**Version drift is a verification step, not a risk** (owner, 2026-09-15): *no one redesigns a
+main-menu hierarchy between versions.* The reference was built against 3.8.1 and our host is 3.9, so
+Task 1 confirms once — against the real 3.9 interop — that `MainMenu` exposes the method the patch
+targets and that the hierarchy paths resolve. That is a single check at the start of implementation,
+**not** a hedge the design must carry, and it must not be re-raised as a program risk.
+
+**The BepInEx host is secondary, and that is settled, not open.** On this machine `BepInEx/` contains
+only `plugins/` (no `interop/`), and `deploy-play.ps1:5` calls that install *"the older 3.8.1 install,
+kept for BepInEx-specific testing"*; MelonLoader is the deployed default (`:39,115`). **MelonLoader is
+the first target.** Whether the BepInEx interop exposes `MainMenu` is checked when that host is touched.
+If it does not, the tombstone is MelonLoader-only and the BepInEx host keeps F10 — a scoped difference
+to state plainly, not a design input.
+
+`ClassInjector.RegisterTypeInIl2Cpp` is not used anywhere in our repo today; if the affordance can be
+built without a custom `MonoBehaviour` (a plain uGUI `Button` with a listener is enough), prefer that
+and avoid introducing class injection at all.
+
+## Enrichment (2026-09-15) — the uGUI click machinery already exists
+
+The reference pattern looks like a new interaction idiom, but three of its four parts are **already
+built here**, which makes `tombstone` a composition rather than an introduction:
+
+| Piece the reference needs | Status | Evidence |
+|---|---|---|
+| Click a real `UnityEngine.UI.Button` | **Built** | `ControlClick.cs:150-153` — `if (target is UnityEngine.UI.Button button) { button.onClick.Invoke(); }` (the shipped `game-control` click path) |
+| Census/inspect the uGUI hierarchy (`Button`/`Text`/`GraphicRaycaster`) | **Built** | `ControlInspect.cs:294-298` |
+| `UnityEngine.UI` referenced by every host | **Built** | `.Injector.MelonLoader.39.csproj:128` · `.Injector.MelonLoader.csproj:131` · `.Injector.BepInEx.csproj:125` |
+| Sprite ↔ PNG conversion (one direction) | **Built** | `TypeIconCapture.cs:158` `SpriteToPng` reads a `Sprite` — the inverse of what a uGUI `Image` needs |
+| PNG file → `Texture2D` | **Built** | `RiftMenuOverlay.cs:112-118` (`ImageConversion.LoadImage`) |
+| **`Texture2D` → `Sprite`** | **Real gap (one line)** | No `Sprite.Create` anywhere in `src/FusionRpg.Injector`. A uGUI `Image` needs a `Sprite`, so this is the one genuinely new call |
+
+So the honest gap for `tombstone` is **`Sprite.Create` plus the affordance node**, not a new click or
+inspection idiom. The spec should say this and point at `ControlClick` as the precedent for "click a
+real game Button", so a later session does not re-derive uGUI plumbing that exists.
+
+**One consequence worth stating:** the shipped Rift art is **IMGUI-painted** (`RiftMenuOverlay.cs:20-43`
+runs inside `OnGUI`, gates on `Event.current.type == Repaint`, and draws with `GUI.DrawTexture` at
+`:79`). The uGUI affordance is a **different rendering path**. Two honest options, and the spec must
+pick one:
+- **(a)** Keep the existing IMGUI art as-is and add the uGUI affordance *on top* of the same visual
+  position, so the painted portal and the clickable node coincide but use different systems.
+- **(b)** Move the menu art itself into the uGUI hierarchy (a `Sprite` on an `Image` under the menu
+  transform), retiring the IMGUI path for the menu — one rendering system, and the art then inherits
+  the game's own canvas scaling.
+
+**(b) is the cleaner end state and is what the reference mod does** (it attaches real `Image`/`Button`
+components rather than painting); (a) is smaller and keeps the shipped art untouched. This is the one
+open enrichment question (below), and it belongs to `tombstone`.
 
 **Consequences for the module set (unchanged count, changed content):**
 - `menu-anchor` becomes **"the menu-screen presence signal"**: patch the menu screen's lifecycle, hold a
@@ -420,6 +458,15 @@ Both audit questions are answered; no open question remains and the module specs
    mid-run breaks a live run. The injector may read menu presence and attach a UI affordance to an
    existing screen; it may not drive the engine's menu state. The existing observe-only `UIMgr` patches
    may be consumed but must not be trusted as the detect logic (they have never worked well).
+4. **Q4 (enrichment, owner, 2026-09-15) — one rendering system for the menu.** The shipped Rift art is
+   IMGUI (`OnGUI` + `GUI.DrawTexture`); the clickable affordance is uGUI. Move the menu art into the
+   uGUI hierarchy as a `Sprite` on an `Image` under the menu transform (the reference mod's own shape),
+   retiring the IMGUI path **for the menu**, so there is one rendering system and the art inherits the
+   game's canvas scaling. The in-match "RPG" button (decision 15) stays IMGUI — it lives in match HUD
+   chrome, not in a menu hierarchy, and that split is deliberate.
+   *Note:* this is the `tombstone` module's rendering decision; if implementation finds the IMGUI→uGUI
+   art move is not a small change, option (a) in the enrichment section (add the uGUI node over the
+   existing painted art) is the documented fallback, and the spec must name it.
 
 Everything else was already decided. `menu-anchor`, `tombstone`, `overlay-hide`, `first-open-signal`,
 and `entry-landing` are all spec-able as corrected above — but the `menu-anchor` and `tombstone` specs
