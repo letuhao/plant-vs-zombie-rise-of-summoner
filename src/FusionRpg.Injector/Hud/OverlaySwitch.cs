@@ -108,9 +108,13 @@ public static class OverlaySwitch
     {
         State.SettingsEnabled = OverlaySettings.OverlayButtonEnabled;
 
-        // Starting the view costs a browser process; with the button off there is no other way
-        // to open it in this mode, so do not pay for a feature the player switched off.
-        if (!_viewStarted && State.SettingsEnabled)
+        // The view must exist for the menu tombstone to work, and the tombstone is a DIFFERENT
+        // affordance from the in-match button: rift-gate's menu entry is always live, while the
+        // in-match button is what the button preference turns off (OverlaySwitchState.ButtonVisible
+        // keeps SettingsEnabled). So the start condition no longer keys off the preference — earlier
+        // it did, on the reasoning that "with the button off there is no other way to open it in this
+        // mode", which stopped being true once the menu affordance shipped.
+        if (!_viewStarted)
         {
             _viewStarted = true;
             OverlayViewHost.Start(RpgHost.ServerUrl);

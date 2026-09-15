@@ -172,6 +172,32 @@ public class RiftGateMenuRenderingGuardTests
             "the in-match button must stay IMGUI (Decision 18's deliberate split)");
     }
 
+    /// <summary>
+    /// Decision 15: the in-match button is restyled but keeps exactly ONE action. The restyle is
+    /// presentation only — a second action (or a second request call) is the defect this catches.
+    /// </summary>
+    [Fact]
+    public void The_restyled_in_match_button_still_has_exactly_one_action()
+    {
+        var gui = File.ReadAllText(Path.Combine(
+            FindRepoRoot(), "src", "FusionRpg.Injector", "Hud", "OverlaySwitchGui.cs"));
+
+        // Exactly one interactive control...
+        var buttons = Regex.Matches(gui, @"GUI\.Button\s*\(").Count;
+        Assert.Equal(1, buttons);
+
+        // ...and exactly one call into the shared request path.
+        var requests = Regex.Matches(gui, @"OverlaySwitch\.RequestToggle\s*\(").Count;
+        Assert.Equal(1, requests);
+
+        // The gate that decides visibility is still the switch's, not a local re-implementation.
+        Assert.Contains("OverlaySwitch.ButtonVisible", gui, StringComparison.Ordinal);
+
+        // And it must NOT reach for a cheats/toggle surface of its own.
+        Assert.DoesNotContain("CheatCommandRunner", gui, StringComparison.Ordinal);
+        Assert.DoesNotContain("SendChat", gui, StringComparison.Ordinal);
+    }
+
     static string FindRepoRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
