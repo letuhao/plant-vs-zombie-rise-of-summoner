@@ -48,10 +48,10 @@ instrument that changes behaviour when switched on measures a different system.
       never victims), stamina spent, regen accrued, exhaustion events, **dropped-record counters**
       (D9 says zero — the counter is the proof), frame-share sample under a 300z wave.
       **audit 2026-09-15 OPEN: no 300z frame-share sample exists — baseline is 1v1, `DrainTickTotalMs:0`. Next run L-N9**
-- [ ] **Runs with the feature in its shipped configuration** — no debug session, no `SessionMode`, no
+- [x] **Runs with the feature in its shipped configuration** — no debug session, no `SessionMode`, no
       flag flipped to observe. A test or assertion proves the collection path does not alter
       `EventDrainHost.Active`.
-      **audit 2026-09-15 OPEN: run flag `EventDrainActiveProvenThroughout` exists; the required test/assertion does not. Next run L-N10**
+      *audit 2026-09-15 L-N10 CONFIRMED: `LawnObserverDrainNeutralityGuardTests` (7) closes the chain — `Active` reads only `Enabled`/`SessionActive`; `SessionActive` is written only inside `DebugRuntime.StartSession`/`EndSession`, `EventDrainHost.Enabled` only in `InjectorLoop`; the observer tool is GET-only on four read routes; server `/snapshot` relays only `debug.snapshot`, whose handler and `DebugRuntime.Snapshot()` write no flag; the bridge and Core observer write none. Mutants killed: bridge starts a session, `/snapshot` also relays `debug.session`, observer calls a session-start route. Run half: baseline run file reads `InjectorSessionActiveEverTrue:false` over 2 checks (start and end, not continuous).*
 - [x] Emits machine-readable output (a run file), not console prose — so a gate can diff two runs.
       *audit 2026-09-15 CONFIRMED: `tools/LawnCombatObserver/Program.cs:116-121` writes the run file*
 - [x] Reports **"no data"** distinctly from **"zero"**. A silent empty run is the failure mode this
@@ -1117,8 +1117,9 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
 
 ### Phase A — code/test debt (agent-gated, no live game needed)
 
-- [ ] **L-N10** Test: observer collection path never alters `EventDrainHost.Active` (T0 bullet 3).
+- [x] **L-N10** Test: observer collection path never alters `EventDrainHost.Active` (T0 bullet 3).
       Verify: new Core/Injector test fails when collection toggles `Active`.
+      *Done: `LawnObserverDrainNeutralityGuardTests` 7/7 (source-scan chain; the Injector has no CI unit tests and the observer talks to a live server). 3 mutants killed. Guard.Tests 280 via verify-change. No production defect found: the collection path was already read-only.*
 - [x] **L-N13** Core test: two shooters with different composed `combat.power.*` produce different
       packet power through a ptr-aware resolver (T6 differential). Mutation: resolver ignoring ptr fails.
       *Done: `AttackerPowerByPtrTests` — one `OverlayCombatMath`, one `EventDrain`, attackers 0x1001 (power 10) and 0x2002 (power 400); resolver keyed strictly by ActorPtr and throws on unknown keys; asserts strong hits harder and the swing ptr is never resolved. Mutation (resolver returns the weak snapshot for every attacker ptr) fails. Core.Tests 13544 via verify-change. T6 bullet stays open: snapshots are fixed overlays, not Hub-composed, and the live half is L-N7.*
