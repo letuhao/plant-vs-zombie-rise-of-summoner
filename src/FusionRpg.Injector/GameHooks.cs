@@ -640,6 +640,8 @@ public static class GameHooks
         public static void Postfix(Plant __instance)
         {
             if (__instance == null) return;
+            // L-N16: a real spawn clears a dead mark left by an earlier entity at this native address.
+            Effects.EventDrainHost.MarkSpawned(__instance.Pointer);
             Effects.InjectorEntityRegistry.Add(__instance);
             Effects.InjectorBoardSnapshot.Invalidate();
             if (!Ready()) return;
@@ -831,6 +833,7 @@ public static class GameHooks
         public static void Postfix(Zombie __instance)
         {
             if (__instance == null) return;
+            NoteZombieSpawned(__instance.Pointer);
             Effects.InjectorEntityRegistry.Add(__instance);
             Effects.InjectorBoardSnapshot.Invalidate();
             if (!Ready() || __instance.theZombieType == ZombieType.Nothing) return;
@@ -843,6 +846,7 @@ public static class GameHooks
     {
         public static void Postfix(Zombie __instance)
         {
+            if (__instance != null) NoteZombieSpawned(__instance.Pointer);
             Effects.InjectorEntityRegistry.Add(__instance);
             Effects.InjectorBoardSnapshot.Invalidate();
             if (!Ready() || __instance == null || __instance.theZombieType == ZombieType.Nothing) return;
@@ -1383,6 +1387,17 @@ public static class GameHooks
             catch { }
             Emit("bullet.init", payload);
         }
+    }
+
+    /// <summary>L-N16: a real zombie spawn edge (Start / InitHealth postfix) — clears the once-per-ptr
+    /// death latch and the drain liveness mark left by an earlier zombie at this native address, so
+    /// the new zombie takes RPG hits and its own death is flushed and forgotten. Never called from a
+    /// registry resync, which also re-adds dying-but-not-destroyed objects.</summary>
+    static void NoteZombieSpawned(IntPtr p)
+    {
+        if (p == IntPtr.Zero) return;
+        DeadZombies.Remove(p);
+        Effects.EventDrainHost.MarkSpawned(p);
     }
 
     static void NoteZombieDead(Zombie z, int reason)

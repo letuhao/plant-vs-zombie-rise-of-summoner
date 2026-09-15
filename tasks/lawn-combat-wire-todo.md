@@ -318,8 +318,8 @@ FSM — a general creature has no binding). Owns the four gates and every correc
       *audit 2026-09-15 CONFIRMED: `EventDrainTests.cs:640` `Ring_overflow_diverts…`; `event-pipeline-v2-ssot.md:11` amended*
 - [x] Coalescing preserves total damage.
       *audit 2026-09-15 CONFIRMED: `EventCoalescerTests.cs:35`; `EventDrainIntegrationTests.cs:110`*
-- [ ] A dead/dying target absorbs no delta and triggers **no second `Die()`**.
-      **audit 2026-09-15 OPEN: record-time guard only (`EventDrainHost.cs:91,120`); no test for a record queued before death; live 'proof' used a cheat kill. Next run L-N16**
+- [x] A dead/dying target absorbs no delta and triggers **no second `Die()`**.
+      *audit 2026-09-15 L-N16 CONFIRMED at code level: the record-time guard missed a hit recorded BEFORE death that drains after it — it reached `EntityStatWriter.AddZombieHp` at HP <= 0 and `ForceKillZombie` ran `Die()` again. Fixed: `EntityLiveness.AdmitsDelta` gates `InjectorEffectActionSink.ExecApplyResourceDelta` before any write. `EntityLivenessTests` (queued-before-death: 1 delta, 1 death); mutant AdmitsDelta=>true fails 6. Wiring pinned by `EntityLivenessWiringGuardTests`. Live half: L-N5.*
 - [x] Records for a ptr drain **before** that ptr's grants withdraw, including from a nested drain.
       *audit 2026-09-15 CONFIRMED: `GameHooks.cs:693-694,1413-1414` `DeferForget`; `EventDrainTests.cs:490`*
 - [x] "Instakill-shaped" is **defined** — prefer the engine's own `DamageType` (`Squash`, `MaxDamage`,
@@ -342,8 +342,8 @@ FSM — a general creature has no binding). Owns the four gates and every correc
 
 - [x] Lead re-ran the guards; green
       *audit 2026-09-15 CONFIRMED: single-writer, funnel-delta, actor-hub re-run at audit*
-- [ ] Safety rules verified **without** a real grant (synthetic fixtures) — T9 must stand alone
-      **audit 2026-09-15 OPEN: Core fixtures exist; liveness guard and `DeferForget` have none. Next run L-N16**
+- [x] Safety rules verified **without** a real grant (synthetic fixtures) — T9 must stand alone
+      *audit 2026-09-15 L-N16 CONFIRMED: synthetic fixtures now exist for both missing rules — `EntityLivenessTests` (liveness) and `DeferredForgetQueueTests` (deferred forget runs only after that ptr's records drain, including one recorded after the defer; mutant skipping the pre-forget flush fails 2).*
 - [x] T9's rules proven before T10 makes them load-bearing — **this gate is the ordering constraint**;
       the lead does not dispatch T10 until it passes
       *audit 2026-09-15 CONFIRMED: git order: `f74a58ab` 05:43 before `62ec0b9e` 06:49*
@@ -1110,7 +1110,7 @@ metric.*
 
 ---
 
-## Next run — audit 2026-09-15 gaps (`L-N1` … `L-N26`)
+## Next run — audit 2026-09-15 gaps (`L-N1` … `L-N27`)
 
 Ordered by the plan's "Next run" phases. Every task reports commands run and raw output; a box is
 ticked only when evidence matches the bullet's exact wording — never reword a bullet to tick it.
@@ -1126,8 +1126,9 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       population-count pins (24/3/21) in `ActionCorpusImporterTests.cs` with contract assertions
       (guardrail rule: never pin a population count).
       *Done: T7 bullet reworded in this commit (not ticked — tick is a separate change). `TheRealShippedCorpusHasExactlyOneDocumentedKindChangeAndNoOthers` (pinned 24/3/21 + named ids) replaced by `TheRealShippedCorpusHonoursKindHintAndKindAwareCostForEveryImportedBrief`: reconciliation (imported + rejected = parsed) and per-imported-brief Kind == kindHint ?? Skill, cost resource == template row. Mutation (composer ignores kindHint) fails it. Data.Tests 1231/1231 via verify-change.*
-- [ ] **L-N16** Test: a record queued for a ptr later marked dead applies no delta and runs no `Die()`
+- [x] **L-N16** Test: a record queued for a ptr later marked dead applies no delta and runs no `Die()`
       on the funnel path; fixture for `EventDrainHost.DeferForget` ordering (T9, GATE 2).
+      *Done: new Core `EntityLiveness` + `DeferredForgetQueue`, used by `EventDrainHost`. Two real defects fixed: (1) a record queued before death drained into `AddZombieHp` at HP <= 0 and ForceKill ran a second `Die()` — now refused at apply time; (2) dead marks and the `DeadZombies` once-per-ptr latch never cleared on spawn, so a new entity at a recycled ptr refused every RPG hit and skipped its own death flush/forget for the rest of the match — now cleared on Plant.Start / Zombie.Start / Zombie.InitHealth (never on resync). Tests: `EntityLivenessTests` 10, `DeferredForgetQueueTests` 4, `EntityLivenessWiringGuardTests` 7. Mutants killed: AdmitsDelta=>true, MarkSpawned no-op, RunDue without flush, sink gate removed. verify-change: Core 13560, Guard 273, injector-compile + single-writer/funnel-delta/actor-hub/secondary-no-unity OK.*
 - [x] **L-N17** Test: bind grant at ptr P, forget P, re-register P → no stale grant (T10).
       *Done: `BasicAttackGrantRecycleTests` 4/4 — forget withdraws; new entity at P carries only its own element; withdraw catches a differently-cased ptr spelling (found: GrantId keyed on the raw spelling let two spellings of one entity hold two grants that both fire — fixed by normalising `GrantIdFor`, test `Two_spellings_of_one_ptr_bind_one_grant_not_two`); same-ptr rebind is an upsert. Mutation fails 2/4. Core.Tests 13541 via verify-change.*
 - [x] **L-N18** Test `ResourceBaselineSubsystem` for side=zombie (max stamina > 0, spend succeeds),
@@ -1207,3 +1208,11 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       `enter-level` left stale entities under a main-menu overlay; a kill batch produced no
       `zombie.die` events and no soul credit on the same `matchKey`; `debug_restart_game` ran 30 min
       with no response. Each needs a reproduction and an owner.
+- [ ] **L-N27** Liveness on pooled reuse (found by L-N16): a dead mark now clears only on a real spawn
+      hook. A pooled entity reactivated without `Start()`/`InitHealth()` (T10's frozen-wave replacement
+      plant) at a dead-marked ptr still refuses RPG hits, and a pooled zombie skips `NoteZombieDead`.
+      Live: log `EntityLiveness.DeadCount` and pooled-reactivation ptrs across a long wave; if a
+      reactivated ptr is dead-marked, find the engine's reactivation hook — never clear from resync,
+      which also sees dying objects. Also confirm `Zombie.InitHealth` never fires on a dying zombie
+      between `Die` and `DestoryZombie` — that would re-open the once-per-death latch and emit a second
+      `zombie.die`.

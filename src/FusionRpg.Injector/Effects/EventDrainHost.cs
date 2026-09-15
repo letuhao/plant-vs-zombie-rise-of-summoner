@@ -76,19 +76,22 @@ public static class EventDrainHost
     // RECORD time (below) is simpler and cheaper than filtering at drain time, and needs no change
     // to DamagePacketBuilder/EntityStatWriter. Marked from GameHooks.ForgetEntity — the one shared
     // point both PlantDie and NoteZombieDead already funnel through, so both sides get this for
-    // free. Cleared per-ptr only at match end (FlushAllAndReset), same lifetime as every other
-    // per-match set this host owns; a ptr reused for a brand-new entity within the same match can
-    // very slightly over-suppress until the next match boundary, which is the safe direction for a
-    // liveness guard to err in (never under-suppress a genuinely dead target).
-    static readonly HashSet<IntPtr> _deadPtrs = new();
+    // free. Cleared at match end (FlushAllAndReset) and per-ptr on a genuine spawn edge
+    // (MarkSpawned, from the Plant.Start / Zombie.Start / Zombie.InitHealth postfixes) — L-N16:
+    // IL2CPP reuses native addresses inside a match, and a mark that outlived its entity used to make
+    // the next entity at that ptr refuse every RPG hit for the rest of the match. The same set also
+    // gates the APPLY side (Liveness.AdmitsDelta in InjectorEffectActionSink): a record queued before
+    // death that drains after it absorbs no delta and so cannot ForceKill — a second Die() — again.
+    public static readonly EntityLiveness Liveness = new();
 
-    /// <summary>See <see cref="_deadPtrs"/>.</summary>
-    public static void MarkDead(IntPtr ptr)
-    {
-        if (ptr != IntPtr.Zero) _deadPtrs.Add(ptr);
-    }
+    /// <summary>See <see cref="Liveness"/>.</summary>
+    public static void MarkDead(IntPtr ptr) => Liveness.MarkDead(ptr);
 
-    static bool IsDead(IntPtr ptr) => ptr != IntPtr.Zero && _deadPtrs.Contains(ptr);
+    /// <summary>See <see cref="Liveness"/>. Call only from a real spawn hook — never from a resync
+    /// re-add, which also sees dying-but-not-destroyed objects.</summary>
+    public static void MarkSpawned(IntPtr ptr) => Liveness.MarkSpawned(ptr);
+
+    static bool IsDead(IntPtr ptr) => Liveness.IsDead(ptr);
 
     static int SafeFrame()
     {
@@ -354,16 +357,9 @@ public static class EventDrainHost
         // _drain.Drain(...) above returns, EventDrain's own nested-flush queue has already forced
         // through every ptr any nested FlushForPtr call queued during this pass, so it is now safe
         // to run the grant-withdraw callbacks that were deferred alongside them.
-        if (_pendingForgets.Count > 0)
-        {
-            var due = _pendingForgets.ToArray();
-            _pendingForgets.Clear();
-            foreach (var (ptr, onSafeToForget) in due)
-            {
-                FlushForPtr(ptr); // mop up anything that arrived since the ptr was queued
-                onSafeToForget();
-            }
-        }
+        // Each ptr is flushed once more (mop up anything that arrived since it was queued) before
+        // its forget runs — the ordering contract DeferredForgetQueueTests pins.
+        _pendingForgets.RunDue(ptr => FlushForPtr(ptr));
     }
 
     /// <summary>Perf-window stats for PerfReporter — returns and resets the rolling counters.</summary>
@@ -398,7 +394,7 @@ public static class EventDrainHost
     // after its own Drain() call returns — by which point EventDrain's own nested-flush queue (see
     // EventDrain.DrainPendingNestedFlushes) has already forced every one of these ptrs' records
     // through, so it is finally safe to withdraw their grants.
-    static readonly List<(IntPtr Ptr, Action OnSafeToForget)> _pendingForgets = new();
+    static readonly DeferredForgetQueue _pendingForgets = new();
 
     /// <summary>
     /// Death barrier — pending hits for a dying entity drain before grant-withdraw (SSOT §A2).
@@ -453,7 +449,7 @@ public static class EventDrainHost
     /// between), rather than the single combined <see cref="FlushForPtr(IntPtr, Action)"/> call.
     /// Runs from <see cref="Tick"/> exactly like every other deferred forget.
     /// </summary>
-    public static void DeferForget(IntPtr ptr, Action onSafeToForget) => _pendingForgets.Add((ptr, onSafeToForget));
+    public static void DeferForget(IntPtr ptr, Action onSafeToForget) => _pendingForgets.Defer(ptr, onSafeToForget);
 
     /// <summary>Match-edge barrier — drain everything, reset interning (board.end / match.result).</summary>
     public static void FlushAllAndReset()
@@ -464,7 +460,7 @@ public static class EventDrainHost
         _drain.FlushAllAndReset();
         _meleePairsByTarget.Clear();
         _meleePairsFrame = -1;
-        _deadPtrs.Clear();
+        Liveness.Clear();
         _pendingForgets.Clear(); // match is over — nothing queued for it may fire into the next one
         EndAmbientMeleeAttacker();
     }
