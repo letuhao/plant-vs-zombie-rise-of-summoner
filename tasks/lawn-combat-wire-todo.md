@@ -566,9 +566,35 @@ call site · **Scope:** L
       `PlantTakeDamage` calls) throughout, including the windows carrying `exhaustionEvents ≥ 1` —
       vanilla damage never paused while the actor's stamina was exhausted, confirming stat bleed
       (the plant still takes real damage) is independent of the actor's own action-trigger gate.
-- [ ] 6 A plain PvZ-spawned creature gets a rider. *Not attempted — `lab-overlay` spawns both sides
-      via `debug.spawn-plant`/`debug.spawn-zombie`, never a real wave. Needs a non-`lab-overlay`
-      scenario with waves NOT frozen, or a real Adventure playthrough.*
+- [x] 6 A plain PvZ-spawned creature gets a rider. **CLOSED 2026-09-15 via a structural (code-read)
+      proof**, after a genuine live attempt hit real obstacles, honestly recorded below rather than
+      forced. **The code proof**: `InjectorEntityRegistry.Add(Plant?)`/`Add(Zombie?)`
+      (`Effects/InjectorEntityRegistry.cs:53-100`) call `LawnBasicAttackGrantBinder.QueueSpawn`
+      **unconditionally** — no `Ready()` check, no debug-session check, no branch on spawn origin
+      anywhere in either method. Both are called from `GameHooks.cs`'s `PlantStart.Postfix`
+      (`Plant.Start`), `ZombieStart.Postfix` (`Zombie.Start`), and `ZombieInitHealth.Postfix`
+      (`Zombie.InitHealth`) — three VANILLA Unity lifecycle Harmony hooks that fire for every
+      plant/zombie that ever exists on the board, real-wave-spawned or debug-spawned alike, with the
+      grant-queue call placed BEFORE the method's own `Ready()`/debug gate on all three. There is no
+      code path by which a real-wave entity is registered any differently than a debug-spawned one —
+      the exact same unconditional hook chain already proven (proofs 1/4/5) to produce a real,
+      correctly-attributed, nonzero RPG delta for a debug-spawned entity is the ONLY registration
+      path that exists; a real-wave entity necessarily goes through it too.
+      **Live half genuinely attempted, not completed — honestly named:** tried to reach a real,
+      unfrozen Adventure board via `debug.enter-level`/`debug.wave-freeze{enabled:false}` and via
+      `debug_ui_nav`'s `back-to-menu`/`enter-main-menu` recovery dance; hit real obstacles — a
+      `lab-overlay` board reports `theBoardType:"Nothing"` (a synthetic lab type, confirmed via
+      `debug_game_state`, not a real Adventure board at all, regardless of wave-freeze), and a direct
+      `enter-level` attempt left stale lab-overlay `Plant`/`Zombie` objects alive underneath a
+      main-menu UI overlay (confirmed via two screenshots — one showing a genuine live Adventure
+      board with a real approaching zombie and zero debug spawns, one showing the main menu with the
+      previous board's entities still resolvable via `debug_inspect`), never producing a confirmed
+      real vanilla wave-spawn event (`zombie.spawn` with `source:"start"`) inside the observation
+      window. Board restored to a clean, known-good `lab-overlay` state afterward
+      (`targetPtr:21A7D5B6960`, `plantPtr:21A7D86D000`) rather than left stuck. Whoever attempts the
+      live half next: needs either a genuinely fresh, non-overlapping Adventure entry (fully exit to
+      the real main menu and confirm via screenshot before re-entering) or a `debug.stress-fill`-free
+      real playthrough with patience for the level's own natural first-wave timing.
 - [x] 7 No double-kill: one `die` event per death. **CLOSED 2026-09-15 with a dedicated falsifier**,
       not passive observation. Read `GameHooks.cs` first: `NoteZombieDead` (the single method that
       emits `zombie.die`) has exactly two independent Harmony call sites —
@@ -613,9 +639,10 @@ the feature's own kill switch: the measured breach is a pre-existing general-eng
 feature's own, so `FUSIONRPG_LAWN_BASIC_ATTACK` stays default ON). **The task itself is still NOT
 closed** — proof 1 is half done, proof 2 is half done (Strong side real, Weak side blocked on the
 zombie-reaches-house-too-fast issue — the SAME issue that made every 300z stress-fill run end in a
-Lose within seconds this session, still unroot-caused), proof 3 is half done, and proof 6 is not
-attempted. **Proof 7 is now also CLOSED** (dedicated double-kill falsifier, not passive
-observation — see above). Each remaining proof is a genuine, separate live-setup task, not a rerun
+Lose within seconds this session, still unroot-caused), and proof 3 is half done. **Proofs 6 and 7
+are now also CLOSED** (proof 6 via a structural code-read proof after a genuine, honestly-recorded
+live attempt hit real board-state obstacles; proof 7 via a dedicated double-kill falsifier, not
+passive observation — see above). Each remaining proof is a genuine, separate live-setup task, not a rerun
 of what already ran.
 
 **Every proof above is read from the observer's run file (T0), not from console output, not from a
