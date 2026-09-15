@@ -171,7 +171,7 @@ public static class EventDrainHost
         // taken-side record stays suppressed, matching existing bullet policy.
         if (shooterPtr == IntPtr.Zero)
         {
-            if (CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))
+            if (FsmTrace.Enabled)
                 CheatState.Note($"fsm-trace EventDrainHost.TryRecordDealtFromBullet DROPPED bulletPtr={bullet.Pointer:X} shooterPtr=0 (no shooter resolved)");
             return false;
         }
@@ -185,7 +185,7 @@ public static class EventDrainHost
             chainDepth: d.RecordDepth, sourceGrantIdx: -1,
             matchKeyIdx: d.InternMatchKey(GameHooks.MatchKey), pairId: 0,
             swingPtr: bullet.Pointer, instakillShaped: instakillShaped));
-        if (CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))
+        if (FsmTrace.Enabled)
             CheatState.Note($"fsm-trace EventDrainHost.TryRecordDealtFromBullet recorded={recorded} shooterPtr={shooterPtr:X} targetPtr={targetPtr:X} damage={damage}");
         return recorded;
     }

@@ -22,8 +22,14 @@ namespace FusionRpg.Injector.Stats;
 /// then end the debug session so combat routes through the real v2 path" workflow — clearing on
 /// session end would wipe the pin before the very combat window it was pinned for. A stale entry for
 /// a despawned ptr is harmless (this is a debug-only feature, never populated in real gameplay, so
-/// unbounded growth is not a practical concern); <see cref="Clear"/> exists for a future genuine
-/// match-end hook if one is ever needed, not wired here on purpose.</para>
+/// unbounded growth is not a practical concern). <see cref="Clear"/> IS wired to match end
+/// (<c>GameHooks.ClearMatch</c>) — a pin on an entity still alive at match end would otherwise leak onto
+/// the next match's reused ptr.</para>
+///
+/// <para><b>Evidence caveat:</b> the pin is re-asserted AFTER the Hub write, so it overrides any Hub
+/// maxHp bonus (aptitude, loadout, equipment) on that ptr. A pinned debug entity is never a valid
+/// subject for a Hub HP live proof. Moving the pin into a Hub override input is a tracked next-run
+/// task (lawn-combat-wire-todo).</para>
 /// </summary>
 public static class InjectorSpawnHpPin
 {

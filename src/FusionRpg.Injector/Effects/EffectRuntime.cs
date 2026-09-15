@@ -345,7 +345,7 @@ public static class EffectRuntime
         // untouched passthrough for every trigger but OnDamageDealt, and for OnDamageDealt whenever the
         // feature's kill switch is off -- see LawnBasicAttackCostCharger.ShouldApplyRider's own doc.
         if (!LawnBasicAttackCostCharger.ShouldApplyRider(ev)) return;
-        var fsmTraceOn = CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF");
+        var fsmTraceOn = FsmTrace.Enabled;
         if (fsmTraceOn)
             CheatState.Note($"fsm-trace EffectRuntime.OnDrained ev trigger={ev.Trigger} actorPtr={ev.ActorPtr} targetPtr={ev.TargetPtr} damage={ev.Damage} swingId={ev.SwingId} isFirstOfSwing={ev.IsFirstOfSwing}");
         try

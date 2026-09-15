@@ -59,7 +59,7 @@ public static class GateCounterHost
     public static void HandleDamageApplied(
         DamageApplyResult result, DamageOrigin origin, IReadOnlyList<ElementPayloadComponent> components, string? attackerPtr)
     {
-        if (CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))
+        if (FsmTrace.Enabled)
             CheatState.Note($"fsm-trace CombatDamageDispatcher.OnDamageApplied outcome={result.Outcome} appliedAmount={result.AppliedAmount} absorbedAmount={result.AbsorbedAmount} origin={origin} attackerPtr={attackerPtr}");
         Ensure();
         _elementCounter!.Handle(new ElementMasteryCreditInput(result, origin, components, attackerPtr));

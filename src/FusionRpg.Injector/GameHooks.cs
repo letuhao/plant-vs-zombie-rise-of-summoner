@@ -55,6 +55,8 @@ public static class GameHooks
         // lawn-combat-wire T12b: drop this match's regen-telemetry baseline -- the pools themselves
         // are already dropped by InjectorEntityRegistry.Clear() below.
         try { Effects.LawnBasicAttackCostCharger.ClearMatchState(); } catch { }
+        // Pins on entities still alive at match end would otherwise leak onto next match's reused ptrs.
+        try { Stats.InjectorSpawnHpPin.Clear(); } catch { }
         Effects.InjectorEntityRegistry.Clear();
         Effects.InjectorBoardSnapshot.Invalidate();
         Applied.Clear();
@@ -877,7 +879,7 @@ public static class GameHooks
     {
         public static void Prefix(Zombie __instance, ref int theDamage, IDamageMaker damageFrom, DamageType theDamageType, PlantType reportType, bool fix)
         {
-            if (CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))
+            if (Effects.FsmTrace.Enabled)
                 CheatState.Note($"fsm-trace ZombieTakeDamage.Prefix RAW theDamage={theDamage} zombiePtr={__instance?.Pointer:X} zGod={CheatState.On("Z-GOD")}");
             BeginDamageSource(__instance?.Pointer ?? IntPtr.Zero, damageFrom);
             using var _perf = PerfProbe.Measure(PerfSection.TakeDamagePrefix);
@@ -1329,33 +1331,50 @@ public static class GameHooks
                 // is a real field (confirmed via metadata dump) and always set regardless of spawn
                 // path, so resolve the firing side's living occupant of that row from the SAME board
                 // snapshot InjectorCombatBridge/InjectorStatusBridge already share (E27) -- no second
-                // scan. Ambiguous only if two same-side entities share a row, which a lawn lane never
-                // allows for the basic-attack-relevant occupant.
+                // scan. A row holds many same-side entities (Sunflower, Wall-nut, shooter), so row alone
+                // is not an identity: InitData runs at the bullet's spawn point, i.e. the shooter's own
+                // cell, so match the nearest same-side entity by column (<= 1 away). No column, no
+                // candidate, or a tie ⇒ leave shooterPtr zero (no RPG record) rather than credit a guess.
+                // Known residual: a multi-lane shot (Threepeater side peas) can still match an adjacent-
+                // lane occupant at the same column -- tracked in lawn-combat-wire-todo next-run tasks.
                 if (shooterPtr == IntPtr.Zero)
                 {
                     try
                     {
                         var side = __instance.shootByZombie ? "zombie" : "plant";
                         var row = __instance.theBulletRow;
-                        var snap = Effects.InjectorBoardSnapshot.Capture();
-                        foreach (var e in snap.Entities)
+                        var bulletCol = FusionRpg.Injector.Lawn.LawnCoords.ColFromX(__instance.transform.position.x);
+                        if (bulletCol >= 0)
                         {
-                            if (e.Living && e.Row == row && string.Equals(e.Side, side, StringComparison.OrdinalIgnoreCase))
+                            var snap = Effects.InjectorBoardSnapshot.Capture();
+                            FusionRpg.Core.Combat.BoardEntitySnap? best = null;
+                            var bestScore = int.MaxValue;
+                            var tie = false;
+                            foreach (var e in snap.Entities)
                             {
-                                if (ulong.TryParse(e.Ptr, System.Globalization.NumberStyles.HexNumber,
-                                        System.Globalization.CultureInfo.InvariantCulture, out var raw))
-                                {
-                                    shooterPtr = unchecked((IntPtr)raw);
-                                    shooterTypeId = e.TypeId;
-                                }
-                                break;
+                                if (!e.Living || e.Row != row || !string.Equals(e.Side, side, StringComparison.OrdinalIgnoreCase))
+                                    continue;
+                                var dist = Math.Abs(e.Col - bulletCol);
+                                if (dist > 1) continue;
+                                // Prefer the occupant behind (plant) / ahead-of-house (zombie) side of the pea.
+                                var behind = side == "plant" ? e.Col <= bulletCol : e.Col >= bulletCol;
+                                var score = dist * 2 + (behind ? 0 : 1);
+                                if (score < bestScore) { best = e; bestScore = score; tie = false; }
+                                else if (score == bestScore) tie = true;
+                            }
+                            if (best != null && !tie &&
+                                ulong.TryParse(best.Ptr, System.Globalization.NumberStyles.HexNumber,
+                                    System.Globalization.CultureInfo.InvariantCulture, out var raw))
+                            {
+                                shooterPtr = unchecked((IntPtr)raw);
+                                shooterTypeId = best.TypeId;
                             }
                         }
                     }
                     catch { }
                 }
                 Effects.EventDrainHost.CacheBulletShooter(__instance.Pointer, shooterPtr, shooterTypeId);
-                if (CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))
+                if (Effects.FsmTrace.Enabled)
                     CheatState.Note($"fsm-trace BulletInit.Postfix bulletPtr={__instance.Pointer:X} shooterPtr={shooterPtr:X} shooterTypeId={shooterTypeId}");
             }
             catch { }

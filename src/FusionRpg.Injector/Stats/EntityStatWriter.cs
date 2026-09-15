@@ -325,8 +325,7 @@ public static class EntityStatWriter
             var liveMax = (long)p.thePlantMaxHealth;
             if (liveMax == targetMaxHp) return;
             var liveHp = (long)p.thePlantHealth;
-            var ratio = liveMax > 0 ? (double)liveHp / liveMax : 1.0;
-            var newHp = Math.Clamp((long)Math.Round(targetMaxHp * ratio), 1, targetMaxHp);
+            var newHp = Math.Clamp(liveMax > 0 ? checked(liveHp * targetMaxHp) / liveMax : targetMaxHp, 1, targetMaxHp);
             var max = ClampToInt32Reporting(targetMaxHp, "plant.maxHp", source);
             var hp = ClampToInt32Reporting(newHp, "plant.hp", source);
             p.thePlantMaxHealth = max;
@@ -348,8 +347,7 @@ public static class EntityStatWriter
             var liveMax = ZombieCombatFields.GetMaxHp(z);
             if (liveMax == targetMaxHp) return;
             var liveHp = ZombieCombatFields.GetHp(z);
-            var ratio = liveMax > 0 ? (double)liveHp / liveMax : 1.0;
-            var newHp = Math.Clamp((long)Math.Round(targetMaxHp * ratio), 1, targetMaxHp);
+            var newHp = Math.Clamp(liveMax > 0 ? checked(liveHp * targetMaxHp) / liveMax : targetMaxHp, 1, targetMaxHp);
             ZombieCombatFields.SetMaxHp(z, targetMaxHp);
             ZombieCombatFields.SetHp(z, newHp);
             try { z.UpdateHealthText(); } catch { }
