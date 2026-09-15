@@ -280,6 +280,9 @@ These are settled; the sections above are what they change.
 | 11 | **Clickable surfaces: the full tombstone on the PVZ main menu, plus a compact icon on the live-lawn entry and one reviewed non-gameplay menu surface** (Q11a) — the idea's own shape (`rift-gate.md:44,46,132-133`). | The allow-list is small, named, and owner-reviewed. |
 | 12 | **A narrow reviewed menu-state signal gates the hit target** (Q11b); paint may stay broad, clicking may not. | The one genuinely new mechanism the door needs. |
 | 13 | **The two programs run in parallel and their specs are written together** (Q12), so the landing contract (decision 8) is agreed once. | Sequenced, not serial. |
+| 14 | **`rift.hide` is one verb with two implementations, matching the dual-host split** (owner, 2026-09-15). | The launcher adds a `hide` verb to its pipe (`OverlayPipeServer.cs:14-19`, today only `toggle`/`ping`); the injector host calls the in-process `OverlayViewHost.Hide()` (`OverlaySwitch.cs:55`). One vocabulary, two transports — the FE does not care which host owns it. |
+| 15 | **The live-lawn affordance is the existing guard-pinned "RPG" button, restyled** (owner, 2026-09-15; supersedes decision 11's "compact icon" wording). | One lawn affordance. The tombstone program owns that button's icon/label as a reviewed change to the guard's scope; the guard/test is updated, not bypassed — the button still carries one action. |
+| 16 | **Both hosts set an embed marker at open**, so the page knows it is embedded and that **Leave** can work (owner, 2026-09-15). | Verified same-origin-safe (`OverlayViewPolicy.cs:53-55` compares only scheme/host/port). The page must still behave correctly with **no** marker (plain browser visit), where **Leave** is not offered. |
 
 **This dissolves the earlier Q7/Q8/Q9 and creates two new conflicts.** Q7 is answered — two programs,
 not one map. Q8 is superseded by decision 8. Q9 is answered — text only.
@@ -555,6 +558,24 @@ deployed) and it is not a module of this map.
 together so the landing contract (decision 8) is agreed once. The `commander-surface` name change
 lands as its own small follow-up that this program depends on, not as an edit inside the rift-gate
 spec.
+
+**The capability map exists and is approved:** [rift-gate-map.md](rift-gate-map.md) (Phase 0 complete
+2026-09-15, five modules: `menu-anchor` · `tombstone` · `overlay-hide` · `first-open-signal` ·
+`entry-landing`). **Read the map's Audit section before the module specs** — the map was audited
+against code and the first draft was wrong in three places (the `overlay-hide` path, where
+`first-open-signal` is observable, and how large `menu-anchor` really is) plus seven recorded gaps.
+Those corrections are load-bearing; re-deriving the first draft's shape costs the same hour twice.
+
+**Cross-program boundary (verified 2026-09-15, after the story-scene program specced).** The
+`story-scene` program **ceded this bridge to rift-gate** in its own capability map, three times, in
+its Out table: "The FE↔host bridge mechanism itself" → *"Sibling `rift-gate-ideal` (decision 9) —
+this program **consumes** it, does not redefine it"*; "Unity-side `rift.*` VFX wiring" →
+story-scene T27a/b, with the explicit error to avoid being *"Build a second FE→host channel"*; and
+"Rift Gate mechanism (overlay transport, host selection, first-open capture)" → sibling. Its task
+list restates it (`tasks/story-scene-todo.md:964`: building a second channel *"would violate
+one-owner-per-mechanism"*). So the seam is already agreed: **rift-gate owns the bridge and the
+`rift.hide` verb; story-scene consumes them and stops at the seam if absent.** Do not build a second
+channel, and do not let the story-scene program absorb this one.
 
 Two things the spec must carry that are easy to lose:
 
