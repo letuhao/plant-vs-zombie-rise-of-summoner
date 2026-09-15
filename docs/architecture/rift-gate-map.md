@@ -309,6 +309,80 @@ the key set moves — is here the transition into *any* other surface. The spec 
 edge and test each; copying the exit set from `menu.enter` (a one-shot emit on a single patch,
 `GameCaptureHooks.cs:812-818`) is exactly the wrong template.
 
+## Decision 17 (owner, 2026-09-15) — `menu-anchor` is redefined: patch the **menu screen**, never drive navigation
+
+**This supersedes Gap 10 and Correction 3's proposed mechanism.** The owner's rule, stated plainly:
+**switch the WebView; never fight the PVZ engine.** `UIMgr.BackToMenu` / `EnterMainMenu` are
+**forbidden** — they are a known live hazard ("forced entry … can destabilize the engine",
+`DebugActions.cs:1495-1496`, `DebugEndpoints.cs:759-760`), `BackToMenu` is documented to land one menu
+layer short (`live-test-ssot.md:242-251`), and calling them mid-run breaks a live run. The existing
+observe-only `UIMgr` patches may be **consumed**, but their detect logic has never worked well and must
+not be depended on.
+
+**The owner supplied the reference implementation** —
+[`darkthemer/PvZF_MainMenuFlowers`](https://github.com/darkthemer/PvZF_MainMenuFlowers), whose three
+source files are the pattern to follow. It is the same shape we need and it is materially better than
+the first draft:
+
+1. **It patches the menu screen's own lifecycle, not navigation statics.**
+   `[HarmonyPatch(typeof(MainMenu), "Start")]` (`FlowerClickable.cs`) fires when the main-menu object
+   actually exists. That is a **presence** fact, not a hope that a nav call routes through a particular
+   static.
+2. **It reads the hierarchy by name, observe-only** (`mainMenu.Find("Grave/GraveBackground/Flower1")`,
+   `LowerButtons`), never calling an engine action.
+3. **It attaches a real uGUI `Button` into the game's own menu hierarchy** (`Image.raycastTarget`,
+   `button.transition = Selectable.Transition.None`, parented under the menu transform,
+   `SetAsFirstSibling`) — so the game's **own canvas, layout and raycast system owns hit-testing and
+   z-order**. It is a UI element *in* the menu, not an IMGUI rect *over* it.
+4. Class injection + delegate conversion where needed (`ClassInjector.RegisterTypeInIl2Cpp<T>()`,
+   `DelegateSupport.ConvertDelegate<UnityAction>`), and it deliberately lowers sibling/z-order of the
+   game's own lower buttons and clears `raycastTarget` on two text labels so they do not obstruct.
+
+**Why this is strictly better than what the module specs proposed:**
+
+| First-draft `menu-anchor` | Reference pattern (adopt this) |
+|---|---|
+| New patch on `UIMgr.EnterMainMenu` — a **nav call** that may or may not fire | Patch `MainMenu.Start` — the **screen's own** lifecycle; fires iff the screen exists |
+| Six hand-enumerated exit edges (match/submenu/pause/modal/lose/quit), each needing its own test | **Exit edges dissolve**: the affordance is a child of the menu object, so Unity destroys it with the menu. Enter/exit are the screen's own `Start`/`OnDestroy` |
+| Hand-derived axis-aligned hit box + a "never cover a host primary action" policy (gap 5) | The game's **own** uGUI raycast/layout owns hit-testing; the wobble-vs-hitbox problem does not exist |
+| An IMGUI rect over the menu can eat a host click (gap 7) | A UI element **inside** the menu hierarchy, ordered by the game's own sibling order |
+| Gap 4 (the over-broad `Board == null` paint) needed correcting | Moot for the affordance: it exists only while `MainMenu` exists. (The existing decorative paint is a separate, smaller cleanup.) |
+
+**Verified in this session:** the type `MainMenu` **exists** in our 3.9 MelonLoader interop
+(`H:\Games\PVZ-Fusion-3.9_MelonLoader\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll`), our csproj
+already references `UnityEngine.UI`, `Il2CppInterop.Runtime` and `Assembly-CSharp`
+(`FusionRpg.Injector.MelonLoader.39.csproj:84-93,128-129`), and our global usings already include
+`Il2Cpp` (`GlobalUsings.Il2Cpp.cs`) — so the reference pattern is expressible in our host today.
+
+**Not yet verified — flag, do not assume:**
+- The reference targets **3.8.1**; our MelonLoader host is **3.9**. That `MainMenu`'s entry method is
+  named `Start` and that the hierarchy paths (`Grave/GraveBackground/Flower1`, `LowerButtons`) are
+  identical in 3.9 must be checked against the real 3.9 interop at implementation.
+- Whether the **BepInEx** host's interop also exposes `MainMenu` (our two hosts differ; the BepInEx
+  folder here has only `plugins/`). If it does not, the tombstone is MelonLoader-only and the BepInEx
+  host keeps F10 — a scoped difference, not a blocker, and it must be stated rather than assumed.
+- `ClassInjector.RegisterTypeInIl2Cpp` is not used anywhere in our repo today; if the affordance can be
+  built without a custom `MonoBehaviour` (a plain uGUI `Button` with a listener is enough), prefer that
+  and avoid introducing class injection at all.
+
+**Consequences for the module set (unchanged count, changed content):**
+- `menu-anchor` becomes **"the menu-screen presence signal"**: patch the menu screen's lifecycle, hold a
+  boolean, expose a closed surface enum. Its real work is no longer six exit edges but **proving the
+  signal's presence semantics** (fires on the screen, clears with it) and the 3.9 verification above.
+- `tombstone` becomes **"attach a uGUI affordance to the menu hierarchy"**, consuming the presence
+  signal; the hit-box contract (gap 5) is largely replaced by the game's own layout, and the
+  "never-cover" policy (gap 7) becomes "order ourselves below the game's primary buttons", as the
+  reference does.
+- `overlay-hide`, `first-open-signal`, `entry-landing` are **unaffected** — none of them touches engine
+  navigation.
+
+**The hard rule this adds, to restate inline in the specs:** *no rift-gate code may call a `UIMgr`
+navigation method (or any engine navigation action) to change what the player sees.* The injector may
+**read** engine/menu presence and may **attach** a UI affordance to an existing screen; it may not
+drive the engine's menu state. Switching the WebView is the whole job.
+
+---
+
 ## Verified constraints that shaped the above (so they are not re-derived)
 
 - **F10 already works on the main menu in both host modes** — `MainWindow.xaml.cs:270` (global
@@ -340,6 +414,13 @@ Both audit questions are answered; no open question remains and the module specs
    owns the marker's shape and both host call sites; `entry-landing` may branch on it (e.g. suppress
    browser-only chrome in-game). The page must still behave correctly with **no** marker (plain browser
    visit), where **Leave** is not offered.
+3. **Q3 (decision 17) — `menu-anchor` is redefined.** Patch the **menu screen's own lifecycle**
+   (the owner's reference: `darkthemer/PvZF_MainMenuFlowers`), never a `UIMgr` navigation static.
+   `BackToMenu`/`EnterMainMenu` are **forbidden** — they are a documented live hazard and calling them
+   mid-run breaks a live run. The injector may read menu presence and attach a UI affordance to an
+   existing screen; it may not drive the engine's menu state. The existing observe-only `UIMgr` patches
+   may be consumed but must not be trusted as the detect logic (they have never worked well).
 
 Everything else was already decided. `menu-anchor`, `tombstone`, `overlay-hide`, `first-open-signal`,
-and `entry-landing` are all spec-able as corrected above.
+and `entry-landing` are all spec-able as corrected above — but the `menu-anchor` and `tombstone` specs
+must be **rewritten to decision 17's shape**, not patched in place.
