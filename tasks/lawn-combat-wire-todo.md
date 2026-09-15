@@ -208,7 +208,7 @@ and an `entity:{ptr}` grant can never match a projectile hit. The host game carr
 - [ ] **The attacker's own power reaches the packet**, asserted as a differential: two shooters of
       different composed power produce different `combat.power.*`. *(Not "isn't the stub" — that
       passes even when broken.)*
-      **audit 2026-09-15 OPEN: weak — `EventDrainIntegrationTests.cs:179` resolver lambda ignores ptr, so it is not the required two-shooter differential; the live attempt (T13 proof 1) read `rpgDelta:0`. Next run L-N13**
+      **audit 2026-09-15 OPEN: weak — `EventDrainIntegrationTests.cs:179` resolver lambda ignores ptr, so it is not the required two-shooter differential; the live attempt (T13 proof 1) read `rpgDelta:0`. Next run L-N13** *(L-N13 closed the Core half: `AttackerPowerByPtrTests`, ptr-strict resolver; Hub-composed + live half still L-N7.)*
 - [x] A null shooter ⇒ no RPG contribution, no exception, no fallback to the bullet ptr.
       *audit 2026-09-15 CONFIRMED: `EventDrainHost.cs:167-175`*
 - [x] **The four uncaptured attack methods are hooked**: `QingZombie.AttackPlant` (override),
@@ -1119,8 +1119,9 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
 
 - [ ] **L-N10** Test: observer collection path never alters `EventDrainHost.Active` (T0 bullet 3).
       Verify: new Core/Injector test fails when collection toggles `Active`.
-- [ ] **L-N13** Core test: two shooters with different composed `combat.power.*` produce different
+- [x] **L-N13** Core test: two shooters with different composed `combat.power.*` produce different
       packet power through a ptr-aware resolver (T6 differential). Mutation: resolver ignoring ptr fails.
+      *Done: `AttackerPowerByPtrTests` — one `OverlayCombatMath`, one `EventDrain`, attackers 0x1001 (power 10) and 0x2002 (power 400); resolver keyed strictly by ActorPtr and throws on unknown keys; asserts strong hits harder and the swing ptr is never resolved. Mutation (resolver returns the weak snapshot for every attacker ptr) fails. Core.Tests 13544 via verify-change. T6 bullet stays open: snapshots are fixed overlays, not Hub-composed, and the live half is L-N7.*
 - [x] **L-N14** Fix T7 wording ("24 shipped briefs, one documented Kind change") and replace the
       population-count pins (24/3/21) in `ActionCorpusImporterTests.cs` with contract assertions
       (guardrail rule: never pin a population count).
