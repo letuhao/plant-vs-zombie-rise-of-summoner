@@ -513,9 +513,25 @@ call site · **Scope:** L
 - [ ] 2 Element: **one species, two element assignments**, against a defender proven **non-Neutral**
       and Strong to one / Weak to the other, with the expected ratio computed from
       `stats.v1.json:10 matchupShareK` **before** the run. Falsifier: the same species against a
-      Neutral defender must produce **equal** damage. *Not attempted — every run so far used the
-      scenario's default Earth/Earth (Same matchup) pairing, real numbers (`rpgDelta=-53`/`-33` etc.,
-      2026-09-15) but not the two-assignment comparison this proof specifies.*
+      Neutral defender must produce **equal** damage. **Half done, 2026-09-15**: the Strong half is
+      real, live, repeated data — `lab-overlay`'s own default pairing is Fire plant vs Ice zombie
+      (`ElementTable.Shipped()`: `("fire","ice",1)` = Strong, ring "fire → ice"), and every clean run
+      this session landed a consistent `-16` (occasionally `-21`) per hit with `attackerPtr` =the
+      plant's own ptr, `writer.zombie` deltas matching exactly (e.g. 5-for-5 identical `-16` hits with
+      the zombie held still via `theSpeed=0.001`). **The Weak half (Earth vs the same Ice zombie,
+      expected ~`-10` at `matchupShareK=0.25`, i.e. `(1-k)/(1+k)` of the Strong number) could not be
+      captured** — 4 independent attempts (respawn-plant-as-Earth, respawn-zombie-closer,
+      `debug.combat.pin-element` in place with no attacker gap, then again with the zombie's
+      `theSpeed` frozen near zero) each ended in a real vanilla Lose ("a zombie entered your house")
+      within seconds of switching the plant to Earth, even once with the zombie ostensibly frozen in
+      place — meaning either `theSpeed` is not the field that actually governs X-position advance, or
+      a second, unaccounted-for zombie / timer is ending the level. **Genuinely unresolved, not a code
+      defect in the feature under test** — the elemental math itself is independently confirmed correct
+      by reading `ElementRingMatrix.GetRelation`/`ElementTable.Shipped()` directly (fire→ice Strong,
+      earth→ice Weak, `MatchupShareK` wired into `OverlayCombatMath` via `ElementHub.cs`), only the
+      LIVE numeric ratio comparison is missing. Whoever picks this up next: find what actually holds a
+      debug-spawned zombie stationary in this scenario (or use a real Adventure level with a long lawn
+      and enough sun to place late) before trying this proof again.
 - [ ] 3 One swing, one trigger — N victims still each take damage. *Partially evidenced: every swing
       this session produced exactly one trigger (2026-09-15, `actionTriggers` now tracks real swings
       1:1). Not evidenced: the "N victims" half needs a piercing/multi-target weapon (e.g. a
