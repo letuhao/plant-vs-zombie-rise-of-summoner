@@ -419,4 +419,65 @@ public sealed partial class RpgStore
         using var reader = cmd.ExecuteReader();
         return reader.Read() ? ReadOnboardingCheckpoint(reader) : null;
     }
+
+    // ---- rift-gate first-open-signal ------------------------------------------------------------
+    //
+    // A durable once-per-player fact: "the web FE has been opened". A ROW keyed on player_id, not a
+    // session flag (mirroring OnboardingStoryRow), so it survives restart and is correct however the
+    // player reached the FE — the menu tombstone, F10, the launcher's "Open RPG UI", or a plain
+    // browser visit. It is a TRIGGER only: the capture mechanism that consumes it is a separate
+    // program. Nothing here reads or writes the story ledger.
+
+    /// <summary>The durable first-open fact plus whether it is actionable right now.</summary>
+    public sealed record FirstOpenRow(long PlayerId, string OpenedUtc, long Revision);
+
+    /// <summary>
+    /// Records the first open, once. <c>INSERT OR IGNORE</c> on the <c>player_id</c> primary key is the
+    /// idempotency gate (the same discipline as <c>TryEarnOnboardingCheckpoint</c>): a second open is a
+    /// no-op, never a conflict. Returns true when this call actually created the row.
+    /// </summary>
+    public bool RecordFirstOpen(long playerId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            if (GetPlayerUnlocked(db, playerId) is null) return false;
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                INSERT OR IGNORE INTO rpg_first_open(player_id, opened_utc, revision)
+                VALUES($p, $utc, 1);
+                """;
+            cmd.Parameters.AddWithValue("$p", playerId);
+            cmd.Parameters.AddWithValue("$utc", DateTime.UtcNow.ToString("o"));
+            return cmd.ExecuteNonQuery() > 0;
+        }
+    }
+
+    /// <summary>The fact, or null when the FE has never been opened for this player.</summary>
+    public FirstOpenRow? GetFirstOpen(long playerId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            if (GetPlayerUnlocked(db, playerId) is null) return null;
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                SELECT player_id, opened_utc, revision FROM rpg_first_open WHERE player_id=$p;
+                """;
+            cmd.Parameters.AddWithValue("$p", playerId);
+            using var reader = cmd.ExecuteReader();
+            return reader.Read()
+                ? new FirstOpenRow(reader.GetInt64(0), reader.GetString(1), reader.GetInt64(2))
+                : null;
+        }
+    }
+
+    /// <summary>
+    /// Whether the first-open fact can be acted on yet. The capture program needs the injector running
+    /// and in-game (it reads live Almanac state), so "the injector is connected" is the honest
+    /// condition — the same 5-second heartbeat window <see cref="InjectorConnected"/> already models,
+    /// not a proxy for it. An unactionable fact stays pending until an injector connects; nothing here
+    /// blocks the FE.
+    /// </summary>
+    public bool IsFirstOpenActionable => InjectorConnected;
 }

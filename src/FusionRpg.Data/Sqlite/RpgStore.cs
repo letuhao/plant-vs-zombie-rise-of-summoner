@@ -479,6 +479,12 @@ public sealed partial class RpgStore : IRpgDb, IDisposable
             );
             CREATE INDEX IF NOT EXISTS ix_rpg_onboarding_story_player
               ON rpg_onboarding_story(player_id, story_id, version);
+            CREATE TABLE IF NOT EXISTS rpg_first_open (
+              player_id INTEGER NOT NULL,
+              opened_utc TEXT NOT NULL,
+              revision INTEGER NOT NULL DEFAULT 1,
+              PRIMARY KEY (player_id)
+            );
             CREATE TABLE IF NOT EXISTS rpg_actor_progression (
               player_id INTEGER NOT NULL,
               kind TEXT NOT NULL,

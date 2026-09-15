@@ -49,6 +49,43 @@ public static class OnboardingEndpoints
                     : StatusCodes.Status400BadRequest;
                 return Results.Json(body, statusCode: status);
             });
+
+        // ---- rift-gate first-open-signal -------------------------------------------------------
+        //
+        // The durable once-per-player "FE has been opened" fact. Written FE-side on first load
+        // (deliberately NOT keyed on the tombstone or the embed marker — it is keyed on the FE being
+        // opened, so it is also correct for the launcher's "Open RPG UI" or a plain browser visit).
+        // `actionable` is the server's own injector-connectivity read, so a consumer knows whether the
+        // capture trigger can fire yet. This endpoint never blocks the FE and never touches the story.
+
+        g.MapGet("/{playerId:long}/first-open", (long playerId, RpgStore store) =>
+        {
+            if (!store.PlayerExists(playerId)) return Results.NotFound();
+            return Results.Ok(ProjectFirstOpen(store, playerId));
+        });
+
+        g.MapPost("/{playerId:long}/first-open", (long playerId, RpgStore store) =>
+        {
+            if (!store.PlayerExists(playerId)) return Results.NotFound();
+            store.RecordFirstOpen(playerId);
+            // Idempotent: recording twice is a no-op, so the response is the same either way.
+            return Results.Ok(ProjectFirstOpen(store, playerId));
+        });
+    }
+
+    static FirstOpenDto ProjectFirstOpen(RpgStore store, long playerId)
+    {
+        var row = store.GetFirstOpen(playerId);
+        return new FirstOpenDto
+        {
+            PlayerId = playerId,
+            Opened = row is not null,
+            OpenedUtc = row?.OpenedUtc,
+            Revision = row?.Revision ?? 0,
+            // The honest condition for the capture trigger: the injector must be running and in-game.
+            // An unactionable fact stays pending until one connects.
+            Actionable = row is not null && store.IsFirstOpenActionable,
+        };
     }
 
     internal static OnboardingStateDto? ProjectState(RpgStore store, long playerId)

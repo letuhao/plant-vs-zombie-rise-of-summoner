@@ -107,7 +107,7 @@ disk only when the disk is under test, and a failed temp-delete is a failure, ne
 |---|---|
 | `src/FusionRpg.Data/Sqlite/RpgStore.Onboarding.cs` | The durable fact: `RecordFirstOpen(playerId)` (`INSERT OR IGNORE`, idempotent) and `GetFirstOpen(playerId)`, plus the actionability read reusing `InjectorConnected` (`RpgStore.cs:1059-1060`). Row shape mirrors `OnboardingStoryRow` (`:25`) |
 | `src/FusionRpg.Server/OnboardingEndpoints.cs` | Two routes on the existing group: `POST /api/onboarding/{playerId}/first-open` (record, idempotent) and `GET .../first-open` (read the fact **and** its `actionable` flag). A stable reason vocabulary |
-| `src/FusionRpg.Injector/Host/InjectorLoop.cs` | The **consume** arm at the existing cadence: when the fact is pending **and** the injector is connected, the capture trigger fires. **No new poll** — it rides the existing command/heartbeat cadence (`:118-131`) |
+| `src/FusionRpg.Injector/Host/InjectorLoop.cs` | **NOT CHANGED — see "Implemented scope" below.** The spec's original "consume arm" would be a trigger with no consumer: this program builds the trigger fact, the capture program builds the capture. Recorded rather than stubbed. |
 | `web/fusion-rpg-web/src/lib/bus/firstOpen.ts` (new) | One-shot first-load write via the existing bus; fired once, never blocking, retried next load on failure |
 | `web/fusion-rpg-web/src/app/App.tsx` | Mount the one-shot write beside the existing `ActorSurfaceCatalogBootstrap` (`:12,21-24`) |
 
@@ -200,6 +200,24 @@ spec records the class rule so the capture program inherits it and does not inve
 - [ ] No derived population count asserted anywhere; substrate is in-memory.
 
 ## Open Questions
+
+### Implemented scope (recorded at build time, 2026-09-15)
+
+The spec's project-structure table originally listed an injector **consume arm** in `InjectorLoop`.
+It was **deliberately not implemented**, and this is the honest reason rather than an omission:
+
+- Decision 1 makes the capture a **separate program**. This module's deliverable is the *trigger fact*
+  plus the *actionability* gate on it.
+- The actionability condition is **the server knowing the injector is connected** —
+  `RpgStore.InjectorConnected`, the existing 5-second heartbeat window. The injector's side of that
+  condition is **already shipped**: the injector heartbeats today, and the server exposes the read.
+  No new injector code is required to make the fact actionable.
+- An injector-side "read the fact and fire" arm with **no capture to fire** would be a trigger wired
+  to nothing — unreachable surface, which this repo forbids ("a wire protocol with unreachable verbs
+  is untested surface"). The capture program adds that arm together with the capture it drives.
+
+So the implemented surface is: the durable row, the two endpoints, the actionability read, and the
+FE's one-shot write. Everything needed to *consume* the fact is present; nothing pretends to consume it.
 
 > **Decided (owner, 2026-09-15)** — the storage shape below was a proposed default and is now
 > **confirmed**: **a dedicated row keyed `(player_id)`** (simplest idempotency key, no join), mirroring
