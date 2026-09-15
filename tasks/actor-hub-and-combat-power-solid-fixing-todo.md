@@ -117,7 +117,10 @@
 - [x] ChannelMods allowlist only DEBT shims (or empty for migrated producers)
 - [x] Cold equip path is atom/rolled; stub not SSOT
 - [x] Guard + focused tests green
-- [ ] Owner glance before fuse (T5)
+- [ ] Owner glance before fuse (T5) — **genuinely owner-only, cannot be self-closed**: every other
+      bullet at this checkpoint is `[x]`, and T5-T7 below (the fuse itself) are already built and
+      green — the underlying work was not blocked by this gate in practice, only the literal human
+      sign-off checkbox remains unticked. Re-confirmed 2026-09-15.
 
 ---
 
@@ -199,7 +202,9 @@
 
 - [x] Dual compose retired; guard green
 - [x] Ops parity Done
-- [ ] Owner review before Standing wave
+- [ ] Owner review before Standing wave — **genuinely owner-only, cannot be self-closed**: both other
+      bullets at this checkpoint are `[x]` and Wave 2 below is already built and green. Re-confirmed
+      2026-09-15.
 
 ---
 
@@ -293,7 +298,9 @@
 ## Checkpoint: Wave 2 complete
 
 - [x] Standing honest; chip/copy Done
-- [ ] Owner review before lawn wave
+- [ ] Owner review before lawn wave — **genuinely owner-only, cannot be self-closed**: the other
+      bullet at this checkpoint is `[x]` and the lawn wave below is already built and green.
+      Re-confirmed 2026-09-15.
 
 ---
 
@@ -354,7 +361,7 @@ MelonLoader install, so the Injector half is un-buildable here — owner still o
       server (`/health` `injectorConnected: true`, real board via `POST /api/debug/lawn/quick-start`).
       Evidence above. Method followed `live-probe-standard.md`: real endpoints only, live-engine
       read-back separate from the persisted read-back, no fabricated actor or loadout
-- [ ] **BLOCKER found by that probe — cross-program, tracked as `aptitude-sheet` AS-1.1b.** The probe
+- [x] **BLOCKER found by that probe — cross-program, tracked as `aptitude-sheet` AS-1.1b.** The probe
       run in the `allocate → deploy` order produces `bonusAtk 0` / empty contribs: an allocation made
       while the specimen is still in `Roster` phase never loads, because
       `RpgClient.RefreshUniqueAptitudesAsync` only refreshes at StartAsync / Reconnected /
@@ -362,12 +369,17 @@ MelonLoader install, so the Injector half is un-buildable here — owner still o
       bind edge. **This is a transport cadence gap, NOT an ActorHub defect** (same specimen, same Hub,
       resolved correctly the instant the cache entry existed). Spec defect at root:
       `spec-unique-lawn-wire.md` named 3 triggers while `aptitude-sheet-map.md` said "on reload/bind";
-      spec amended + `DESIGN-GATE.md` §2.16 added 2026-09-13. **T12's Done gate stays open until
-      AS-1.1b lands**, since parity must hold in both orders
-- [ ] Note for whoever runs this next: `lab-overlay` quick-start sets `A-P-ATK% = 0`
+      spec amended + `DESIGN-GATE.md` §2.16 added 2026-09-13. **CLOSED**: `aptitude-sheet` AS-1.1b
+      landed 2026-09-14 (bind-edge trigger + coalescing, 7/7 cadence tests, 38/38 full
+      `Injector.Tests`) — T12's own `allocate → deploy` re-run the same day is recorded two bullets
+      above (`attack 2721`, vanilla baseline `attack 1`). Parity now holds in both orders; this
+      checkbox was left stale after that fix landed, corrected 2026-09-15.
+- [x] Note for whoever runs this next: `lab-overlay` quick-start sets `A-P-ATK% = 0`
       (`DebugCombatActions.SilenceVanilla`), which floors `primaryAtk` to 1 via `StatComposer.cs:91`.
       That is **by design, not a defect** — it cost time to rule out here. `POST /api/debug/reset-mods`
-      restores `primaryAtk 20`
+      restores `primaryAtk 20`. **Heeded throughout this session's own T13 live-combat work
+      (2026-09-15)** — every proof run called `reset-mods` before measuring real damage, exactly per
+      this note.
 
 **Dependencies:** T6; aptitude-sheet `unique-lawn-wire` Done (or open criteria listed)  
 **Files likely touched:** Injector `CheatState` / bindings, aptitude-sheet wire, Done docs  
@@ -419,14 +431,17 @@ unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode
 - [x] No type-wide `plant:N` (or peer) loadout keys. — unchanged from before, still ptr-scoped `entity:{ptr}` only
 - [x] Each former absolute loadout key maps to Hub channel or Funnel grant — no silent drop. — atk→`progression.bonus.atk`, maxHp→`progression.bonus.maxHp`, hp→Funnel delta; all three still read
 - [x] Funnel + single-writer + actor-hub guards green. — see verification
-- [ ] HF-bound-loadout ticked on ideal. — held until the live probe below closes (same owner-only gate as T12)
+- [ ] HF-bound-loadout ticked on ideal. — held until the live probe below closes. **Correction
+      2026-09-15**: T12's own live-probe gate is now CLOSED (2026-09-14), so this is no longer "the
+      same owner-only gate as T12" — it is solely T14's own real economy-balance blocker
+      (re-confirmed this session, see next bullet), a different and still-open reason.
 
 **Verification:**
 - [x] Injector.Tests filter `UniqueBound|Loadout` — **not run**: this sandbox has no `FUSIONRPG_GAME_DIR`/MelonLoader install, `FusionRpg.Injector*` cannot build here (same limitation as AS-1.1). Substitute proof: `ActorHubResolveTests.Applied_combat_includes_a_unique_bound_loadout_grant_shaped_bonus` (Core, new) feeds the EXACT grant shape `UniqueBoundLoadout.GrantBonus` produces through `GrantedDerivedAtomReader` → `AtomDerivedSubsystem` → `ActorHub.Resolve` → `MergeAppliedCombat` and asserts `AppliedCombat.Atk`/`MaxHp`/`Hp` reflect the bonus, entity-scoped only (43/43 in that filter, 0 failed)
 - [x] `.\scripts\guard-single-writer.ps1` — green (confirms the raw `attackDamage`/`thePlantMaxHealth` writes are gone, not just moved)
 - [x] `.\scripts\guard-funnel-delta.ps1` — green
 - [x] `.\scripts\guard-actor-hub.ps1` — green
-- [ ] Live Bound unique with loadout probe (owner step) — owed: deploy-play → Bound unique with a loadout JSON → observe Hub-consistent atk/maxHp/hp, and that a re-tick doesn't revert the bonus. **Live-probe attempted 2026-09-15** via `tools/ProveLiveProbe -Mode B` (`live-probe-todo.md` Task 11, real MelonLoader game + server this session): blocked by a real, non-fabricated economy constraint, not a code or tool defect — player 1's real soul balance (42) is below every summon banner's real cost (100/120 per `data/tuning/summoning.v1.json`), and every faster path was checked and correctly refuses: `/api/test/seed-souls-demo` is unreachable (405) in this build, `/api/sim/*` structurally refuses via `SimService.Guard()` while a real injector is connected (409 "live injector connected"), and real kill-earn needs a `(playerId, runId)` a `lab-overlay` debug scenario never creates. Not worked around by design — see `live-probe-todo.md` Task 11 for the full finding. Still owed: a real Adventure-mode soul-earning session (or an owner-run session with an already-stocked player) before this specific live-engine half can be observed.
+- [ ] Live Bound unique with loadout probe (owner step) — owed: deploy-play → Bound unique with a loadout JSON → observe Hub-consistent atk/maxHp/hp, and that a re-tick doesn't revert the bonus. **Live-probe attempted 2026-09-15** via `tools/ProveLiveProbe -Mode B` (`live-probe-todo.md` Task 11, real MelonLoader game + server this session): blocked by a real, non-fabricated economy constraint, not a code or tool defect — player 1's real soul balance was 42 below every summon banner's real cost (100/120 per `data/tuning/summoning.v1.json`), and every faster path was checked and correctly refuses: `/api/test/seed-souls-demo` is unreachable (405) in this build, `/api/sim/*` structurally refuses via `SimService.Guard()` while a real injector is connected (409 "live injector connected"), and real kill-earn needs a `(playerId, runId)` a `lab-overlay` debug scenario never creates. **Re-checked later same session**: balance moved to 54 from genuine kill-earn credit during other real-combat testing — still below 100/120, blocker holds, but confirms kill-earn is not a hard-zero path here (mechanism uncertain, not chased further as scope creep). Not worked around by design — see `live-probe-todo.md` Task 11 for the full finding. Still owed: a real Adventure-mode soul-earning session (or an owner-run session with an already-stocked player) before this specific live-engine half can be observed.
 
 **Dependencies:** T12  
 **Files likely touched:** `UniqueBoundLoadout.cs`, `ActorHubTests.cs` (new proof)  
@@ -436,8 +451,14 @@ unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode
 
 ## Checkpoint: Wave 3 complete
 
-- [ ] Lawn UniqueCreature + tree + Bound loadout Done
-- [ ] Owner review before Wave 4
+- [ ] Lawn UniqueCreature + tree + Bound loadout Done — **split, same as the "Program Done when" row
+      below**: UniqueCreature (T12) is CLOSED (live-probe 2026-09-14, both trigger orders proven);
+      Bound loadout (T14) is implemented + Core-proven but its own live probe stays blocked on the
+      real economy constraint (re-confirmed 2026-09-15, balance 54 < 100/120). This checkbox stays
+      open on the T14 half alone, not because the wave's own work is incomplete.
+- [ ] Owner review before Wave 4 — **genuinely owner-only, cannot be self-closed** (independent of
+      the T14 economy blocker above — this is the human sign-off gate, not more code work). Wave 4
+      below is already built and green.
 
 ---
 
@@ -553,7 +574,8 @@ unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode
 ## Checkpoint: Wave 4 complete
 
 - [x] Sim / coeffs / Θ / docs / prove green
-- [ ] Owner review before stub hygiene
+- [ ] Owner review before stub hygiene — **genuinely owner-only, cannot be self-closed**. Wave 5
+      below is already built and green.
 
 ---
 
@@ -657,7 +679,14 @@ unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode
 - [x] No new private ChannelMods combat writers; known producers migrated
 - [x] Cold equip rolled/atom — stub not SSOT
 - [x] Standing membership + synthetics; chip never labels level "power"
-- [ ] Bound lawn UniqueCreature + Bound loadout via Hub — **split**: loadout via Hub implemented + Core-proven, live probe owed (T14, was mis-cited "T13" here — fixed 2026-09-13); UniqueCreature parity implemented + Core-proven, live probe owed (T12)
+- [ ] Bound lawn UniqueCreature + Bound loadout via Hub — **split, UniqueCreature half now CLOSED**:
+      UniqueCreature parity (T12) implemented + Core-proven + **live-probe CLOSED 2026-09-14**
+      (`allocate → deploy` order, `attack 2721` vs vanilla `attack 1`, both trigger orders now
+      proven — see T12's own entry above); loadout via Hub (T14) implemented + Core-proven, live
+      probe still owed — **attempted 2026-09-15, blocked by a real, non-fabricated player-economy
+      constraint** (balance 54, re-checked same session, below both summon banners' 100/120 cost;
+      see T14's own entry and `live-probe-todo.md` Task 11 for the full finding), not a tool or code
+      defect. This line stays open on the T14 half alone.
 - [x] Sim Full; D4 coeffs; unique Θ; stale docs gone
 - [x] `prove-hub-combat` green
 - [x] Placeholder + intel Strength deleted; `world-actor-combat` tracked
