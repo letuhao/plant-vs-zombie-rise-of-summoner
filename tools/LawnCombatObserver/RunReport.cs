@@ -50,6 +50,10 @@ public sealed class RunReport
     public long RegenAccrued { get; set; }
     public long ExhaustionEvents { get; set; }
     public long RpgDeltaMergedHits { get; set; }
+    /// <summary>RPG-delta records with no vanilla record to merge into (L-N7: every one, live, until swing ids join).</summary>
+    public long RpgDeltaUnmergedRecords { get; set; }
+    /// <summary>Overlay outcomes that missed — their delta is 0 by construction, not a zero-damage hit.</summary>
+    public long RpgMisses { get; set; }
     /// <summary>This tool's OWN ring overflow counter (bounded per-window sample) — D9-shaped: a real
     /// count, never a silent drop.</summary>
     public long ObserverDroppedRecords { get; set; }
@@ -80,5 +84,5 @@ public sealed class RunReport
     /// happened, and not one of them ever had a real overlay breakdown merged in (the feature does not
     /// exist yet). Once `basic-attack-grant`/T10 lands this flips to false, on its own, with no change
     /// to this tool.</summary>
-    public bool BaselineNoRpgDeltaYet => RpgDeltaMergedHits == 0;
+    public bool BaselineNoRpgDeltaYet => RpgDeltaMergedHits + RpgDeltaUnmergedRecords == 0;
 }

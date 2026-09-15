@@ -95,7 +95,8 @@ public static class LawnCombatObserverBridge
 
             LawnCombatObserver.RecordRpgDelta(
                 swingId, attackerPtr, targetPtr ?? "", breakdown.FinalSignedDelta,
-                attackerElement, victimElement, relation);
+                attackerElement, victimElement, relation,
+                LawnCombatObserver.Outcomes.Of(breakdown.Hit, breakdown.Parried, breakdown.Blocked, breakdown.Crit));
         }
         catch { }
     }
@@ -119,6 +120,8 @@ public static class LawnCombatObserverBridge
             ["regenAccrued"] = snap.RegenAccrued,
             ["exhaustionEvents"] = snap.ExhaustionEvents,
             ["rpgDeltaMergedHits"] = snap.RpgDeltaMergedHits,
+            ["rpgDeltaUnmergedRecords"] = snap.RpgDeltaUnmergedRecords,
+            ["rpgMisses"] = snap.RpgMisses,
             ["droppedRecords"] = snap.DroppedRecords,
             ["recentHits"] = snap.RecentHits.Select(h => new Dictionary<string, object>
             {
@@ -133,7 +136,8 @@ public static class LawnCombatObserverBridge
                 ["rpgDeltaObserved"] = h.RpgDeltaObserved,
                 ["attackerElement"] = h.AttackerElement?.ToString() ?? "",
                 ["victimElement"] = h.VictimElement?.ToString() ?? "",
-                ["matchupRelation"] = h.MatchupRelation?.ToString() ?? ""
+                ["matchupRelation"] = h.MatchupRelation?.ToString() ?? "",
+                ["rpgOutcome"] = h.RpgOutcome
             }).ToList()
         };
     }

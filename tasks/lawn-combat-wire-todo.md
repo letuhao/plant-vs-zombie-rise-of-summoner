@@ -1239,6 +1239,12 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       off): on window `ActionTriggers` 2 / `RpgDeltaMergedHits` 2 / `DrainTickTotalMs` 54; log
       `lawn-basic-attack switched off: withdrew 8 bound grants`; off window 21 vanilla hits with `ActionTriggers` 0,
       `RpgDeltaMergedHits` 0, `DrainTickTotalMs` 0. The live build was 38369ff3 + this change (L-N34 blocks HEAD).*
+- [ ] **L-N35** Observer streams never join (found by L-N7): a vanilla hit record's swing id is the bullet's ptr, while the
+      overlay packet's is `shooter:tick` with the shooter resolved from the bullet (`BulletShooterMatch`), so
+      `RecordRpgDelta` never finds the vanilla record — live, 0 of 13 RPG records merged. Every per-hit comparison T13's
+      proofs describe ("vanilla amount beside its RPG delta for the same swing") is therefore unobservable. Carry the
+      resolved shooter on the vanilla record (or the bullet ptr on the packet) and join on it. Verify: a live run with
+      `RpgDeltaMergedHits` equal to the RPG records whose vanilla hit landed in the same window, and a Core test for the join key.
 - [ ] **L-N33** 300z drops (found by L-N9): with the feature on, `EventDrain` shed 35 and 362 records to the per-death
       flush budget in two 60 s runs (D9 says zero), and the observer's own ring dropped 4021 / 5541 records on and ~13k off,
       so its hit/swing/trigger counts are undercounts at 300z. Decide whether death-budget shedding breaks D9 or is the
@@ -1256,6 +1262,9 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       real actor, no HP pin: an exhausted swing on attacker P with vanilla amount and no delta, then a
       later P hit with a non-zero delta (proof 4); P's `attackDamage`/`maxHp` while exhausted equal the
       Hub snapshot (proof 5).
+      *2026-09-15 PROGRESS (not ticked): the committed hit sample now exists and names each RPG outcome. The earlier
+      "alternating 0 / −2754" deltas are overlay misses, not exhaustion (`ExhaustionEvents` 0; five Peashooters over 90 s
+      spent 325 stamina). Proof 4 still needs a real exhaustion inside a window, and a per-attacker view needs L-N35's join.*
 - [ ] **L-N3** Proof 6 live: real Adventure board (confirm board type ≠ `Nothing` and no stale
       lab-overlay entities, screenshot), a `zombie.spawn source:"start"` ptr with a non-Neutral
       element and a rider delta sourced from it; falsifier vs a Bound specimen.
@@ -1268,6 +1277,16 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       not), or use a real long lawn; capture Earth-vs-Ice alongside Fire-vs-Ice.
 - [ ] **L-N7** Proof 1 second half: explain `rpgDelta:0` with the `derived:{"combat.power.omni":2000}`
       overlay first (trace `InjectorDerivedOverride` → `ResolveActor`), then the two-shooter differential.
+      *2026-09-15 PROGRESS (not ticked — the `combat.power.omni:2000` override scenario and the two-shooter differential are
+      still owed): the observer could not tell a miss from a zero-damage hit, and its `RpgDeltaMergedHits` counted every RPG
+      record before checking the merge. Fixed: each RPG record carries `RpgOutcome` (miss/parried/blocked/crit/hit from
+      `OverlayCombatBreakdown`), and the snapshot splits `RpgDeltaMergedHits` / `RpgDeltaUnmergedRecords` and adds `RpgMisses`
+      (`LawnCombatObserver.cs`, bridge, tool; Core tests + `RunAggregatorRpgCounterTests`; merged-before-check mutant killed;
+      verify-change Core 13591/13591, Guard 312/312, observer 4/4). Live, real Adventure 2, five placed Peashooters, feature on,
+      no session, 90 s (`docs/research/perf/_lawn-combat-observer-rpg-outcomes-env-on.json`): 13 RPG records, **every zero
+      delta is a miss** (miss 3 → delta 0; crit 9 and hit 1 all non-zero; zero non-miss zeros). A miss comes from
+      `OverlayCombatCalculator`'s hit roll: `pHitFinal = Sigmoid(accuracy − dodge)`, which is 0.5 with both channels at 0, so
+      untuned actors miss about half their riders by construction. RPG records merged into vanilla records: 0 of 13 (L-N35).*
 - [x] **L-N15** Gate hygiene: per-commit file-list review of the T3–T7 commits; mutant set in
       `scripts/mutants/` for `LawnElementResolver`, `OverlayCombatCalculator`, `EventDrain` with
       killed-mutant output; replace self-asserted "lead read the diff" boxes with commit hashes.

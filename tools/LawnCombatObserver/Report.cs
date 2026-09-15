@@ -36,7 +36,7 @@ public static class Report
                            $"actionTriggers={r.ActionTriggers}");
         Console.WriteLine($"staminaSpent={r.StaminaSpent} regenAccrued={r.RegenAccrued} " +
                            $"exhaustionEvents={r.ExhaustionEvents}");
-        Console.WriteLine($"rpgDeltaMergedHits={r.RpgDeltaMergedHits} " +
+        Console.WriteLine($"rpgDeltaMergedHits={r.RpgDeltaMergedHits} rpgDeltaUnmergedRecords={r.RpgDeltaUnmergedRecords} rpgMisses={r.RpgMisses} " +
                            $"observerDroppedRecords={r.ObserverDroppedRecords}");
         Console.WriteLine($"drain droppedOverflow={r.DrainDroppedOverflow} droppedDepth={r.DrainDroppedDepth} " +
                            $"droppedDeathBudget={r.DrainDroppedDeathBudget}");
@@ -58,7 +58,7 @@ public static class Report
             Console.WriteLine(
                 $"  [{h.Seq}] swing={h.SwingId} {h.AttackerSide} {h.AttackerPtr} -> {h.VictimPtr} " +
                 $"vanilla={h.VanillaAmount} rpgDelta={h.RpgDelta} rpgObserved={h.RpgDeltaObserved} " +
-                $"elem={h.AttackerElement}/{h.VictimElement} matchup={h.MatchupRelation}");
+                $"elem={h.AttackerElement}/{h.VictimElement} matchup={h.MatchupRelation} outcome={h.RpgOutcome}");
         }
         if (r.HitSample.Count > 20)
             Console.WriteLine($"  ... ({r.HitSample.Count - 20} more in the run file)");

@@ -26,7 +26,8 @@ public readonly record struct LawnCombatHitRecord(
     bool RpgDeltaObserved,
     ElementTypeId? AttackerElement,
     ElementTypeId? VictimElement,
-    ElementMatchupRelation? MatchupRelation);
+    ElementMatchupRelation? MatchupRelation,
+    string RpgOutcome = "");
 
 /// <summary>
 /// Aggregate + sampled-record snapshot for one reporting window — same "read and reset the rolling
@@ -48,6 +49,13 @@ public sealed class LawnCombatObserverSnapshot
     /// <summary>How many recorded hits this window ended up with a real overlay breakdown merged in
     /// (<see cref="LawnCombatHitRecord.RpgDeltaObserved"/> true). Zero today, by construction.</summary>
     public long RpgDeltaMergedHits { get; init; }
+    /// <summary>lawn-combat-wire L-N7: RPG-delta observations that found no vanilla record for the same swing+victim this
+    /// window. Live 2026-09-15 every one did — the vanilla swing id is the bullet's ptr while the overlay packet's is
+    /// <c>attacker:tick</c> — so this, not <see cref="RpgDeltaMergedHits"/>, carried every RPG observation.</summary>
+    public long RpgDeltaUnmergedRecords { get; init; }
+    /// <summary>lawn-combat-wire L-N7: overlay outcomes that missed (<c>OverlayCombatBreakdown.Hit</c> false) — a miss
+    /// yields <c>FinalSignedDelta</c> 0, which a bare zero delta cannot be told apart from.</summary>
+    public long RpgMisses { get; init; }
     /// <summary>D9-shaped self-check: THIS observer's own ring overflow counter for the window — never
     /// silently discards a record, always counts what it drops. Distinct from
     /// `EventDrainHost.SnapshotStats()`'s own drop counters, which this snapshot does not duplicate.</summary>
@@ -94,6 +102,8 @@ public static class LawnCombatObserver
     static long _exhaustionEvents;
     static long _dropped;
     static long _rpgDeltaMerged;
+    static long _rpgDeltaUnmerged;
+    static long _rpgMisses;
     static long _seq;
 
     /// <summary>Unconditional vanilla-hit capture — called once per `Plant.TakeDamage`/
@@ -134,11 +144,13 @@ public static class LawnCombatObserver
     /// each other at a window boundary — see the merge-miss branch below).</summary>
     public static void RecordRpgDelta(
         string swingId, string attackerPtr, string victimPtr, long rpgDelta,
-        ElementTypeId? attackerElement, ElementTypeId? victimElement, ElementMatchupRelation? matchupRelation)
+        ElementTypeId? attackerElement, ElementTypeId? victimElement, ElementMatchupRelation? matchupRelation,
+        string outcome = "")
     {
-        _rpgDeltaMerged++;
+        if (outcome == Outcomes.Miss) _rpgMisses++;
         if (IndexBySwingVictim.TryGetValue(Key(swingId, victimPtr), out var idx) && idx < Recent.Count)
         {
+            _rpgDeltaMerged++;
             var r = Recent[idx];
             Recent[idx] = r with
             {
@@ -146,17 +158,34 @@ public static class LawnCombatObserver
                 RpgDeltaObserved = true,
                 AttackerElement = attackerElement,
                 VictimElement = victimElement,
-                MatchupRelation = matchupRelation
+                MatchupRelation = matchupRelation,
+                RpgOutcome = outcome
             };
             return;
         }
+
+        _rpgDeltaUnmerged++;
 
         if (Recent.Count >= MaxRecentHitsPerWindow) { _dropped++; return; }
         Recent.Add(new LawnCombatHitRecord(
             Seq: ++_seq, Frame: 0, SwingId: swingId,
             AttackerPtr: attackerPtr, VictimPtr: victimPtr, AttackerSide: "",
             VanillaAmount: 0, RpgDelta: rpgDelta, RpgDeltaObserved: true,
-            AttackerElement: attackerElement, VictimElement: victimElement, MatchupRelation: matchupRelation));
+            AttackerElement: attackerElement, VictimElement: victimElement, MatchupRelation: matchupRelation,
+            RpgOutcome: outcome));
+    }
+
+    /// <summary>The overlay outcome vocabulary a record carries (closed: one per <c>OverlayCombatBreakdown</c> branch).</summary>
+    public static class Outcomes
+    {
+        public const string Miss = "miss";
+        public const string Parried = "parried";
+        public const string Blocked = "blocked";
+        public const string Crit = "crit";
+        public const string Hit = "hit";
+
+        public static string Of(bool hit, bool parried, bool blocked, bool crit) =>
+            !hit ? Miss : parried ? Parried : blocked ? Blocked : crit ? Crit : Hit;
     }
 
     /// <summary>D8 hook — not yet called from anywhere (`basic-attack-grant`/T10 is the real caller).
@@ -183,6 +212,8 @@ public static class LawnCombatObserver
             RegenAccrued = _regenAccrued,
             ExhaustionEvents = _exhaustionEvents,
             RpgDeltaMergedHits = _rpgDeltaMerged,
+            RpgDeltaUnmergedRecords = _rpgDeltaUnmerged,
+            RpgMisses = _rpgMisses,
             DroppedRecords = _dropped,
             RecentHits = Recent.ToArray()
         };
@@ -196,6 +227,8 @@ public static class LawnCombatObserver
         _exhaustionEvents = 0;
         _dropped = 0;
         _rpgDeltaMerged = 0;
+        _rpgDeltaUnmerged = 0;
+        _rpgMisses = 0;
         Recent.Clear();
         IndexBySwingVictim.Clear();
         return snap;

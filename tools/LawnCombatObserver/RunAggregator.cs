@@ -106,6 +106,8 @@ public sealed class RunAggregator
                 Report.RegenAccrued += lco.RegenAccrued;
                 Report.ExhaustionEvents += lco.ExhaustionEvents;
                 Report.RpgDeltaMergedHits += lco.RpgDeltaMergedHits;
+                Report.RpgDeltaUnmergedRecords += lco.RpgDeltaUnmergedRecords;
+                Report.RpgMisses += lco.RpgMisses;
                 Report.ObserverDroppedRecords += lco.DroppedRecords;
 
                 if (lco.RecentHits is { } hits)

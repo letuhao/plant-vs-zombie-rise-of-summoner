@@ -58,6 +58,8 @@ public sealed class LawnCombatObserverWindowDto
     public long RegenAccrued { get; set; }
     public long ExhaustionEvents { get; set; }
     public long RpgDeltaMergedHits { get; set; }
+    public long RpgDeltaUnmergedRecords { get; set; }
+    public long RpgMisses { get; set; }
     public long DroppedRecords { get; set; }
     public List<LawnCombatHitDto>? RecentHits { get; set; }
 }
@@ -76,6 +78,7 @@ public sealed class LawnCombatHitDto
     public string AttackerElement { get; set; } = "";
     public string VictimElement { get; set; } = "";
     public string MatchupRelation { get; set; } = "";
+    public string RpgOutcome { get; set; } = "";
 }
 
 /// <summary><c>DebugRuntime.Snapshot()</c>'s shape, as carried by the <c>debug.snapshot</c> event this

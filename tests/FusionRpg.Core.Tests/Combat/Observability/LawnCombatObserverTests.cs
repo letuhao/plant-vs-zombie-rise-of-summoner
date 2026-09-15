@@ -75,7 +75,7 @@ public class LawnCombatObserverTests
         LawnCombatObserver.RecordRpgDelta(
             "bullet-1", "AAA", "BBB", rpgDelta: -6,
             attackerElement: ElementTypeId.Fire, victimElement: ElementTypeId.Ice,
-            matchupRelation: ElementMatchupRelation.Strong);
+            matchupRelation: ElementMatchupRelation.Strong, outcome: LawnCombatObserver.Outcomes.Crit);
 
         var snap = LawnCombatObserver.SnapshotAndReset();
 
@@ -87,7 +87,9 @@ public class LawnCombatObserverTests
         Assert.Equal(ElementTypeId.Fire, hit.AttackerElement);
         Assert.Equal(ElementTypeId.Ice, hit.VictimElement);
         Assert.Equal(ElementMatchupRelation.Strong, hit.MatchupRelation);
+        Assert.Equal("crit", hit.RpgOutcome);
         Assert.Equal(1, snap.RpgDeltaMergedHits);
+        Assert.Equal(0, snap.RpgDeltaUnmergedRecords);
     }
 
     [Fact]
@@ -101,11 +103,38 @@ public class LawnCombatObserverTests
 
         var snap = LawnCombatObserver.SnapshotAndReset();
 
-        Assert.Equal(1, snap.RpgDeltaMergedHits);
+        // lawn-combat-wire L-N7: an observation that merged into nothing is counted as unmerged, never as merged.
+        Assert.Equal(0, snap.RpgDeltaMergedHits);
+        Assert.Equal(1, snap.RpgDeltaUnmergedRecords);
         var hit = Assert.Single(snap.RecentHits);
         Assert.True(hit.RpgDeltaObserved);
         Assert.Equal(-3, hit.RpgDelta);
         Assert.Equal(0, hit.VanillaAmount); // no vanilla half arrived — an honest zero, not a merge
+    }
+
+    /// <summary>lawn-combat-wire L-N7: an overlay miss yields a delta of 0, the same number a zero-damage hit gives; the
+    /// record names the breakdown branch so a run file can explain every zero.</summary>
+    [Theory]
+    [InlineData(false, false, false, false, "miss")]
+    [InlineData(false, true, true, true, "miss")]
+    [InlineData(true, true, false, false, "parried")]
+    [InlineData(true, false, true, false, "blocked")]
+    [InlineData(true, false, false, true, "crit")]
+    [InlineData(true, false, false, false, "hit")]
+    public void Outcome_names_the_breakdown_branch(bool hit, bool parried, bool blocked, bool crit, string expected) =>
+        Assert.Equal(expected, LawnCombatObserver.Outcomes.Of(hit, parried, blocked, crit));
+
+    [Fact]
+    public void Misses_are_counted_and_carried_on_the_record()
+    {
+        LawnCombatObserver.RecordRpgDelta("P:1", "P", "Z", 0, null, null, null, LawnCombatObserver.Outcomes.Miss);
+        LawnCombatObserver.RecordRpgDelta("P:2", "P", "Z", -4326, null, null, null, LawnCombatObserver.Outcomes.Hit);
+
+        var snap = LawnCombatObserver.SnapshotAndReset();
+
+        Assert.Equal(1, snap.RpgMisses);
+        Assert.Equal(2, snap.RpgDeltaUnmergedRecords);
+        Assert.Equal(new[] { "miss", "hit" }, snap.RecentHits.Select(h => h.RpgOutcome));
     }
 
     [Fact]
