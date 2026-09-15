@@ -18,6 +18,13 @@ public static class GameHooks
 {
     public static Board? Board;
     public static string? MatchKey;
+
+    /// <summary>lawn-combat-wire L-N31: the server run's key for the whole life of the board. <see cref="MatchKey"/> is the
+    /// RPG match's key and <c>MatchHost</c> clears it on <c>match.result</c>; events after that (end-of-level deaths, the
+    /// board's own <c>board.end</c>) still belong to this board's run, so the wire falls back to this key. Set in
+    /// <c>Board.Awake</c>, cleared after <c>board.end</c> is emitted.</summary>
+    static string? _runKey;
+
     public static int LastWave = -1;
     public static int CatalogPlantCount;
     public static readonly HashSet<IntPtr> Applied = new();
@@ -112,7 +119,20 @@ public static class GameHooks
                 // the occurrence while constructing the terminal payload.
                 dict["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence);
             }
+        }
+        catch (Exception ex)
+        {
+            try { CheatState.Error("emit stamp: " + ex.Message); } catch { }
+        }
 
+        // lawn-combat-wire L-N31: enqueue before the capture side effects. MatchHost.Apply and EffectRuntime.OnCapture
+        // emit their own events (cheat.apply, debug.effect.cleared on board.start) and clear MatchKey on match.result and
+        // board.end; enqueuing afterwards put effects on the wire ahead of their cause and sent match.result/board.end
+        // without a key, so no live run was ever closed or given a result.
+        RpgHost.Client?.Enqueue(kind, payload, MatchKey ?? _runKey);
+
+        try
+        {
             using var _perf = PerfProbe.Measure(PerfSection.MatchApply);
             Match.MatchHost.Apply(kind, dict);
         }
@@ -130,8 +150,6 @@ public static class GameHooks
         {
             try { CheatState.Error("effect capture: " + ex.Message); } catch { }
         }
-
-        RpgHost.Client?.Enqueue(kind, payload, MatchKey);
     }
 
     static bool IsProgressionLifecycle(string kind) =>
@@ -539,6 +557,7 @@ public static class GameHooks
             Board = __instance;
             ClearMatch();
             MatchKey = Guid.NewGuid().ToString();
+            _runKey = MatchKey;
             try { LastWave = __instance.theWave; }
             catch { LastWave = -1; }
             Dictionary<string, object> modifiers;
@@ -600,6 +619,7 @@ public static class GameHooks
             });
             try { Hud.OverlaySwitch.OnMatchEnd(); } catch { }
             MatchKey = null;
+            _runKey = null;
             ClearMatch();
             try { Fx.VfxDirector.ClearAll(); } catch { }
         }

@@ -1288,12 +1288,29 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       `levelEnterAckMissing:false`, `board.start` stored once, runs 103–107 `levelType=Advanture boardLevel=2 modifiers` set,
       server stderr empty; quick-start went from ~9.4 s to ~5.1 s. Not changed: the injector still enqueues side-effect
       events ahead of their cause — the store now tolerates that order, and L-N31 tracks the order itself.*
-- [ ] **L-N31** Capture order (found by L-N29): `GameHooks.Emit` enqueues `kind` after `MatchHost.Apply` and
+- [x] **L-N31** Capture order (found by L-N29): `GameHooks.Emit` enqueues `kind` after `MatchHost.Apply` and
       `EffectRuntime.OnCapture`, so any event those emit (`cheat.apply`, `debug.effect.cleared` on `board.start`) lands on
       the wire before its cause. The store tolerates it since L-N29, but every consumer that reads the feed in id order
       (web lawn, probes, `UniqueActorService.ObserveEvents`) sees effect before cause. Decide whether to enqueue first
       (check `lifecycleOccurrence`/`activeMatchMs` stamping still precedes the enqueue) and add a guard test on the order.
       Verify: a quick-start's first event under the new matchKey is `board.start`.
+      *Done 2026-09-15. Worse than ordering: `MatchHost.Apply` clears `GameHooks.MatchKey` on `match.result` and
+      `board.end`, and the enqueue read `MatchKey` afterwards — so both went out keyless, and **no live run was ever closed
+      or given a result** (1 of the last 100 runs had `endedUtc`, and that one was a web match). Fix in `GameHooks`:
+      enqueue right after the payload stamps and before `MatchHost.Apply`/`OnCapture`; the wire key is
+      `MatchKey ?? _runKey`, where `_runKey` lives from `Board.Awake` until `board.end` is emitted (events after
+      `match.result` still belong to the board's run). Guard: `tests/FusionRpg.Guard.Tests/CaptureEnqueueOrderGuardTests.cs`
+      (2; mutant with the enqueue moved back after the side effects fails). verify-change: Guard 297/297, injector compile,
+      single-writer/funnel/actor-hub/secondary guards OK. Live after redeploy: 3 quick-starts, first events under each key
+      `board.start, cheat.apply, debug.effect.cleared`; leave-board emitted `board.end` with the key and runs 108–110
+      closed. A real loss on Adventure 2 (no plants, no debug session): `match.result defeat` keyed `73992f5c`, events after
+      it keyed, soul ledger `defeat 25` on run 111, and after the lose menu's `backtomenu` `board.end` 334151 keyed —
+      run 111 `endedUtc` set, `result=defeat`. Found in passing: `debug.leave-board` cannot leave the lose screen (its
+      `open-menu` stage times out; the LoseMenu has its own `backtomenu`) — L-N32.*
+- [ ] **L-N32** `debug.leave-board` from the lose screen (found by L-N31): with `CanvasUp/LoseMenu(Clone)` up, the
+      leave machine waits 20 s on `open-menu` and returns 409. Press `LoseMenu(Clone)/backtomenu` when present (the
+      same control a player presses), then wait for the board to be destroyed. Verify: a real loss, then
+      `POST /api/debug/leave-board` returns ok with `stage:"left"` and `board.end` is stored under the run's key.
 - [x] **L-N30** `debug.act place` reports done without a placement (found 2026-09-15): issued ~6s after the
       setup skip, it emitted `card.place type:-1` and `debug.act.done` but no `plant.place`/`sun.spend`; the same call
       seconds later placed the plant. The verb must confirm its expected kind (a `plant.place` at the target cell) or
