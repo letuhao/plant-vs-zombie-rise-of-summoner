@@ -1307,10 +1307,15 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       it keyed, soul ledger `defeat 25` on run 111, and after the lose menu's `backtomenu` `board.end` 334151 keyed —
       run 111 `endedUtc` set, `result=defeat`. Found in passing: `debug.leave-board` cannot leave the lose screen (its
       `open-menu` stage times out; the LoseMenu has its own `backtomenu`) — L-N32.*
-- [ ] **L-N32** `debug.leave-board` from the lose screen (found by L-N31): with `CanvasUp/LoseMenu(Clone)` up, the
+- [x] **L-N32** `debug.leave-board` from the lose screen (found by L-N31): with `CanvasUp/LoseMenu(Clone)` up, the
       leave machine waits 20 s on `open-menu` and returns 409. Press `LoseMenu(Clone)/backtomenu` when present (the
       same control a player presses), then wait for the board to be destroyed. Verify: a real loss, then
       `POST /api/debug/leave-board` returns ok with `stage:"left"` and `board.end` is stored under the run's key.
+      *Done 2026-09-15: `DebugLeaveBoard` stage 0 presses the lose menu's `backtomenu` first and goes straight to waiting for
+      the board to be destroyed. Guard `tests/FusionRpg.Guard.Tests/DebugLeaveBoardLoseScreenGuardTests.cs`; verify-change
+      Guard 298/298, injector compile and boundary guards OK. Live after redeploy: real Adventure 2 loss (200 s, no plants),
+      `leave-board` → `{"loseMenuMs":609,"ok":true,"stage":"left","waitedMs":1218}`, `board.end` 334780 keyed `0a5ddf85`,
+      run 112 `endedUtc` set and `result=defeat`, game-state `hasBoard:false`.*
 - [x] **L-N30** `debug.act place` reports done without a placement (found 2026-09-15): issued ~6s after the
       setup skip, it emitted `card.place type:-1` and `debug.act.done` but no `plant.place`/`sun.spend`; the same call
       seconds later placed the plant. The verb must confirm its expected kind (a `plant.place` at the target cell) or

@@ -13,7 +13,8 @@ namespace FusionRpg.Injector;
 /// (<c>debug.leave-board</c>) is emitted once — when the Board has been destroyed
 /// (<see cref="GameHooks.Board"/> cleared by <c>Board.OnDestroy</c>), or with the stage that failed.
 /// Controls and their press methods were read live: the menu button is a <c>UIButton</c>
-/// (<c>OnMouseUpAsButton</c>), the two dialog buttons are <c>PauseMenu_Btn</c> (<c>OnMouseDown</c>/<c>OnMouseUp</c>).</para>
+/// (<c>OnMouseUpAsButton</c>), the two dialog buttons are <c>PauseMenu_Btn</c> (<c>OnMouseDown</c>/<c>OnMouseUp</c>).
+/// On the lose screen the single press is the lose menu's own back-to-menu button.</para>
 /// </summary>
 public static class DebugLeaveBoard
 {
@@ -23,6 +24,9 @@ public static class DebugLeaveBoard
     // On the seed-picker the in-battle menu button does not exist and the picker's own 主菜单 ignores a
     // synthetic press (live 2026-09-15), so leave-board starts the battle first with the picker's start button.
     const string PickerStartPath = "CanvasUp/InGameUI(Clone)/Bottom/SeedLibrary/StartGameButton";
+    // After a loss the in-battle menu is gone and the lose screen carries its own back-to-menu button
+    // (a LoseMenuBtn, pressed with OnMouseDown/OnMouseUp like the dialog buttons) — lawn-combat-wire L-N32.
+    const string LoseBackToMenuPath = "CanvasUp/LoseMenu(Clone)/backtomenu";
 
     // Structural (not tunable): acknowledgement and animation bounds for a debug command.
     const long PressSettleMs = 600;
@@ -73,6 +77,13 @@ public static class DebugLeaveBoard
             switch (p.Stage)
             {
                 case 0:
+                    if (Press(LoseBackToMenuPath, "OnMouseDown", "OnMouseUp"))
+                    {
+                        p.Dump["loseMenuMs"] = now - p.StartedMs;
+                        p.Stage = 3;
+                        p.StageSinceMs = now;
+                        return;
+                    }
                     if (Press(MenuButtonPath, "OnMouseUpAsButton"))
                     {
                         Advance(p, now);
