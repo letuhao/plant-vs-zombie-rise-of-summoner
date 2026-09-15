@@ -67,7 +67,9 @@ public static class EntityApply
             var prevHp = p.thePlantHealth;
             var prevMax = p.thePlantMaxHealth;
             var preserveRatio = StatSystem.PreserveLiveCurrentHp(source);
-            var abs = includeAbsolute ? CheatState.BuildPlantAbsolute() : null;
+            // L-N20: a debug-spawn max-HP pin rides into the Hub as an absolute input on EVERY resolve
+            // (includeAbsolute or not), so Hub max-HP bonuses still compose on top of it.
+            var abs = InjectorSpawnHpPin.Store.ApplyTo(key, includeAbsolute ? CheatState.BuildPlantAbsolute() : null);
             var applyScales = s.ApplyStats && !CheatState.On("D-PROBE-BULLET");
             var hasScaleMods = applyScales && CheatState.HasPlantScaleMods();
             var hasPvz = CheatState.HasPvzStatsMods();
@@ -101,14 +103,6 @@ public static class EntityApply
 
             if (hasExtras)
                 EntityStatWriter.WritePlantExtras(p);
-
-            // lawn-combat-wire (2026-09-15 finding): re-assert a debug-spawn max-HP pin on every
-            // apply, regardless of includeAbsolute — see InjectorSpawnHpPin's own doc for why the
-            // global P-HP/P-MAXHP channel this bypasses does not survive an includeAbsolute:false
-            // reapply (e.g. cheat.pushScales). Ratio-preserving, never a full-heal: a no-op both for
-            // every plant that was never pinned and for one whose live max already meets the pin.
-            if (InjectorSpawnHpPin.TryGet(key, out var pinnedMaxHp) && p.thePlantHealth > 0)
-                EntityStatWriter.ForceSetPlantMaxHpPreserveRatio(p, pinnedMaxHp, source + ":hp-pin");
 
             if (shouldWrite && RpgHost.Client != null)
             {
@@ -207,7 +201,8 @@ public static class EntityApply
             var prevHp = ZombieCombatFields.GetHp(z);
             var prevMax = ZombieCombatFields.GetMaxHp(z);
             var preserveRatio = StatSystem.PreserveLiveCurrentHp(source);
-            var abs = includeAbsolute ? CheatState.BuildZombieAbsolute() : null;
+            // L-N20: same pin-as-Hub-input as RunPlant.
+            var abs = InjectorSpawnHpPin.Store.ApplyTo(key, includeAbsolute ? CheatState.BuildZombieAbsolute() : null);
             var applyScales = s.ApplyStats;
             var hasScaleMods = applyScales && CheatState.HasZombieScaleMods();
             var hasPvz = CheatState.HasPvzStatsMods();
@@ -239,10 +234,6 @@ public static class EntityApply
 
             if (hasExtras)
                 EntityStatWriter.WriteZombieExtras(z);
-
-            // See the identical comment on RunPlant above — same fix, same reason.
-            if (InjectorSpawnHpPin.TryGet(key, out var pinnedMaxHpZ) && ZombieCombatFields.GetHp(z) > 0)
-                EntityStatWriter.ForceSetZombieMaxHpPreserveRatio(z, pinnedMaxHpZ, source + ":hp-pin");
 
             if (shouldWrite && RpgHost.Client != null)
             {

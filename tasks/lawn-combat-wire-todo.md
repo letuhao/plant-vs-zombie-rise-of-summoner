@@ -1142,9 +1142,10 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       magnitude-positive contract) and add bag-level tests with a lawn-shaped AND a battle-shaped
       event asserting a non-zero negative HP packet.
       *Done: `eventField:"damage"` now reads the magnitude (`DamagePacketBuilder.ResolveAmount`); `fx.overlay_damage` authored `multiplierMilli:-1000`; catalog regenerated (1-line diff); parity pin updated; sign contract added to `spec-value-spec-and-curve.md`. `EventLinkedDamageSignTests` 5/5 (lawn -20 and battle +20 both give -20; +500 gives +10 heal); before the fix the lawn-shaped cases failed. Core.Tests 13537, AtomImporter.Tests 33, ElementEnumGen.Tests 14. Lawn numbers unchanged by construction; live check stays L-N22. Registry gained `seed-atoms-fallback` owner.*
-- [ ] **L-N20** Move the debug-spawn HP pin from a post-write re-assert into a Hub override input
+- [x] **L-N20** Move the debug-spawn HP pin from a post-write re-assert into a Hub override input
       (`InjectorDerivedOverride` pattern) so a pin never clobbers Hub maxHp bonuses; move pin/ratio
       math into Core with unit tests (currently zero tests, Injector.Tests not in CI).
+      *Done: Core `SpawnHpPin` (per-ptr store + `ApplyTo` Hub absolute input); `EntityApply.RunPlant/RunZombie` pass it into `ActorHub.Resolve` on every resolve regardless of includeAbsolute; post-write re-assert and `EntityStatWriter.Force*MaxHpPreserveRatio` removed (ratio math is the existing tested `StatSystem.CurrentHpForWrite`). `SpawnHpPinTests` 11 incl. real Hub resolve: pin 5000 + bonus 700 = applied 5700; mutant (pin not applied) fails 3. `SpawnHpPinHubInputGuardTests` 3. verify-change: Core 13571, Guard 283, injector-compile + 4 guards OK. Not live-verified. Unchanged pre-existing edge: a non-preserve write with no P-HP takes composed baseline hp even above a low pin.*
 - [x] **L-N21** Move the bullet-shooter fallback matcher (`GameHooks.BulletInit.Postfix`, fixed in
       `7073ffcb`) into a pure Core function with tests: Sunflower in same row, tie → drop, no column →
       drop, zombie-side bullet, adjacent-lane (Threepeater side pea) residual pinned as a known case.

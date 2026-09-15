@@ -1897,8 +1897,9 @@ public static class DebugActions
     /// GLOBAL `P-HP`/`P-MAXHP` Tab-B channels, which the very next `includeAbsolute: false` reapply
     /// (e.g. `cheat.pushScales`) silently drops for every plant/zombie on the board — a debug-spawned
     /// entity's own spawn-time HP override does not survive normal cheat-state churn. Pin it
-    /// per-ptr too, via <see cref="InjectorSpawnHpPin"/>, so <see cref="EntityApply"/> can re-assert
-    /// it on every future reapply for this one ptr regardless of that flag. Additive: the global
+    /// per-ptr too, via <see cref="InjectorSpawnHpPin"/>, so <see cref="EntityApply"/> feeds it to the
+    /// Hub as an absolute input on every future resolve for this one ptr regardless of that flag
+    /// (L-N20 — Hub max-HP bonuses still compose on top). Additive: the global
     /// channel write in `ApplyAbsoluteProps` is unchanged, so Tab-B's own board-wide behaviour is
     /// untouched — this only makes the SAME spawn-time value durable for the one ptr it was meant for.
     /// </summary>
