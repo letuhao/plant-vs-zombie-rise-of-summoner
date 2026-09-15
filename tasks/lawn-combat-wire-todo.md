@@ -1264,12 +1264,36 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       opt-in per compose, battle off).*
       *Done: owner ruled "battle regen on" (2026-09-15). `resource-hub-ssot.md` §11 amended (authored regen rows also regenerate during an encounter; pools still not refilled per encounter); `BattleModels.BaseResourceRegen` doc records the decision; explicit-tuning overloads + optional `ResourceBaselineSubsystem` tuning param let `BattleStaminaRegenTests` (3) read the real `battle-resources.v2.json` without mutating ambient state: battle compose seeds the seam, only stamina regenerates, a spent battle pool recovers `min(max, ticks*rate/1000)`. Mutant (subsystem ignores explicit tuning) fails 2 of 3.*
 
-- [ ] **L-N29** Event loss on level entry (found 2026-09-15): twice, on quick-start's path, the injector logged
+- [x] **L-N29** Event loss on level entry (found 2026-09-15): twice, on quick-start's path, the injector logged
       `debug.enter-level Advanture#1` but that frame's `debug.level.enter` and `board.modifiers` events never reached the
       server while neighbouring events (43.597, 43.604) did. quick-start now confirms entry via game-state and returns
       `levelEnterAckMissing:true`, which masks nothing but does not explain it. Reproduce with the event ids around
       `debug.level.enter`, trace `DebugRuntime.Emit` → `GameHooks.Emit` → `RpgClient` batching/dedupe → `EventIngest`,
       and fix the drop. Verify: 5 quick-starts from the main menu with `levelEnterAckMissing:false`.
+      *Done 2026-09-15. Root cause is wider than the symptom: **no `board.start` had been stored since run 52
+      (2026-09-07 02:01)** — runs 53–102 all had null `levelType`/`boardLevel`/`modifiers`. `GameHooks.Emit` enqueues an
+      event only after `MatchHost.Apply`/`EffectRuntime.OnCapture`, which emit `cheat.apply`/`debug.effect.cleared` under the
+      new matchKey first. Those reach `RpgStore.InsertOneUnlocked` ahead of `board.start` and self-heal the run (the
+      2026-09-07 orphan fix; run 102's `startedUtc` equals its `cheat.apply` t); `board.start` then INSERTed a second row,
+      violated `ix_runs_match_key`, and the transaction rolled back its whole writer batch — neighbours such as
+      `debug.level.enter`/`board.modifiers` went with it whenever they shared that batch. Fix: (1) `board.start` for a
+      matchKey that already has a run fills that run's null metadata (`FillRunStartMetadataUnlocked`, COALESCE; a repeated
+      board.start keeps the first values); (2) `EventIngest.InsertIsolatingFailures` re-inserts a failed writer batch one
+      event at a time, so a poison event costs only itself (counted in `DroppedEvents`, logged). Tests:
+      `tests/FusionRpg.Data.Tests/RunStartAfterSelfHealTests.cs` (3; all failed first with `UNIQUE constraint failed:
+      runs.match_key`), `tests/FusionRpg.Server.Tests/EventIngestIsolationTests.cs` (2; isolation mutant killed).
+      `WebMatchStoreTests.Web_insert_is_one_transaction` used a duplicate board.start as its poison; the atomic-insert contract
+      is unchanged and the poison is now an unserializable payload. verify-change: Data 1236/1236, Server 446/446, dal and
+      test-substrate guards OK. Live after republishing the Server: 5 quick-starts from the menu, each
+      `levelEnterAckMissing:false`, `board.start` stored once, runs 103–107 `levelType=Advanture boardLevel=2 modifiers` set,
+      server stderr empty; quick-start went from ~9.4 s to ~5.1 s. Not changed: the injector still enqueues side-effect
+      events ahead of their cause — the store now tolerates that order, and L-N31 tracks the order itself.*
+- [ ] **L-N31** Capture order (found by L-N29): `GameHooks.Emit` enqueues `kind` after `MatchHost.Apply` and
+      `EffectRuntime.OnCapture`, so any event those emit (`cheat.apply`, `debug.effect.cleared` on `board.start`) lands on
+      the wire before its cause. The store tolerates it since L-N29, but every consumer that reads the feed in id order
+      (web lawn, probes, `UniqueActorService.ObserveEvents`) sees effect before cause. Decide whether to enqueue first
+      (check `lifecycleOccurrence`/`activeMatchMs` stamping still precedes the enqueue) and add a guard test on the order.
+      Verify: a quick-start's first event under the new matchKey is `board.start`.
 - [x] **L-N30** `debug.act place` reports done without a placement (found 2026-09-15): issued ~6s after the
       setup skip, it emitted `card.place type:-1` and `debug.act.done` but no `plant.place`/`sun.spend`; the same call
       seconds later placed the plant. The verb must confirm its expected kind (a `plant.place` at the target cell) or

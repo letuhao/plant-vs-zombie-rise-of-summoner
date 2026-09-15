@@ -2731,6 +2731,26 @@ public sealed partial class RpgStore : IRpgDb, IDisposable
         return (long)(cmd.ExecuteScalar() ?? 0L);
     }
 
+    void FillRunStartMetadataUnlocked(SqliteConnection db, long runId,
+        string? levelName, string? levelType, int? boardLevel, string? modifiersJson)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = """
+            UPDATE runs SET
+              level_name = COALESCE(level_name, $n),
+              level_type = COALESCE(level_type, $lt),
+              board_level = COALESCE(board_level, $bl),
+              modifiers_json = COALESCE(modifiers_json, $mod)
+            WHERE id = $id;
+            """;
+        cmd.Parameters.AddWithValue("$id", runId);
+        cmd.Parameters.AddWithValue("$n", (object?)levelName ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$lt", (object?)levelType ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$bl", Db(boardLevel));
+        cmd.Parameters.AddWithValue("$mod", (object?)modifiersJson ?? DBNull.Value);
+        cmd.ExecuteNonQuery();
+    }
+
     void InsertOneUnlocked(SqliteConnection db, EventEnvelope e, long? explicitPlayerId = null)
     {
         var payload = e.Payload is null ? "{}" : JsonSerializer.Serialize(e.Payload, Json);
@@ -2742,12 +2762,28 @@ public sealed partial class RpgStore : IRpgDb, IDisposable
         if (e.Kind == "board.start")
         {
             matchKey ??= Guid.NewGuid().ToString();
-            // Explicit player (web ingest): never stamp current_player_id on a web run — a mid-
-            // resolution player switch would mis-credit the save (audit precondition 4).
-            playerId = explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
-            runId = CreateRunUnlocked(db, playerId, matchKey, t, e.Game,
-                levelName: TryString(payload, "levelName"), levelType: TryString(payload, "levelType"),
-                boardLevel: TryInt(payload, "boardLevel"), modifiersJson: TryObjectJson(payload, "modifiers"));
+            var levelName = TryString(payload, "levelName");
+            var levelType = TryString(payload, "levelType");
+            var boardLevel = TryInt(payload, "boardLevel");
+            var modifiersJson = TryObjectJson(payload, "modifiers");
+            if (FindRunId(db, matchKey) is { } existing)
+            {
+                // lawn-combat-wire L-N29: the injector's own board.start handling emits events (cheat.apply,
+                // debug.effect.cleared) that reach this store first and self-heal the run below. A second INSERT
+                // would violate ix_runs_match_key and roll back the whole ingest batch, so the late board.start
+                // fills the recovered run's missing metadata instead. A repeated board.start keeps the first values.
+                runId = existing;
+                playerId = GetRunPlayerId(db, existing) ?? explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
+                FillRunStartMetadataUnlocked(db, existing, levelName, levelType, boardLevel, modifiersJson);
+            }
+            else
+            {
+                // Explicit player (web ingest): never stamp current_player_id on a web run — a mid-
+                // resolution player switch would mis-credit the save (audit precondition 4).
+                playerId = explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
+                runId = CreateRunUnlocked(db, playerId, matchKey, t, e.Game,
+                    levelName: levelName, levelType: levelType, boardLevel: boardLevel, modifiersJson: modifiersJson);
+            }
         }
         else
         {
