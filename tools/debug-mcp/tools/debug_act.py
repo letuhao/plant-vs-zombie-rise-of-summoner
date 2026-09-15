@@ -33,8 +33,12 @@ def act(verb, timeout=60, transport=None, sleep=None, **params):
                 "fix": "resolve refusals name their link in the injector log; "
                        "check BepInEx/LogOutput.txt or MelonLoader/Latest.log",
                 "verb": verb, "scope": _control.SCOPE}
+    # The injector's receipt carries its own verdict (place: a new plant of the card's type in the target
+    # cell, lawn-combat-wire L-N30). Receipts without the field predate that check and keep reading as ok.
+    receipt_ok = ready.get("ok", True) is not False
     return {
-        "ok": True,
+        "ok": receipt_ok,
+        **({} if receipt_ok else {"error": ready.get("error") or f"{verb} receipt reported failure"}),
         "scope": _control.SCOPE,
         "verb": verb,
         "receipt": {k: v for k, v in ready.items() if k != "snapshot"},

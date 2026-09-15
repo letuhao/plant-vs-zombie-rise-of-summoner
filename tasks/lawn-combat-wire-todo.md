@@ -1270,7 +1270,8 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       `levelEnterAckMissing:true`, which masks nothing but does not explain it. Reproduce with the event ids around
       `debug.level.enter`, trace `DebugRuntime.Emit` → `GameHooks.Emit` → `RpgClient` batching/dedupe → `EventIngest`,
       and fix the drop. Verify: 5 quick-starts from the main menu with `levelEnterAckMissing:false`.
-- [ ] **L-N30** `debug.act place` reports done without a placement (found 2026-09-15): issued ~6s after the
+- [x] **L-N30** `debug.act place` reports done without a placement (found 2026-09-15): issued ~6s after the
       setup skip, it emitted `card.place type:-1` and `debug.act.done` but no `plant.place`/`sun.spend`; the same call
       seconds later placed the plant. The verb must confirm its expected kind (a `plant.place` at the target cell) or
-      report a refusal naming the stage. Verify: a place issued during the start pan returns a failure, not done.
+      report a refusal naming the stage. Verify: a place issued during the start pan returns a failure, not done
+      *Done: `ControlAct.DoPlace` reads the target cell before and after `TryToSetPlantByCard` and decides the receipt by a new live plant of the card type (`ok`/`placed`/`plantPtr`, or `error`); the MCP `debug_act` tool now honours the receipt verdict. Live: first place into (2,2) `ok:true plantPtr 26F78BD3480`; a second place into the same occupied cell `ok:false placed:false` with the reason. Tests: Guard `ControlActPlaceConfirmGuardTests`, debug-mcp `test_act_place_receipt_failure_is_not_ok` (6/6). verify-change: Guard 295, injector-compile + single-writer OK.*.

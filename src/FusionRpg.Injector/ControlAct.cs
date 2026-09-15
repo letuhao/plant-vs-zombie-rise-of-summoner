@@ -80,6 +80,7 @@ public static class ControlAct
             CheatState.Error("debug.act place: no Mouse.Instance (resolve link)");
             return;
         }
+        var before = PlantPtrsAt(col, row, typeId);
         try
         {
             mouse.theMouseColumn = col;
@@ -92,19 +93,51 @@ public static class ControlAct
             CheatState.Error("debug.act place: invoke link failed: " + ex.Message);
             return;
         }
+        // lawn-combat-wire L-N30 (2026-09-15, live): during the battle-start camera pan the chain ran without
+        // error, the game emitted card.place with type Nothing, and no plant appeared — yet this receipt said
+        // done. TryToSetPlantByCard plants synchronously, so confirm a NEW live plant of the card's type now
+        // sits in the target cell, and say so either way.
+        var placed = PlantPtrsAt(col, row, typeId).FirstOrDefault(ptr => !before.Contains(ptr));
         CheatState.SpawnCol = col;
         CheatState.SpawnRow = row;
-        DebugRuntime.Emit("debug.act.done", new Dictionary<string, object>
+        var receipt = new Dictionary<string, object>
         {
             ["tag"] = _tag,
             ["verb"] = "place",
             ["typeId"] = typeId,
             ["col"] = col,
             ["row"] = row,
-            ["expectKind"] = "card.place",
+            ["ok"] = placed != null,
+            ["placed"] = placed != null,
+            ["expectKind"] = "plant.place",
             ["snapshot"] = ControlRefs.CurrentSnapshot()
-        });
-        CheatState.Note($"debug act place {typeId} @{col},{row} (expect card.place telemetry)");
+        };
+        if (placed != null) receipt["plantPtr"] = placed;
+        else receipt["error"] = "no new plant of that type in the target cell after the card was used (board busy, blocked cell, or not enough sun)";
+        DebugRuntime.Emit("debug.act.done", receipt);
+        if (placed != null) CheatState.Note($"debug act place {typeId} @{col},{row} -> {placed}");
+        else CheatState.Error($"debug.act place {typeId} @{col},{row}: nothing was planted");
+    }
+
+    static HashSet<string> PlantPtrsAt(int col, int row, int typeId)
+    {
+        var found = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            foreach (var plant in UnityEngine.Object.FindObjectsOfType<Plant>())
+            {
+                if (plant == null) continue;
+                try
+                {
+                    if (plant.thePlantColumn == col && plant.thePlantRow == row && (int)plant.thePlantType == typeId
+                        && plant.thePlantHealth > 0)
+                        found.Add(GameDumps.Ptr(plant));
+                }
+                catch { /* keep scanning */ }
+            }
+        }
+        catch { /* a failed scan reads as nothing placed */ }
+        return found;
     }
 
     static void DoShovel(JsonElement p)

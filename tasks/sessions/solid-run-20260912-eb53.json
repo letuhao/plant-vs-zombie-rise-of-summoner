@@ -73,7 +73,9 @@
     "tests/FusionRpg.SquadHarness.Tests/**",
     "scripts/guard-overflow.ps1",
     "src/FusionRpg.Injector/DebugLeaveBoard.cs",
-    "src/FusionRpg.Contracts/Dtos.cs"
+    "src/FusionRpg.Contracts/Dtos.cs",
+    "tools/debug-mcp/tools/debug_act.py",
+    "tools/debug-mcp/tests/test_debug_control_act_cursor.py"
   ],
   "started": "2026-09-12T14:38:04Z",
   "status": "active",

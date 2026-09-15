@@ -41,6 +41,23 @@ def test_act_place_returns_receipt():
     assert out["receipt"]["typeId"] == 3
 
 
+def test_act_place_receipt_failure_is_not_ok():
+    # lawn-combat-wire L-N30: the injector said nothing was planted -- the tool must not report success.
+    send = _mux({
+        "/api/debug/act": {"ok": True},
+        "/api/debug/events": {"items": [
+            {"id": 11, "kind": "debug.act.done",
+             "payload": {"verb": "place", "typeId": 0, "ok": False, "placed": False,
+                         "error": "no new plant of that type in the target cell",
+                         "snapshot": {"snapshotId": "s2"}}}]},
+    })
+    out = act.act("place", typeId=0, col=1, row=2, transport=send,
+                  sleep=lambda s: None)
+    assert out["ok"] is False
+    assert "no new plant" in out["error"]
+    assert out["receipt"]["placed"] is False
+
+
 def test_act_unknown_verb_raises():
     with pytest.raises(ValueError):
         act.act("dance", transport=_mux({}))
