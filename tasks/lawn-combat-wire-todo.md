@@ -125,10 +125,10 @@ invalidates only on `matchKey` change. A hypnotised zombie keeps its old side fo
 §2.16's fourth shipped instance.**
 
 **Acceptance:**
-- [ ] Hypno is not an invalidation trigger: side is object kind, so a charmed zombie keeps its cached
+- [x] Hypno is not an invalidation trigger: side is object kind, so a charmed zombie keeps its cached
       `(side, elements)`, and a test asserts that absence.
       *(reworded 2026-09-15 per owner ruling L-N11 — was "per-ptr invalidation on side change; hypno resolves the new side next read"; not ticked in this change)*
-      **audit 2026-09-15 OPEN: premise superseded — `spec-element-cache-invalidate.md:70` says hypno is NOT a trigger (tests `Trigger2_hypno_cannot_change…`). Needs rewording, not a tick. Next run L-N11**
+      *Ticked 2026-09-15 against the reworded bullet (owner ruling L-N11, `dc8c7d43`): `LawnElementResolverTests.Trigger2_hypno_cannot_change_a_cached_side_because_side_is_object_kind_not_allegiance` asserts the absence; `spec-element-cache-invalidate.md` trigger 2.*
 - [x] Trigger 3 (ptr reuse) has an **executable** test: resolve P → A, kill, re-register a different
       species at P, resolve → not A.
       *audit 2026-09-15 CONFIRMED: `LawnElementResolverTests.cs:351` `Trigger3_a_pointer_reused…`*
@@ -152,19 +152,19 @@ multiplying (`:252`), exits on an **unchecked** `(long)Math.Round` (`:297`), and
 `ClampToInt32`. This program multiplies traffic through it.
 
 **Acceptance:**
-- [ ] The magnitude handed to the Funnel is a checked `long`; integer per-mille arithmetic widens before
+- [x] The magnitude handed to the Funnel is a checked `long`; integer per-mille arithmetic widens before
       multiplying and divides by 1000 last, exactly once. Floating-point is allowed inside the calculation.
       *(reworded 2026-09-15 per owner ruling L-N12 — was "`long`/per-mille interior"; not ticked in this change)*
-      **audit 2026-09-15 OPEN: FALSE as written — `OverlayCombatCalculator.cs:225-228` still `/ 1000.0` on a `double` interior; spec `spec-combat-numerics.md:74` unamended. Next run L-N12**
+      *Ticked 2026-09-15 against the reworded bullet (owner ruling L-N12): `OverlayCombatNumericsTests.Compute_throws_on_a_magnitude_past_long_range` (overflow throws), `DivideFirst_and_divideLast_can_round_to_different_longs` + `TheShippedCode_multipliesBeforeItDivides_forTheNeutralShare` (divide last); Funnel-bound values use `checked((long)Math.Round(...))` (`OverlayCombatCalculator.cs:281,295,301`). Core.Tests 13551 green (`e103db1e`).*
 - [x] Overflow **throws**; a test asserts it.
       *audit 2026-09-15 CONFIRMED: `OverlayCombatNumericsTests.cs:70` `Assert.Throws<OverflowException>`*
 - [x] The Unity-boundary narrowing throws **or reports**, with a comment naming it a structural host
       limit.
       *audit 2026-09-15 CONFIRMED: `EntityStatWriter.cs:49` `ClampToInt32Reporting`*
-- [ ] No floating-point ban: `OverlayCombatCalculator.cs`, `ElementHub.cs`, `OverlayCombatMath.cs` carry no
+- [x] No floating-point ban: `OverlayCombatCalculator.cs`, `ElementHub.cs`, `OverlayCombatMath.cs` carry no
       source-scan test that forbids `double`/`float`.
       *(reworded 2026-09-15 per owner ruling L-N12 — was "a source-scan test proves no double/float remains"; not ticked in this change)*
-      **audit 2026-09-15 OPEN: FALSE — the scan test (`OverlayCombatNumericsTests.cs:29-43`) uses an allowlist and says the absolute claim does not hold; spec box `:92` still `[ ]`. Next run L-N12**
+      *Ticked 2026-09-15 (owner ruling L-N12): the three no-double scan tests were deleted in `e103db1e`; `grep AssertNoDoubleOrFloat|double` over `tests/FusionRpg.Core.Tests/Combat/` finds no ban.*
 - [x] **D1 guarded:** a test asserts `MergeAppliedCombat` (`ActorHub.cs:89-113`) folds only
       `progression.bonus.*` and **no `combat.*`**.
       *audit 2026-09-15 CONFIRMED: `OverlayCombatNumericsTests.cs:118` `MergeAppliedCombat_ignores_a_combat_channel`*
@@ -373,10 +373,10 @@ true. The atom already exists purpose-built: `atom.fx-overlay-damage`, `kind: re
 - [x] `elementPayload` baked from the owner's species element, sourced at bind from
       `LawnElementResolverHost.Resolve(ptr)`.
       *audit 2026-09-15 CONFIRMED: `LawnBasicAttackGrantBinder.Bind` → `Resolve(ptr)`*
-- [ ] **Hypno needs no re-bake:** hypno changes side, never element, so the grant's baked
+- [x] **Hypno needs no re-bake:** hypno changes side, never element, so the grant's baked
       `elementPayload` stays correct and nothing re-binds on charm.
       *(reworded 2026-09-15 per owner ruling L-N11 — was "a side change re-bakes or re-binds the grant … new element"; not ticked in this change)*
-      **audit 2026-09-15 OPEN: argument that elements are hypno-invariant is sound, but `spec-basic-attack-grant.md:91` still says "Required: … re-bakes" — amend spec, then tick. Next run L-N11**
+      *Ticked 2026-09-15 against the reworded bullet (owner ruling L-N11): `spec-basic-attack-grant.md` re-bake section marked superseded; the baked `elementPayload` comes from `BasicAttackGrantBuilder.Build(ptr, primary, …)` with the species element, which a charm does not change (side is object kind, Trigger2 test above).*
 - [x] Grants withdraw **before** ptr reuse; a test recycles an address.
       *audit 2026-09-15 CONFIRMED: `BasicAttackGrantRecycleTests` (4) recycle ptr P through `EffectBag.WithdrawForOwner` (the Core call behind `EffectRuntime.WithdrawEntity`); mutation (withdraw counts but does not remove) fails 2 of 4. Ordering before re-registration is `GameHooks.ForgetEntity`.*
 - [x] No per-actor push storm on a mass spawn.
@@ -1177,14 +1177,15 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
 - [x] **L-N1** Perf ceiling breached (T13). Plan: breach escalates to owner; spec default on breach is
       **kill switch defaulted off**. Owner rules ship / ship-behind-switch-off / stop after L-N8 data.
       *Done: owner ruled "ship behind switch, default OFF" (2026-09-15). `LawnBasicAttackFeature.DefaultEnabled = false`; env `FUSIONRPG_LAWN_BASIC_ATTACK=0` forces off, `=1` forces on at process start (the only sanctioned enable for live proofs, per L-N8); CheatSchema/CheatRegistry display default follows. Tests: `LawnBasicAttackDefaultOffGuardTests` (Guard, CI), `CheatSchemaTests` (CheatCore 41/41), `LawnBasicAttackFeatureFlagTests` (Injector.Tests 5/5, local only). Also fixed a verification-boundary defect: `src/FusionRpg.CheatCore/**` mapped to Core.Tests and never ran CheatCore.Tests. verify-change: Core 13575, Guard 293, CheatCore 41, injector-compile + 4 guards OK.*
-- [ ] **L-N11** Spec amendments: `spec-element-cache-invalidate.md` / `spec-basic-attack-grant.md:84-92`
+- [x] **L-N11** Spec amendments: `spec-element-cache-invalidate.md` / `spec-basic-attack-grant.md:84-92`
       still require hypno re-bake; the finding says elements are hypno-invariant. Owner approves the
       rewording; then T3 bullet 1 and T10 hypno bullet are reworded and ticked.
-- [ ] **L-N12** T4 numerics: rewrite the `double` mitigation interior to long/per-mille, or amend
+      *Done: owner approved the rewording 2026-09-15; spec amendment + rewording in `dc8c7d43`, ticks in a separate change against `Trigger2_hypno…`.*
+- [x] **L-N12** T4 numerics: rewrite the `double` mitigation interior to long/per-mille, or amend
       `spec-combat-numerics.md:74,92-93` to the allowlist the scan test already uses.
 
 ### Phase C — live re-proof (needs game restart — ask owner before closing the game)
-
+      *Done: owner ruled floating-point allowed (and the whole float ban removed, `e103db1e`, `303952f7`); spec amended in `dc8c7d43`; T4 bullets reworded there and ticked separately against the overflow/divide-last tests.*
 - [x] **L-N22** Redeploy `7073ffcb` (game must be closed; ask first). Verify: no `fsm-trace` notes
       without `FUSIONRPG_FSM_TRACE=1`; shooter attribution on a real player-placed plant (is
       `Bullet.from` populated there?); no pin carried across a match edge.
