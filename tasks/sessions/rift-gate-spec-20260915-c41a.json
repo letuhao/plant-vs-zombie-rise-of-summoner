@@ -56,7 +56,24 @@
     "tests/FusionRpg.Core.Tests/Overlay/RiftMenuAnchorTests.cs"
   ],
   "planned_build_note": "These are the /build phase's intended files, recorded now so the guard tests a future build adds (e.g. a rift-gate no-navigation guard) can be scoped narrowly rather than claiming all of tests/FusionRpg.Guard.Tests/**, which an active session already owns.",
-  "phase": "spec + plan complete (2026-09-15); /build full authorized by the owner, same worktree and fence.",
+  "phase": "spec + plan + /build full complete (2026-09-15). All 13 tasks built, each gated PASS by an independent fresh-context build-gate verifier.",
+  "status": "merged",
+  "build_result": {
+    "tasks_total": 13,
+    "gates_passed": 13,
+    "gate_rounds": { "T1": 1, "T2+T3": 2, "T4": 2, "T5+T6": 1, "T7-T11": 2, "T12": 2, "T13": 1 },
+    "deferred": [],
+    "commits": [
+      "4f36f032 docs(rift-gate): T1 3.9 verification — reference scene paths absent, typed-field anchor found",
+      "2daf0d4d feat(rift-gate): menu-screen presence signal + placement + no-navigation guard",
+      "67e8aa0f feat(rift-gate): attach uGUI tombstone into the menu and move menu art to uGUI",
+      "cbb5376d fix(rift-gate): start the injector view independently; restyle the RPG button",
+      "0d6723a2 feat(rift-gate): page-initiated overlay close over the existing command seam",
+      "7520871c feat(rift-gate): durable once-per-player first-open fact with an actionability gate",
+      "273faaab feat(rift-gate): land the first open at the new-save entry point"
+    ],
+    "live_probes_pending": "All live behaviour is unproven here: the running game holds a pre-increment build. Pending owner-terminal probes are written into each task's gate report (tombstone visible/clickable + no stolen click; Leave hiding in both host modes; the first-open flip to actionable; first open landing on /sanctum)."
+  },
   "build_baseline": {
     "head": "5a238f28b84b1186251d960c8a8d4e9a272d4ed0",
     "branch": "rift-gate-spec",
@@ -64,5 +81,5 @@
   },
   "build_env_note": "FUSIONRPG_ML_GAMEDIR is unset at User and Machine scope; .env only defines FUSIONRPG_ML_GAMEDIR_DEFAULT, which MSBuild does not read. Injector tasks must set FUSIONRPG_ML_GAMEDIR=H:\\Games\\PVZ-Fusion-3.9_MelonLoader and grep the build log for the 'Skipping FusionRpg.Injector.MelonLoader.39' stub warning — a green exit code alone is a false pass.",
   "started": "2026-09-15T04:22:53Z",
-  "status": "active"
+  "completed": "2026-09-15"
 }
