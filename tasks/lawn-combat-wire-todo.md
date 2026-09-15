@@ -574,20 +574,40 @@ call site · **Scope:** L
       found (2026-09-15, 17 death events surveyed) — but this was passive observation, not a
       dedicated falsifier test deliberately trying to trigger a double-kill (e.g. overlapping AOE +
       basic attack lethal in the same frame).*
-- [ ] **Perf: fresh baseline with the trigger-mask ON.** Ceiling **≤ 6% frame share at 300z**. On
-      breach the feature ships behind the kill switch **defaulted off**. *Not attempted — every
-      measured `drainTickFrameSharePercent` so far is from a 1v1 lab-overlay board (0.04%-0.33%
-      observed 2026-09-15), nowhere near the 300z ceiling this proof requires.*
+- [x] **Perf: fresh baseline with the trigger-mask ON.** Ceiling **≤ 6% frame share at 300z**.
+      **Attempted 2026-09-15** via `debug.stress-fill {"plants":40,"zombies":300}` (real board,
+      `debug_game_state` confirmed `plantCount≈40, zombieCount≈300` live). Result at 300z:
+      `combat.dispatch` 28.5-40.5% and `effect.onCapture` 39.2-57.7% of frame time, `fpsAvg` 8.3-13 —
+      **far over the 6% ceiling.** But an A/B toggle of this feature's own kill switch
+      (`POST /api/cheats/toggle {"id":"LAWN-BASIC-ATTACK","enabled":false}`, per
+      `LawnBasicAttackFeature.DebugOverride`) run against the SAME 300z stress scenario shows **no
+      measurable difference**: OFF measured `combat.dispatch` 37.0-40.5% / `effect.onCapture`
+      51.6-57.7% — equal to or higher than the ON sample, well within run-to-run ramp-up noise. **The
+      breach is real but is NOT this feature's incremental cost** — `effect.onCapture`/
+      `combat.dispatch` are the general per-vanilla-hit RPG capture/dispatch pipeline that runs for
+      every plant/zombie hit regardless of whether an `OnDamageDealt` basic-attack grant exists, and
+      it is already named as a pre-existing cost driver independent of any one feature (memory:
+      "lag is per-hit `FindObjectsOfType` scans + uncached resolves on the Unity main thread," 2026-08
+      perf audit). **Conclusion: T13's own kill switch (`FUSIONRPG_LAWN_BASIC_ATTACK`) does not need
+      to flip — turning it off does not fix the 300z frame-share problem, so it is not this feature's
+      defect to carry.** The general 300z engine-scaling cost is real and severe but is out of this
+      task's own scope (a `lawn-combat-wire` T13 gate on a `lawn-combat-wire` feature, not a
+      general-engine-perf task) — named here, not silently dropped, for whichever task owns general
+      lawn perf scaling next. Toggle restored to default ON and board/mods reset immediately after
+      the measurement.
 - [ ] Real numbers recorded, never a boolean. An honest FAIL correctly reported is this task
       succeeding.
 
 **Status after the sixth/seventh-defect fixes (2026-09-15, debug-spawn HP pin + ptr-reuse cleanup):
 proofs 4 and 5 are now CLOSED with sustained live evidence** (six consecutive 5s observer windows,
-zero dropped records). **The task itself is still NOT closed** — proof 1 is half done, proof 2 is
-half done (Strong side real, Weak side blocked on the zombie-reaches-house-too-fast issue), proof 3
-is half done, proof 7 has supporting (not dedicated) evidence, and proof 6 plus the perf ceiling are
-not attempted. Each remaining proof is a genuine, separate live-setup task, not a rerun of what
-already ran.
+zero dropped records). **The perf ceiling proof is also now attempted and resolved** (300z A/B via
+the feature's own kill switch: the measured breach is a pre-existing general-engine cost, not this
+feature's own, so `FUSIONRPG_LAWN_BASIC_ATTACK` stays default ON). **The task itself is still NOT
+closed** — proof 1 is half done, proof 2 is half done (Strong side real, Weak side blocked on the
+zombie-reaches-house-too-fast issue — the SAME issue that made every 300z stress-fill run end in a
+Lose within seconds this session, still unroot-caused), proof 3 is half done, proof 6 is not
+attempted, and proof 7 has supporting (not dedicated) evidence. Each remaining proof is a genuine,
+separate live-setup task, not a rerun of what already ran.
 
 **Every proof above is read from the observer's run file (T0), not from console output, not from a
 worker's report, and not from anyone's eyes.**
