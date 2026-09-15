@@ -37,6 +37,9 @@ public sealed class RpgHub : Hub
     public async Task Hello(HelloDto hello)
     {
         _store.Heartbeat(RpgConstants.SourceInjector);
+        // The injector is the truth for its own debug session; this in-memory mirror resets on a server restart.
+        DebugSessionState.Active = hello.DebugSessionActive;
+        DebugSessionState.ScenarioId = hello.DebugSessionActive ? hello.DebugScenarioId ?? "" : "";
         _ingest.Enqueue(new EventEnvelope
         {
             T = DateTime.UtcNow.ToString("o"),

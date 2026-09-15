@@ -594,7 +594,12 @@ honestly split if T14 is still failing).
       the step `Mismatch` (RESULT: FAIL, `DEBUG-FUNDED: N souls`); pre-stamping kills print as `Unrecorded`, never as
       clean. Tests: `tools/ProveLiveProbe.Tests/SoulProvenanceTests.cs` (13 cases, suite 55/55),
       `tests/FusionRpg.Guard.Tests/SpawnOriginStampGuardTests.cs`. Live half is Task 19.*
-- [ ] **Task 19 — Task 18 live check.** After the injector redeploy (lawn-combat-wire L-N22): debug-spawn one zombie,
+- [x] **Task 19 — Task 18 live check.** After the injector redeploy (lawn-combat-wire L-N22): debug-spawn one zombie,
       kill it on a real board, then run `prove-live-probe.ps1 -Mode B -PlayerId <id>` and confirm step 0 reports
       `Debug:>0` and `DEBUG-FUNDED`; kill one game-spawned zombie and confirm it lands under `Game`. Verify: the two
       report lines and the fact payloads from `GET /api/pvz-activity/{id}/facts?kind=ZombieKilled`.
+      *Done 2026-09-15 live: real level-2 kills stamped `spawnOrigin: game` (14 die payloads, latest 20 ZombieKilled facts `game`, ledger `kill` rows refId → those facts); a debug-spawned zombie (`1B279DB3000`) killed by the real Peashooter emitted `spawnOrigin: debug`, fact 9058 `debug`, ledger kill refId 9058. `ProveLiveProbe -Mode B -PlayerId 1 -BannerId no-such-banner…` printed `[MISMATCH] 0-soul-provenance: DEBUG-FUNDED: 2 souls … killSoulsByOrigin{Game:26, Debug:2, Cheat:0, Unrecorded:1511, FactNotFound:645}` and RESULT: FAIL; the unknown banner refused the summon so no souls were spent. FactNotFound is the facts API's 500-per-run cap — Task 20.*
+- [ ] **Task 20 — provenance coverage past 500 kills per run.** `GET /api/pvz-activity/{id}/facts` returns at most
+      500 rows per run and has no cursor, so step 0 reports 645 kill souls as `FactNotFound` (unproven, never clean).
+      Add `afterId` paging to the facts endpoint (Data + Server) and page it in `LiveProbeClient.GetSoulProvenanceAsync`.
+      Verify: player 1's report has `FactNotFound:0` for runs with facts on disk; offline test pages two facts pages.

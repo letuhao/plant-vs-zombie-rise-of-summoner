@@ -1344,6 +1344,8 @@ public static class GameHooks
                 // candidate, or a tie ⇒ leave shooterPtr zero (no RPG record) rather than credit a guess.
                 // Known residual: a multi-lane shot (Threepeater side peas) can still match an adjacent-
                 // lane occupant at the same column -- tracked in lawn-combat-wire-todo next-run tasks.
+                // L-N22 observability: which source named the shooter (the direct field, the position fallback, or none).
+                var shooterVia = shooterPtr != IntPtr.Zero ? "from" : "none";
                 if (shooterPtr == IntPtr.Zero)
                 {
                     try
@@ -1359,13 +1361,14 @@ public static class GameHooks
                         {
                             shooterPtr = unchecked((IntPtr)raw);
                             shooterTypeId = best.TypeId;
+                            shooterVia = "fallback";
                         }
                     }
                     catch { }
                 }
                 Effects.EventDrainHost.CacheBulletShooter(__instance.Pointer, shooterPtr, shooterTypeId);
                 if (Effects.FsmTrace.Enabled)
-                    CheatState.Note($"fsm-trace BulletInit.Postfix bulletPtr={__instance.Pointer:X} shooterPtr={shooterPtr:X} shooterTypeId={shooterTypeId}");
+                    CheatState.Note($"fsm-trace BulletInit.Postfix bulletPtr={__instance.Pointer:X} shooterPtr={shooterPtr:X} shooterTypeId={shooterTypeId} via={shooterVia}");
             }
             catch { }
             // Highest-rate kind (~per pea). Emit only when something consumes it: an OnSpawn

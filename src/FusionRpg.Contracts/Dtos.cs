@@ -178,6 +178,10 @@ public sealed class HelloDto
 {
     [JsonPropertyName("game")] public string Game { get; set; } = "pvzrh-3.8.1";
     [JsonPropertyName("version")] public string Version { get; set; } = "1.0.0";
+    /// <summary>Additive 2026-09-15: the injector's own debug-session state at Hello. The server keeps an in-memory
+    /// mirror that a server restart resets while the game (and its session) lives on; Hello re-syncs it.</summary>
+    [JsonPropertyName("debugSessionActive")] public bool DebugSessionActive { get; set; }
+    [JsonPropertyName("debugScenarioId")] public string? DebugScenarioId { get; set; }
 }
 
 public sealed class CommandDto

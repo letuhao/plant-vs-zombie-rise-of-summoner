@@ -237,6 +237,33 @@ public class UniqueActorAtomRepushTests : IAsyncLifetime
         return arr.EnumerateArray().ToList();
     }
 
+    /// <summary>2026-09-15 live: after a server restart <c>GET /api/debug/session</c> read inactive while the game was
+    /// still running a lab session, so a "shipped configuration" probe trusted a contaminated board. Hello now carries
+    /// the injector's session state and resyncs the in-memory mirror in both directions. (Lives in this class because it
+    /// already hosts a real <see cref="RpgHub"/>.)</summary>
+    [Fact]
+    public async Task Hello_resyncs_the_debug_session_mirror_from_the_injector()
+    {
+        var hub = ActivatorUtilities.CreateInstance<RpgHub>(_app.Services);
+        try
+        {
+            DebugSessionState.Active = false;
+            DebugSessionState.ScenarioId = "";
+            await hub.Hello(new HelloDto { Game = "pvz", DebugSessionActive = true, DebugScenarioId = "cae1f85426ed" });
+            Assert.True(DebugSessionState.Active);
+            Assert.Equal("cae1f85426ed", DebugSessionState.ScenarioId);
+
+            await hub.Hello(new HelloDto { Game = "pvz", DebugSessionActive = false, DebugScenarioId = "stale" });
+            Assert.False(DebugSessionState.Active);
+            Assert.Equal("", DebugSessionState.ScenarioId);
+        }
+        finally
+        {
+            DebugSessionState.Active = false;
+            DebugSessionState.ScenarioId = "";
+        }
+    }
+
     [Fact]
     public async Task A_real_Hello_puts_the_compiled_grant_on_the_wire_not_only_its_def()
     {

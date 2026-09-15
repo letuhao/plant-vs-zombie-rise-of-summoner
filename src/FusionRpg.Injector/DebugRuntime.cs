@@ -30,8 +30,28 @@ public static class DebugRuntime
     public static string OnHitStatus = "butter";
     public static int OnHitStatusRemaining;
 
+    // 2026-09-15 (live, lawn-combat-wire L-N22): a lab scenario sets wave-freeze, plant attack x0, zombie count
+    // x0 and silenced vanilla damage through ordinary cheat entries, and nothing undid them when the session
+    // ended -- the next "shipped configuration" board spawned no zombies and dealt no vanilla damage. The
+    // user-set cheat entries are now snapshotted when a session starts and restored when it ends.
+    static string? _preSessionCheats;
+    static bool _preSessionLocalStatsOverride;
+
     public static void StartSession(string? scenarioId)
     {
+        if (!SessionActive)
+        {
+            try
+            {
+                _preSessionCheats = JsonSerializer.Serialize(CheatState.Snapshot());
+                _preSessionLocalStatsOverride = CheatState.LocalStatsOverride;
+            }
+            catch (Exception ex)
+            {
+                _preSessionCheats = null;
+                CheatState.Error("debug session: cheat snapshot failed, lab state will not be restored: " + ex.Message);
+            }
+        }
         SessionActive = true;
         ScenarioId = string.IsNullOrWhiteSpace(scenarioId) ? Guid.NewGuid().ToString("N")[..12] : scenarioId!;
         HitCapture = true;
@@ -57,8 +77,39 @@ public static class DebugRuntime
         InjectorElementOverride.Clear();
         Hud.ActorHudMeterOverride.Clear(); // E41: per-match state, same reset as the two lines above
         try { Hud.ActorHudCache.Clear(); } catch { }
-        Emit("debug.session.end", new Dictionary<string, object> { ["scenarioId"] = id });
+        var restored = RestorePreSessionCheats();
+        Emit("debug.session.end", new Dictionary<string, object> { ["scenarioId"] = id, ["cheatsRestored"] = restored });
         ScenarioId = "";
+    }
+
+    /// <summary>Restores the cheat entries captured by <see cref="StartSession"/> and re-resolves every living
+    /// entity so a lab's stat writes (e.g. plant attack 0) are undone on the board too. Returns the number of
+    /// user-set entries restored, or -1 when there was no snapshot.</summary>
+    static int RestorePreSessionCheats()
+    {
+        var json = _preSessionCheats;
+        _preSessionCheats = null;
+        if (json == null) return -1;
+        try
+        {
+            var revision = CheatState.DocumentRevision;
+            using var doc = JsonDocument.Parse(json);
+            CheatState.ApplySnapshot(doc.RootElement);
+            CheatState.LocalStatsOverride = _preSessionLocalStatsOverride;
+            CheatState.DocumentRevision = revision + 1;
+            CheatState.MarkAppliedRevision();
+            CheatActions.ReapplyAllLiving();
+            var count = doc.RootElement.TryGetProperty("entries", out var entries) && entries.ValueKind == JsonValueKind.Array
+                ? entries.GetArrayLength()
+                : 0;
+            CheatState.Note($"debug session: restored {count} pre-session cheat entries");
+            return count;
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug session: cheat restore failed: " + ex.Message);
+            return -1;
+        }
     }
 
     public static void DisarmAll()
@@ -151,7 +202,10 @@ public static class DebugRuntime
             ["livingZombies"] = matchSnap.ZombieCount,
             ["matchPhase"] = matchSnap.Phase.ToString(),
             ["matchRevision"] = matchSnap.Revision,
-            ["match"] = matchDict
+            ["match"] = matchDict,
+            // L-N22 observability: per-match stores that must be empty after a match edge.
+            ["spawnHpPins"] = Stats.InjectorSpawnHpPin.Store.Count,
+            ["spawnOriginMarks"] = Match.SpawnOriginTags.Count
         };
         try
         {

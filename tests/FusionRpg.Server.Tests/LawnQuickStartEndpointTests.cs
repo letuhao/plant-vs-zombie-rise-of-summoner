@@ -333,6 +333,7 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
         var toggleIdx = sent.FindIndex(n => n == "cheat.toggle");
         var skipIdx = sent.FindIndex(n => n == "debug.skip-setup");
         var freezeIdx = sent.FindIndex(n => n == "debug.wave-freeze");
+        var sessionIdx = sent.FindIndex(n => n == "debug.session");
         var runStepsIdx = sent.FindIndex(n => n == "debug.run-steps");
 
         Assert.True(toggleIdx >= 0, "expected a cheat.toggle command (DEBUG-SETUP-SKIP) to be sent");
@@ -341,6 +342,8 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
         Assert.True(runStepsIdx >= 0, "expected debug.run-steps to be sent");
         Assert.True(toggleIdx < skipIdx, "the DEBUG-SETUP-SKIP toggle must be enabled before debug.skip-setup is sent");
         Assert.True(skipIdx < freezeIdx, "the seed-picker screen must be dismissed before waves are frozen");
+        Assert.True(sessionIdx >= 0 && sessionIdx < freezeIdx,
+            "the debug session must start before the freeze, or the injector's pre-session cheat snapshot captures the freeze and restores it after the lab");
         Assert.True(freezeIdx < runStepsIdx, "waves must be frozen before scenario steps run");
     }
 

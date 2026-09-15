@@ -969,9 +969,14 @@ public static class DebugEndpoints
                     });
             }
 
+            // 2026-09-15 live: this freeze used to go out before the scenario's own debug.session start, so the
+            // injector's pre-session cheat snapshot captured it and "restored" a frozen wave timer after the lab
+            // ended -- the next real board never spawned a zombie. Start the session first so every lab-scoped
+            // change, including this freeze, is undone when the session ends (the scenario's own start is then a no-op).
+            var scenarioCorrelation = Guid.NewGuid().ToString("N")[..12];
+            await Send(hub, inbox, "debug.session", new { op = "start", scenarioId = scenarioCorrelation });
             await Send(hub, inbox, "debug.wave-freeze", new { enabled = true });
 
-            var scenarioCorrelation = Guid.NewGuid().ToString("N")[..12];
             IReadOnlyList<DebugScenarioStep> steps;
             try { steps = DebugScenarios.Expand(scenarioId, scenarioCorrelation); }
             catch (ArgumentException ex) { return Results.NotFound(new { ok = false, error = ex.Message }); }

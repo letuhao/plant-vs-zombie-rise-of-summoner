@@ -1116,7 +1116,7 @@ metric.*
 
 ---
 
-## Next run — audit 2026-09-15 gaps (`L-N1` … `L-N29`)
+## Next run — audit 2026-09-15 gaps (`L-N1` … `L-N30`)
 
 Ordered by the plan's "Next run" phases. Every task reports commands run and raw output; a box is
 ticked only when evidence matches the bullet's exact wording — never reword a bullet to tick it.
@@ -1185,9 +1185,10 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
 
 ### Phase C — live re-proof (needs game restart — ask owner before closing the game)
 
-- [ ] **L-N22** Redeploy `7073ffcb` (game must be closed; ask first). Verify: no `fsm-trace` notes
+- [x] **L-N22** Redeploy `7073ffcb` (game must be closed; ask first). Verify: no `fsm-trace` notes
       without `FUSIONRPG_FSM_TRACE=1`; shooter attribution on a real player-placed plant (is
       `Bullet.from` populated there?); no pin carried across a match edge.
+      *Done 2026-09-15, live on MelonLoader pvzrh-3.9 with the audit build, no debug session, real Adventure level 2 (1-1 is tutorial-gated: wave timer never leaves 15): (1) `fsm-trace` notes = 0 across a real match without `FUSIONRPG_FSM_TRACE` (22 zombie.spawn, 14 zombie.die). (2) Real player-placed Peashooter (`debug.act place` card path, `plant.place` isFreeSet=false, sun.spend 200): every observed RPG delta names attacker = that plant's ptr (`1FEF8693B40`); with `FUSIONRPG_FSM_TRACE=1` the new trace field shows `Bullet.from` is NOT populated on a real plant either — 2/2 shots `via=fallback`, resolved to the placed plant `1B279B8ED80` — so the position fallback is load-bearing for real play, not only debug spawns. (3) `debug.snapshot` now reports `spawnHpPins`/`spawnOriginMarks`: 1/1 after a pinned debug spawn, 0/0 after leave-board across the match edge.*
 - [ ] **L-N9** Observer run files: 300z wave with trigger mask on (`DrainTickTotalMs > 0`, dropped
       counters), and a T0 baseline re-run diffed against `_lawn-combat-observer-baseline.json`. Commit
       both run files to `docs/research/perf/`.
@@ -1236,6 +1237,7 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       (mowers over the menu, `enter-level` refused "board already live"); new `POST /api/debug/leave-board` presses
       menu → 主菜单 → 确定 (owner-specified) and acks after `Board.OnDestroy` — live 4/4, re-entry accepted every time.
       (d) game-state now reports `initBoardReady`/`timeScale`/`gameTime`; it still labels the seed-picker `InMatch`.*
+      *audit 2026-09-15 PROGRESS 2 (still not ticked — `debug_restart_game` hang and the earlier kill→soul gap not reproduced): (e) lab contamination fixed — a lab scenario's wave-freeze / attack x0 / zombie count x0 / silenced vanilla outlived its session; `DebugRuntime` now snapshots user-set cheats at session start and restores + reapplies at end (live: `cheatsRestored: 13`, F-WAVE-FREEZE back to false), and quick-start starts the session before its own freeze. (f) the server's session mirror read inactive after a server restart while a lab ran; Hello now carries `debugSessionActive`/`debugScenarioId` (live: mirror matched after end). (g) level 1-1 never starts waves under the tutorial caption — probes must use level 2+. (h) `debug.act place` during the battle-start pan emitted `debug.act.done` with no plant placed (L-N30).*
 - [ ] **L-N27** Liveness on pooled reuse (found by L-N16): a dead mark now clears only on a real spawn
       hook. A pooled entity reactivated without `Start()`/`InitHealth()` (T10's frozen-wave replacement
       plant) at a dead-marked ptr still refuses RPG hits, and a pooled zombie skips `NoteZombieDead`.
@@ -1267,3 +1269,7 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       `levelEnterAckMissing:true`, which masks nothing but does not explain it. Reproduce with the event ids around
       `debug.level.enter`, trace `DebugRuntime.Emit` → `GameHooks.Emit` → `RpgClient` batching/dedupe → `EventIngest`,
       and fix the drop. Verify: 5 quick-starts from the main menu with `levelEnterAckMissing:false`.
+- [ ] **L-N30** `debug.act place` reports done without a placement (found 2026-09-15): issued ~6s after the
+      setup skip, it emitted `card.place type:-1` and `debug.act.done` but no `plant.place`/`sun.spend`; the same call
+      seconds later placed the plant. The verb must confirm its expected kind (a `plant.place` at the target cell) or
+      report a refusal naming the stage. Verify: a place issued during the start pan returns a failure, not done.

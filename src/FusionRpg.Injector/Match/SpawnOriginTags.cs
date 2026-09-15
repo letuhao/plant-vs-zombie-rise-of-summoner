@@ -38,6 +38,11 @@ public static class SpawnOriginTags
             return Marks.Remove(ptr, out var origin) ? origin : Game;
     }
 
+    public static int Count
+    {
+        get { lock (Gate) return Marks.Count; }
+    }
+
     public static void Forget(IntPtr ptr)
     {
         lock (Gate) Marks.Remove(ptr);
