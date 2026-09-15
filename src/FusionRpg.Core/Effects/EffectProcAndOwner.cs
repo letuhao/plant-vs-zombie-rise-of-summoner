@@ -119,8 +119,8 @@ public static class EffectOwnerKey
             // OWN grant (correct) AND the victim's OWN grant for its (unrelated, future) attacks
             // (wrong) — silently doubling every basic-attack's RPG delta since T10 shipped, hidden
             // until the same session's fx.overlay_damage fix (fdf3885c) made the delta non-zero enough
-            // to notice. Narrowed to actor-only here, mirroring the plant:{tid}/zombie:{tid} branches
-            // above, which already carry this exact narrowing for the identical trigger. OnDamageTaken
+            // to notice. Narrowed to actor-only here. (The plant:{tid}/zombie:{tid} branches above do NOT
+            // narrow this way — they fall back to TargetTypeId — unaudited, tracked separately.) OnDamageTaken
             // and every other trigger keep the broader either-ptr match (e.g. OnDeath kill-credit,
             // EffectBagAuditTests's own documented "Actor or Target" contract) — unaudited here, named
             // rather than silently swept into the same fix.
