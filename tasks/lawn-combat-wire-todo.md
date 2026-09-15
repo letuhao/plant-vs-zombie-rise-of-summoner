@@ -237,7 +237,10 @@ row, so its cost becomes config. Seed already authored: `data/seed/actions/autho
       *audit 2026-09-15 CONFIRMED: `ActionCorpusImportTests.cs:249`*
 - [x] `Program.cs`'s loader includes the authored file.
       *audit 2026-09-15 CONFIRMED: `Program.cs:415`*
-- [ ] **All 179 existing briefs import unchanged** — no Kind or cost drift.
+- [ ] **Every imported brief's Kind is its authored `kindHint` (else `Skill`) and its cost is the template row
+      for that (kind, category)** — no other Kind or cost drift. *(Reworded 2026-09-15 by L-N14, owner-visible:
+      the original "All 179 existing briefs import unchanged" was false — one shipped brief authors
+      `kindHint:"innate"` and correctly changes Kind — and pinned a population count.)*
       **audit 2026-09-15 OPEN: FALSE — `ActionCorpusImporterTests.cs:182` says "That is false…" (24 shipped briefs, one documented Kind change); that test also pins population counts (24/3/21), which the guardrail rule bans. Next run L-N14**
 - [x] No `committed-round-*.json` modified.
       *audit 2026-09-15 CONFIRMED: no commit in the T7 range touches `committed-round-*.json`*
@@ -1118,9 +1121,10 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       Verify: new Core/Injector test fails when collection toggles `Active`.
 - [ ] **L-N13** Core test: two shooters with different composed `combat.power.*` produce different
       packet power through a ptr-aware resolver (T6 differential). Mutation: resolver ignoring ptr fails.
-- [ ] **L-N14** Fix T7 wording ("24 shipped briefs, one documented Kind change") and replace the
+- [x] **L-N14** Fix T7 wording ("24 shipped briefs, one documented Kind change") and replace the
       population-count pins (24/3/21) in `ActionCorpusImporterTests.cs` with contract assertions
       (guardrail rule: never pin a population count).
+      *Done: T7 bullet reworded in this commit (not ticked — tick is a separate change). `TheRealShippedCorpusHasExactlyOneDocumentedKindChangeAndNoOthers` (pinned 24/3/21 + named ids) replaced by `TheRealShippedCorpusHonoursKindHintAndKindAwareCostForEveryImportedBrief`: reconciliation (imported + rejected = parsed) and per-imported-brief Kind == kindHint ?? Skill, cost resource == template row. Mutation (composer ignores kindHint) fails it. Data.Tests 1231/1231 via verify-change.*
 - [ ] **L-N16** Test: a record queued for a ptr later marked dead applies no delta and runs no `Die()`
       on the funnel path; fixture for `EventDrainHost.DeferForget` ordering (T9, GATE 2).
 - [ ] **L-N17** Test: bind grant at ptr P, forget P, re-register P → no stale grant (T10).

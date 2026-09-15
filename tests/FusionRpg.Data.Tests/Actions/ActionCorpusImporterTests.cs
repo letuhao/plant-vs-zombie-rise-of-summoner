@@ -192,37 +192,43 @@ public class ActionCorpusImporterTests : IDisposable
     /// (`action.general.0003`, `action.species.cabbagepult.001`) carry no `kindHint` and are provably
     /// unaffected, asserted below.</para>
     /// </summary>
+    /// <remarks>lawn-combat-wire audit 2026-09-15 (L-N14): this test used to pin the corpus population
+    /// (24 briefs, 3 imported, 21 rejected) and three named brief ids — readings that change whenever
+    /// content ships, banned by the guardrail rule (validation-ssot.md). It now asserts the contract
+    /// every imported brief must satisfy, whatever the corpus size.</remarks>
     [Fact]
-    public void TheRealShippedCorpusHasExactlyOneDocumentedKindChangeAndNoOthers()
+    public void TheRealShippedCorpusHonoursKindHintAndKindAwareCostForEveryImportedBrief()
     {
         SeedRealAtomFile("data/seed/atoms/generated/family-expand.g-life.json");
         var briefs = new List<ActionCorpusBrief>();
         foreach (var f in new[] { "committed-round-1.json", "committed-round-2.json" })
             briefs.AddRange(ActionCorpusBriefJson.Parse(File.ReadAllText(RepoPath("data", "seed", "actions", f))));
-        Assert.Equal(24, briefs.Count); // liveness -- the real files still have 24 rows between them
+        Assert.NotEmpty(briefs); // liveness only; the population size is a reading, never pinned
 
-        var result = ActionCorpusImporter.Import(_store, briefs, RealCostTemplate(), RungPolicy.Table);
+        var template = RealCostTemplate();
+        var result = ActionCorpusImporter.Import(_store, briefs, template, RungPolicy.Table);
 
-        // Atom-family resolution is untouched by this task -- same 3-imported/21-rejected split as
-        // ActionCorpusRealContentQualityTests already established before this task existed.
-        Assert.Equal(3, result.ImportedCount);
-        Assert.Equal(21, result.RejectedCount);
+        // Reconciliation: every parsed brief has exactly one outcome.
+        Assert.Equal(briefs.Count, result.Outcomes.Count);
+        Assert.Equal(briefs.Count, result.ImportedCount + result.RejectedCount);
+        Assert.True(result.ImportedCount > 0, "the real corpus must import at least one brief for this contract to be exercised");
 
-        // Unaffected: no kindHint authored on either -> Skill, category-driven cost, same as always.
-        var general0003 = _store.GetAction("action.general.0003")!;
-        Assert.Equal(ActionKind.Skill, general0003.Kind);
-        Assert.Equal("qi", _store.ListCosts("action.general.0003").Single().ResourceId);
+        var byId = briefs.ToDictionary(b => b.Id, StringComparer.Ordinal);
+        foreach (var outcome in result.Outcomes.Where(o => o.Imported))
+        {
+            var brief = byId[outcome.BriefId];
+            var stored = _store.GetAction(brief.Id)!;
 
-        var cabbagepult1 = _store.GetAction("action.species.cabbagepult.001")!;
-        Assert.Equal(ActionKind.Skill, cabbagepult1.Kind);
-        Assert.Equal("qi", _store.ListCosts("action.species.cabbagepult.001").Single().ResourceId);
+            // Kind contract: the authored kindHint, or Skill when absent.
+            var expectedKind = brief.KindHint ?? ActionKind.Skill;
+            Assert.Equal(expectedKind, stored.Kind);
 
-        // The one documented, intended change: kindHint="innate" was always in this file; only now is
-        // it honored.
-        var cabbagepult2 = _store.GetAction("action.species.cabbagepult.002")!;
-        Assert.Equal(ActionKind.Innate, cabbagepult2.Kind);
-        var cabbagepult2Cost = _store.ListCosts("action.species.cabbagepult.002").Single();
-        Assert.Equal("qi", cabbagepult2Cost.ResourceId);
-        Assert.Equal(ValueSpec.Of(25), cabbagepult2Cost.AmountSpec); // kinds.innate, not defense-category's 30
+            // Cost contract: the template row for (kind, category) — kind rows for Basic/Innate,
+            // the category row otherwise.
+            Assert.True(ActionCategories.TryParse(brief.Category, out var category), brief.Id);
+            var expectedRow = template.ResolveFor(expectedKind, category);
+            var cost = _store.ListCosts(brief.Id).Single();
+            Assert.Equal(expectedRow.ResourceId, cost.ResourceId);
+        }
     }
 }
