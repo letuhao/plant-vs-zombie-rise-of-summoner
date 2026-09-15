@@ -68,5 +68,7 @@ public static class BasicAttackGrantBuilder
         };
     }
 
-    public static string GrantIdFor(string ptr) => GrantPrefix + "@" + ptr.Trim();
+    /// <summary>Keyed on the canonical ptr (<see cref="CombatPtr.Normalize"/>): "1A2B", "1a2b" and
+    /// "0x1a2b" are one entity and must upsert one grant, never hold two that both fire.</summary>
+    public static string GrantIdFor(string ptr) => GrantPrefix + "@" + CombatPtr.Normalize(ptr);
 }

@@ -1128,7 +1128,7 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
 - [ ] **L-N16** Test: a record queued for a ptr later marked dead applies no delta and runs no `Die()`
       on the funnel path; fixture for `EventDrainHost.DeferForget` ordering (T9, GATE 2).
 - [x] **L-N17** Test: bind grant at ptr P, forget P, re-register P → no stale grant (T10).
-      *Done: `BasicAttackGrantRecycleTests` 4/4 — forget withdraws; new entity at P carries only its own element; withdraw catches a differently-cased ptr spelling (BasicAttackGrantBuilder keys GrantId on the raw spelling, so two spellings CAN coexist until withdraw); same-ptr rebind is an upsert. Mutation fails 2/4. Core.Tests 13541 via verify-change.*
+      *Done: `BasicAttackGrantRecycleTests` 4/4 — forget withdraws; new entity at P carries only its own element; withdraw catches a differently-cased ptr spelling (found: GrantId keyed on the raw spelling let two spellings of one entity hold two grants that both fire — fixed by normalising `GrantIdFor`, test `Two_spellings_of_one_ptr_bind_one_grant_not_two`); same-ptr rebind is an upsert. Mutation fails 2/4. Core.Tests 13541 via verify-change.*
 - [ ] **L-N18** Test `ResourceBaselineSubsystem` for side=zombie (max stamina > 0, spend succeeds),
       or record a stated exemption in `spec-basic-attack-cost.md` (T12).
 - [x] **L-N19** `fx.overlay_damage` sign contract. Producers disagree: lawn records store

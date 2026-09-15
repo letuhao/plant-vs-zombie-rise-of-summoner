@@ -75,6 +75,19 @@ public class BasicAttackGrantRecycleTests
     }
 
     [Fact]
+    public void Two_spellings_of_one_ptr_bind_one_grant_not_two()
+    {
+        // Two grants for one entity would both match its OnDamageDealt and double the rider delta —
+        // the same failure class 29cbb7f3 fixed for attacker/victim matching.
+        var bag = NewBag();
+        bag.Grant(BasicAttackGrantBuilder.Build("0x" + P.ToLowerInvariant(), ElementTypeId.Fire));
+        bag.Grant(BasicAttackGrantBuilder.Build(P, ElementTypeId.Fire));
+
+        Assert.Single(bag.ForOwner(null, EffectOwnerKeys.Entity(P)));
+        Assert.Single(MatchingDealt(bag, P));
+    }
+
+    [Fact]
     public void Rebinding_the_same_ptr_without_forgetting_is_an_upsert_not_a_duplicate()
     {
         var bag = NewBag();
