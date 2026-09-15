@@ -8,19 +8,28 @@
   },
   "guards": {
     "dal": "scripts/guard-dal.ps1",
-    "test-substrate": "scripts/guard-test-substrate.ps1"
+    "test-substrate": "scripts/guard-test-substrate.ps1",
+    "single-writer": "scripts/guard-single-writer.ps1",
+    "funnel-delta": "scripts/guard-funnel-delta.ps1",
+    "actor-hub": "scripts/guard-actor-hub.ps1",
+    "secondary-no-unity": "scripts/guard-secondary-no-unity.ps1",
+    "debug-scope": "scripts/guard-debug-scope.ps1",
+    "injector-compile": "scripts/guard-injector-compile.ps1"
   },
   "boundaries": [
     { "id": "data-item-socket", "kind": "owner", "paths": ["src/FusionRpg.Data/Sqlite/RpgStore.Sockets.cs"], "project": "data", "verificationId": "data.item-socket", "guards": ["dal", "test-substrate"], "level": "focused" },
     { "id": "data-item-socket-test", "kind": "owner", "paths": ["tests/FusionRpg.Data.Tests/Items/ItemSocketStoreTests.cs"], "project": "data", "verificationId": "data.item-socket", "guards": ["test-substrate"], "level": "focused" },
-    { "id": "guard-verification-boundary-tests", "kind": "owner", "paths": ["tests/FusionRpg.Guard.Tests/VerificationBoundaryWorkflowTests.cs"], "project": "guard", "verificationId": "guard.verification-boundaries", "guards": [], "level": "focused" },
+    { "id": "guard-verification-boundary-tests", "kind": "owner", "paths": ["tests/FusionRpg.Guard.Tests/VerificationBoundaryWorkflowTests.cs", "scripts/verification-boundaries.v1.json", "scripts/verify-change.ps1", "scripts/guard-verification-boundaries.ps1"], "project": "guard", "verificationId": "guard.verification-boundaries", "guards": [], "level": "focused" },
     { "id": "core-fallback", "kind": "owner", "paths": ["src/FusionRpg.Core/**"], "project": "core", "level": "module", "guards": [] },
     { "id": "data-fallback", "kind": "owner", "paths": ["src/FusionRpg.Data/**"], "project": "data", "level": "module", "guards": ["dal", "test-substrate"] },
     { "id": "server-fallback", "kind": "owner", "paths": ["src/FusionRpg.Server/**"], "project": "server", "level": "module", "guards": ["dal"] },
     { "id": "contracts-fallback", "kind": "owner", "paths": ["src/FusionRpg.Contracts/**"], "project": "core", "level": "module", "guards": [] },
     { "id": "cheatcore-fallback", "kind": "owner", "paths": ["src/FusionRpg.CheatCore/**"], "project": "core", "level": "module", "guards": [] }
-    ,{ "id": "injector-fallback", "kind": "owner", "paths": ["src/FusionRpg.Injector/**", "src/FusionRpg.Injector.BepInEx/**", "src/FusionRpg.Injector.MelonLoader/**", "src/FusionRpg.Injector.MelonLoader.39/**"], "project": "core", "level": "module", "guards": [] }
+    ,{ "id": "injector-fallback", "kind": "owner", "paths": ["src/FusionRpg.Injector/**", "src/FusionRpg.Injector.BepInEx/**", "src/FusionRpg.Injector.MelonLoader/**", "src/FusionRpg.Injector.MelonLoader.39/**", "scripts/guard-injector-compile.ps1"], "project": "guard", "level": "module", "guards": ["injector-compile", "single-writer", "funnel-delta", "actor-hub", "secondary-no-unity"] }
     ,{ "id": "launcher-fallback", "kind": "owner", "paths": ["src/FusionRpg.Launcher/**"], "project": "guard", "level": "module", "guards": [] }
+    ,{ "id": "core-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Core.Tests/**"], "project": "core", "level": "module", "guards": [] }
+    ,{ "id": "data-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Data.Tests/**"], "project": "data", "level": "module", "guards": [] }
+    ,{ "id": "guard-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Guard.Tests/**"], "project": "guard", "level": "module", "guards": [] }
     ,{ "id": "server-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Server.Tests/**"], "project": "server", "level": "module", "guards": [] }
   ]
 }

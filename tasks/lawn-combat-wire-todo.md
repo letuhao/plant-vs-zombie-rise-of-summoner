@@ -1138,9 +1138,10 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
 - [ ] **L-N21** Move the bullet-shooter fallback matcher (`GameHooks.BulletInit.Postfix`, fixed in
       `7073ffcb`) into a pure Core function with tests: Sunflower in same row, tie → drop, no column →
       drop, zombie-side bullet, adjacent-lane (Threepeater side pea) residual pinned as a known case.
-- [ ] **L-N23** Verification boundaries: add an owner mapping for `tests/FusionRpg.Core.Tests/Atoms/**`
+- [x] **L-N23** Verification boundaries: add an owner mapping for `tests/FusionRpg.Core.Tests/Atoms/**`
       (currently "BOUNDARY MISSING"); make `injector-fallback` run the injector host compile (scratch
       `OutputPath`) + single-writer/funnel/actor-hub/secondary guards instead of only Core.Tests.
+      *Done: registry adds owners for `tests/FusionRpg.{Core,Data,Guard}.Tests/**` and the registry/verify scripts; `injector-fallback` now runs `injector-compile` (new `scripts/guard-injector-compile.ps1`, temp OutputPath, loud SKIPPED without a game dir; deliberate compile error → exit 1) + single-writer/funnel/actor-hub/secondary guards + Guard.Tests. First real run exposed `EntityFields12PlusGuardTests` stale since T4 `e6af60b5` (3 assertions) — fixed. `verify-change` EXIT=0: 5 guards OK, Guard.Tests 266/266.*
 - [ ] **L-N24** `tools/ElementEnumGen` `--effect-check` mode wired into CI so a stale
       `EffectAtomCatalog.Generated.cs` fails (today no check mode exists).
 - [x] **L-N25** Audit `plant:{tid}`/`zombie:{tid}` owner keys for the same OnDamageDealt either-side
