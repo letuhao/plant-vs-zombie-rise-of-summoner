@@ -45,6 +45,21 @@ public static class InjectorSpawnHpPin
             return Pins.TryGetValue(key, out hp);
     }
 
+    /// <summary>Removes one ptr's pin — call from <see cref="GameHooks.ForgetEntity"/> (the same
+    /// site <c>LawnElementResolverHost.Invalidate</c> uses and for the identical reason, per that
+    /// call's own doc comment: "IL2CPP can hand this exact address to a NEW entity later in the same
+    /// match" — without this, a fresh, never-pinned entity that happens to land on a reused address
+    /// would silently inherit a long-dead entity's HP pin. Confirmed live, not theoretical: a debug
+    /// respawn during this same session reused a prior pinned zombie's exact ptr and inherited its
+    /// 20000 HP pin before this method existed.</summary>
+    public static void Remove(string? ptr)
+    {
+        var key = CombatPtr.Normalize(ptr);
+        if (string.IsNullOrEmpty(key)) return;
+        lock (Gate)
+            Pins.Remove(key);
+    }
+
     public static void Clear()
     {
         lock (Gate)

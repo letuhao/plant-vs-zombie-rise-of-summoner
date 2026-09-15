@@ -1551,6 +1551,9 @@ public static class GameHooks
         try { Effects.LawnElementResolverHost.Invalidate(ptr.ToString("X")); } catch { }
         try { Hud.ActorHudCache.Remove(ptr.ToString("X")); } catch { }
         try { Hud.ActorHudPool.ReleaseOwner(ptr.ToString("X")); } catch { }
+        // Same ptr-reuse hazard as LawnElementResolverHost.Invalidate above, same fix shape —
+        // see InjectorSpawnHpPin.Remove's own doc comment (confirmed live, not theoretical).
+        try { Stats.InjectorSpawnHpPin.Remove(ptr.ToString("X")); } catch { }
     }
 
     internal static void RecapturePlant(Plant p, string source)
