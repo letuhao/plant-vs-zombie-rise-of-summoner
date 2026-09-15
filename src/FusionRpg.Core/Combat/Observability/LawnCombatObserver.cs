@@ -92,6 +92,9 @@ public static class LawnCombatObserver
 
     static readonly List<LawnCombatHitRecord> Recent = new();
     static readonly Dictionary<string, int> IndexBySwingVictim = new(StringComparer.Ordinal);
+    // lawn-combat-wire L-N35: the overlay packet names the swing `shooter:tick`, never the bullet, so a bullet hit is also
+    // queued under its attacker+victim; an RPG record without a swing match takes the oldest unmerged one (FIFO).
+    static readonly Dictionary<string, Queue<int>> UnmergedByAttackerVictim = new(StringComparer.Ordinal);
     static readonly HashSet<string> SwingIds = new(StringComparer.Ordinal);
 
     static long _totalHits;
@@ -134,6 +137,13 @@ public static class LawnCombatObserver
             AttackerElement: null, VictimElement: null, MatchupRelation: null);
         Recent.Add(record);
         IndexBySwingVictim[Key(swingId, victimPtr)] = Recent.Count - 1;
+        if (!string.IsNullOrEmpty(attackerPtr))
+        {
+            var key = AttackerVictimKey(attackerPtr, victimPtr);
+            if (!UnmergedByAttackerVictim.TryGetValue(key, out var queue))
+                UnmergedByAttackerVictim[key] = queue = new Queue<int>();
+            queue.Enqueue(Recent.Count - 1);
+        }
     }
 
     /// <summary>Unconditional RPG-delta capture — called alongside (never instead of)
@@ -148,7 +158,8 @@ public static class LawnCombatObserver
         string outcome = "")
     {
         if (outcome == Outcomes.Miss) _rpgMisses++;
-        if (IndexBySwingVictim.TryGetValue(Key(swingId, victimPtr), out var idx) && idx < Recent.Count)
+        if ((IndexBySwingVictim.TryGetValue(Key(swingId, victimPtr), out var idx) && idx < Recent.Count && !Recent[idx].RpgDeltaObserved)
+            || TryTakeUnmerged(attackerPtr, victimPtr, out idx))
         {
             _rpgDeltaMerged++;
             var r = Recent[idx];
@@ -231,6 +242,7 @@ public static class LawnCombatObserver
         _rpgMisses = 0;
         Recent.Clear();
         IndexBySwingVictim.Clear();
+        UnmergedByAttackerVictim.Clear();
         return snap;
     }
 
@@ -243,4 +255,20 @@ public static class LawnCombatObserver
     }
 
     static string Key(string swingId, string victimPtr) => swingId + "|" + victimPtr;
+
+    static string AttackerVictimKey(string attackerPtr, string victimPtr) =>
+        CombatPtr.Normalize(attackerPtr) + "|" + CombatPtr.Normalize(victimPtr);
+
+    static bool TryTakeUnmerged(string attackerPtr, string victimPtr, out int idx)
+    {
+        idx = -1;
+        if (string.IsNullOrEmpty(attackerPtr) || !UnmergedByAttackerVictim.TryGetValue(AttackerVictimKey(attackerPtr, victimPtr), out var queue))
+            return false;
+        while (queue.Count > 0)
+        {
+            var candidate = queue.Dequeue();
+            if (candidate < Recent.Count && !Recent[candidate].RpgDeltaObserved) { idx = candidate; return true; }
+        }
+        return false;
+    }
 }

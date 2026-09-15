@@ -62,6 +62,17 @@ public static class EventDrainHost
         if (bulletPtr == IntPtr.Zero || shooterPtr == IntPtr.Zero) return;
         _bulletShooterCache[bulletPtr] = (shooterPtr, shooterTypeId);
     }
+    /// <summary>lawn-combat-wire L-N35: the shooter cached for <paramref name="bulletPtr"/>, without consuming it — the
+    /// observer records a hit before <see cref="TryRecordDealtFromBullet"/> takes the entry, and must name the same shooter
+    /// the RPG record will carry.</summary>
+    public static bool TryPeekBulletShooter(IntPtr bulletPtr, out IntPtr shooterPtr)
+    {
+        shooterPtr = IntPtr.Zero;
+        if (bulletPtr == IntPtr.Zero || !_bulletShooterCache.TryGetValue(bulletPtr, out var cached)) return false;
+        shooterPtr = cached.ShooterPtr;
+        return shooterPtr != IntPtr.Zero;
+    }
+
     static int _ambientMeleeAttackerFrame = -1;
 
     public static EventDrain Drain => _drain ??= new EventDrain(EffectRuntime.OnDrained);

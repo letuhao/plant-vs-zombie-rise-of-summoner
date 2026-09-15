@@ -162,8 +162,12 @@ public static class LawnCombatObserverBridge
             var bullet = obj.TryCast<Bullet>();
             if (bullet != null)
             {
+                // The swing stays the bullet (one pierce = one swing, D8). The attacker is the shooter the drain resolved
+                // at the bullet's spawn, so the RPG record for this hit (actor = shooter) can find this one (L-N35).
                 var ptr = GameDumps.Ptr(bullet);
-                return (ptr, ptr);
+                return EventDrainHost.TryPeekBulletShooter(bullet.Pointer, out var shooter)
+                    ? (shooter.ToString("X"), ptr)
+                    : (ptr, ptr);
             }
         }
         catch { }

@@ -1239,18 +1239,30 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       off): on window `ActionTriggers` 2 / `RpgDeltaMergedHits` 2 / `DrainTickTotalMs` 54; log
       `lawn-basic-attack switched off: withdrew 8 bound grants`; off window 21 vanilla hits with `ActionTriggers` 0,
       `RpgDeltaMergedHits` 0, `DrainTickTotalMs` 0. The live build was 38369ff3 + this change (L-N34 blocks HEAD).*
-- [ ] **L-N35** Observer streams never join (found by L-N7): a vanilla hit record's swing id is the bullet's ptr, while the
+- [x] **L-N35** Observer streams never join (found by L-N7): a vanilla hit record's swing id is the bullet's ptr, while the
       overlay packet's is `shooter:tick` with the shooter resolved from the bullet (`BulletShooterMatch`), so
       `RecordRpgDelta` never finds the vanilla record — live, 0 of 13 RPG records merged. Every per-hit comparison T13's
       proofs describe ("vanilla amount beside its RPG delta for the same swing") is therefore unobservable. Carry the
       resolved shooter on the vanilla record (or the bullet ptr on the packet) and join on it. Verify: a live run with
       `RpgDeltaMergedHits` equal to the RPG records whose vanilla hit landed in the same window, and a Core test for the join key.
+      *Done 2026-09-15: the vanilla bullet hit now names the shooter the drain cached at the bullet's spawn
+      (`EventDrainHost.TryPeekBulletShooter`, read before `TryRecordDealtFromBullet` consumes it) and keeps the bullet as its
+      swing; `LawnCombatObserver.RecordRpgDelta` falls back to the oldest unmerged vanilla hit with the same normalized
+      shooter+victim. Tests: `LawnCombatObserverTests.Rpg_delta_joins_the_oldest_unmerged_vanilla_hit_by_shooter_and_victim`
+      (FIFO order, ptr casing, different victim never joined; join mutant killed), guard
+      `tests/FusionRpg.Guard.Tests/LawnObserverShooterJoinGuardTests.cs`; verify-change Core 13592/13592, Guard 313/313, injector
+      compile + boundary guards OK. Live (worktree build 38369ff3 + this session's changes, L-N34 blocks HEAD), Adventure 2, five
+      placed Peashooters, feature on, 90 s (`docs/research/perf/_lawn-combat-observer-rpg-join-env-on.json`):
+      `RpgDeltaMergedHits` 11, `RpgDeltaUnmergedRecords` 0; each row shows vanilla 2122 beside its delta and outcome
+      (miss 0, hit −2833, crit −4326) for three distinct shooters. Found in passing: pooled bullet ptrs repeat inside one
+      window (swing `2CCF8DEBD20` twice), so `TotalSwings` 9 < hits 11 there — added to L-N33's D8 note.*
 - [ ] **L-N33** 300z drops (found by L-N9): with the feature on, `EventDrain` shed 35 and 362 records to the per-death
       flush budget in two 60 s runs (D9 says zero), and the observer's own ring dropped 4021 / 5541 records on and ~13k off,
       so its hit/swing/trigger counts are undercounts at 300z. Decide whether death-budget shedding breaks D9 or is the
       designed overload valve (then say so in the spec); size the observer ring from a measured 300z window or make its
       counters ring-independent. Also D8 at 300z: `ActionTriggers` 2764 vs `TotalSwings` 7376 — separate zombie bites from
-      grant-holding swings (or the ring loss) before calling it a D8 breach. Verify: a 300z run file whose
+      grant-holding swings (or the ring loss) before calling it a D8 breach. Also: the observer's swing identity is the bullet ptr, and Unity pools
+      bullets, so one ptr can be two swings in the same window (L-N35 live run) — swings undercount by construction. Verify: a 300z run file whose
       `ObserverDroppedRecords` is 0, triggers reconciled against grant-holding swings, and a written D9 ruling.
 - [ ] **L-N34** Boot crash on HEAD (found 2026-09-15, not this program's code): every build containing merge `8710d326`
       (`rift-gate-spec`) dies at startup with `0xc00000fd` (stack overflow, Windows Application log event 1000) right after

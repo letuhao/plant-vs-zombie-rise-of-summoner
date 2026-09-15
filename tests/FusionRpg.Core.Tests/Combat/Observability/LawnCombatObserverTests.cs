@@ -137,6 +137,29 @@ public class LawnCombatObserverTests
         Assert.Equal(new[] { "miss", "hit" }, snap.RecentHits.Select(h => h.RpgOutcome));
     }
 
+    /// <summary>lawn-combat-wire L-N35: the overlay packet names its swing `shooter:tick`, the vanilla hit names the bullet.
+    /// The RPG record must still join the vanilla hit by shooter and victim, oldest first, whatever the ptr casing.</summary>
+    [Fact]
+    public void Rpg_delta_joins_the_oldest_unmerged_vanilla_hit_by_shooter_and_victim()
+    {
+        LawnCombatObserver.RecordVanillaHit("B1", "226C30A5480", "226C3130320", "plant", 2122, 10);
+        LawnCombatObserver.RecordVanillaHit("B2", "226C30A5480", "226C3130320", "plant", 2122, 20);
+        LawnCombatObserver.RecordVanillaHit("B3", "226C30A5480", "OTHER", "plant", 2122, 30);
+
+        LawnCombatObserver.RecordRpgDelta("226C30A5480:1", "226c30a5480", "226c3130320", 0, null, null, null, LawnCombatObserver.Outcomes.Miss);
+        LawnCombatObserver.RecordRpgDelta("226C30A5480:2", "0x226c30a5480", "226c3130320", -4326, null, null, null, LawnCombatObserver.Outcomes.Crit);
+        LawnCombatObserver.RecordRpgDelta("226C30A5480:3", "226c30a5480", "226c3130320", -9, null, null, null, LawnCombatObserver.Outcomes.Hit);
+
+        var snap = LawnCombatObserver.SnapshotAndReset();
+
+        Assert.Equal(2, snap.RpgDeltaMergedHits);
+        Assert.Equal(1, snap.RpgDeltaUnmergedRecords); // a third RPG record with no third vanilla hit stays its own row
+        Assert.Equal(("B1", "miss", 0L), (snap.RecentHits[0].SwingId, snap.RecentHits[0].RpgOutcome, snap.RecentHits[0].RpgDelta));
+        Assert.Equal(("B2", "crit", -4326L), (snap.RecentHits[1].SwingId, snap.RecentHits[1].RpgOutcome, snap.RecentHits[1].RpgDelta));
+        Assert.False(snap.RecentHits[2].RpgDeltaObserved); // a different victim is never joined
+        Assert.Equal(4, snap.RecentHits.Count);
+    }
+
     [Fact]
     public void Overflow_beyond_the_window_cap_is_counted_never_silent()
     {
