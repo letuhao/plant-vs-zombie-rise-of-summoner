@@ -90,6 +90,12 @@ public static class EffectOwnerKey
             if (string.Equals(ev.Trigger, EffectTriggers.OnActivate, StringComparison.OrdinalIgnoreCase))
                 return string.Equals(ev.Side, "zombie", StringComparison.OrdinalIgnoreCase) && ev.TypeId == tid;
 
+            // lawn-combat-wire L-N25: OnDamageDealt Side is the ATTACKER side; match the attacker's own
+            // type only, exactly like the plant branch. The fall-through below used TargetTypeId when
+            // TypeId was absent — the victim's type standing in for the attacker's.
+            if (string.Equals(ev.Trigger, EffectTriggers.OnDamageDealt, StringComparison.OrdinalIgnoreCase))
+                return string.Equals(ev.Side, "zombie", StringComparison.OrdinalIgnoreCase) && ev.TypeId == tid;
+
             if (!string.Equals(ev.Side, "zombie", StringComparison.OrdinalIgnoreCase) &&
                 !(string.Equals(ev.Trigger, EffectTriggers.OnDamageDealt, StringComparison.OrdinalIgnoreCase) &&
                   string.Equals(ev.Side, "zombie", StringComparison.OrdinalIgnoreCase)))

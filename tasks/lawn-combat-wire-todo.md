@@ -1143,8 +1143,9 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       `OutputPath`) + single-writer/funnel/actor-hub/secondary guards instead of only Core.Tests.
 - [ ] **L-N24** `tools/ElementEnumGen` `--effect-check` mode wired into CI so a stale
       `EffectAtomCatalog.Generated.cs` fails (today no check mode exists).
-- [ ] **L-N25** Audit `plant:{tid}`/`zombie:{tid}` owner keys for the same OnDamageDealt either-side
+- [x] **L-N25** Audit `plant:{tid}`/`zombie:{tid}` owner keys for the same OnDamageDealt either-side
       match fixed for `entity:` in `29cbb7f3` (they fall back to `TargetTypeId`); test both directions.
+      *Done: `plant:` was already attacker-only. `zombie:` was a real defect — with `TypeId` absent it matched the victim's `TargetTypeId`. Explicit attacker-only `OnDamageDealt` arm added. `TypeOwnerKeyDirectionTests` 6/6; before the fix `Zombie_key_does_not_match_on_the_victims_type_when_the_attacker_type_is_absent` failed. Core.Tests 13524/13524.*
 - [x] **L-N5a** Bug: `debug.kill` ignores the request `ptr` (`DebugActions.Kill` → `OneShotSelected`).
       Honour `ptr` or reject it loudly; test the route contract.
       *Done: `DebugActions.Kill` routes an explicit `ptr` to `KillByPtr` (exact match, `CheatState.Error` when absent, no selection fallback). `DebugKillPtrContractGuardTests` 2/2; mutation (ptr read removed) fails `Kill_reads_ptr_before_any_selection_fallback`. Injector compiled to scratch; not live-deployed (game running).*
