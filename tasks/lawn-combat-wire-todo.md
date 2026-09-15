@@ -712,20 +712,34 @@ broader match, unaudited and untouched. Verified: full `Core.Tests` (13513/13513
 co-run, confirmed clean alone) — zero regressions from narrowing the one over-broad case. Committed
 `29cbb7f3`.
 
-**Live re-verification of this second fix was attempted and could not be completed this session — an
-honest gap, not a silent skip.** Three consecutive fresh-process attempts (full `Stop-Process` +
-redeploy each time, `lab-overlay` setup, `reset-mods`, `session/end`, waited 90s+ through the
-already-diagnosed post-load warm-up each time) produced **zero** `BulletInit`/combat activity at all —
-the plant never fired a single bullet, even repositioning the zombie to `x=3.0` (well within range).
-`loopMs` was healthy (~10ms) throughout the third attempt, ruling out the warm-up stall as the cause.
-This is a pure vanilla-PvZ/Unity-level symptom (no bullet ever spawns — a Harmony/game-AI question,
-not anything the two Core-layer C# fixes above could touch) and was not root-caused before time ran
-out this session. The fix itself does not depend on this re-verification: it is fully covered by the
-deterministic test suite above, and the FIRST fix (`fx.overlay_damage`) was already live-verified
-working correctly, with real nonzero, correctly-attributed damage, in the run immediately preceding
-this one. Whoever picks this up next: check whether the plant's own attack-interval/countdown state
-is somehow getting stuck across a redeploy (not ruled out — only in-memory staleness across a full
-process restart was ruled out) before assuming this is a build/deploy problem.
+**Live re-verification of this second fix — root-caused and completed.** Three consecutive attempts
+produced zero combat activity; root cause found via one screenshot (the class of check this program
+correctly avoids for *damage-number* verification, but the right tool for "why has nothing happened at
+all" — the injector's own telemetry had no way to say "the level already ended"): the board was
+sitting on a real vanilla **Lose** screen ("有僵尸进入了你的房子" — a zombie reached the house),
+`CanvasUp/LoseMenu(Clone)/backtomenu`/`TryAgain`, from several attempts earlier — every respawn after
+that point was into a dead, paused level, not a live one. `debug_inspect(scope="menu")` had only ever
+been checked for `PauseMenu_Btn`; a `LoseMenuBtn` state was never in the earlier check, so nothing
+surfaced it. Not a code defect, not caused by either fix. Dismissed (`backtomenu`), fresh
+`lab-overlay` setup, `reset-mods`, `session/end` — combat resumed immediately.
+
+**Clean result, single-fire confirmed live (2026-09-15, `attackerPtr=<plantPtr>` throughout)**:
+```
+fsm-trace CombatDamageDispatcher.OnDamageApplied outcome=Applied appliedAmount=-16 ...
+writer.zombie src=effect.fa10:lawn-basic-attack@<plantPtr> ptr=<zombiePtr> hp 780/840->764/840   (Δ-16, matches exactly)
+fsm-trace CombatDamageDispatcher.OnDamageApplied outcome=Applied appliedAmount=-21 ...
+writer.zombie ... hp 763/840->742/840   (Δ-21, matches exactly)
+```
+Exactly ONE `OnDamageApplied` per hit now (was two, summing to the write, before the fix), and every
+`writer.zombie` delta matches its single `OnDamageApplied` value exactly — no more doubling. Both
+fixes (`fdf3885c`, `29cbb7f3`) are now live-verified, not just test-verified.
+
+**Lesson for this program's own live-probe discipline, named so it isn't repeated**: a "nothing is
+happening" symptom needs a menu-state check for BOTH `PauseMenu_Btn` and `LoseMenuBtn`/win-equivalent
+states before spending time on a code-level root cause — the injector's own telemetry has no dedicated
+signal for "the level already ended," so this is exactly the kind of gap a screenshot is the right,
+fast tool for, distinct from the already-correct rule against using screenshots to read exact damage
+numbers.
 
 **Net effect on this task's status:** proof 1 (attribution) is now confirmed **three ways** — the
 observer's `swing=<plantPtr>:N` sample, the independent FSM log trail (nodes 1-5), and now a genuine
