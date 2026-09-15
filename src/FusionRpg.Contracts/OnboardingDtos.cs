@@ -53,3 +53,19 @@ public sealed class OnboardingStoryAckDto
     [JsonPropertyName("reason")] public string Reason { get; set; } = "";
     [JsonPropertyName("story")] public OnboardingStoryDto? Story { get; set; }
 }
+
+/// <summary>
+/// rift-gate first-open-signal: the durable once-per-player "the web FE has been opened" fact.
+/// <see cref="Actionable"/> is the server's own injector-connectivity read, so a consumer knows
+/// whether the capture trigger can fire yet without guessing. Trigger only — capture is separate.
+/// </summary>
+public sealed class FirstOpenDto
+{
+    [JsonPropertyName("playerId")] public long PlayerId { get; set; }
+    /// <summary>False until the FE has been opened at least once for this player.</summary>
+    [JsonPropertyName("opened")] public bool Opened { get; set; }
+    [JsonPropertyName("openedUtc")] public string? OpenedUtc { get; set; }
+    [JsonPropertyName("revision")] public long Revision { get; set; }
+    /// <summary>True when an injector is connected, i.e. the fact can be acted on.</summary>
+    [JsonPropertyName("actionable")] public bool Actionable { get; set; }
+}

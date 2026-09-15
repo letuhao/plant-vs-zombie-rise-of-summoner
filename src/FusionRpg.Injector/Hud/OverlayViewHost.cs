@@ -278,7 +278,10 @@ public static class OverlayViewHost
         try
         {
             _navigated = false;
-            controller.CoreWebView2.Navigate(_url);
+            // rift-gate decision 16: mark the visit as embedded, so the page knows Leave can work.
+            // _url stays bare (it is also the same-origin reference); only the navigation carries it.
+            controller.CoreWebView2.Navigate(
+                FusionRpg.Core.Overlay.OverlayEmbedMarker.MarkedUrl(_url));
         }
         catch (Exception ex)
         {

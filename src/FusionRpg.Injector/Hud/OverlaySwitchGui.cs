@@ -4,7 +4,11 @@ using UnityEngine;
 namespace FusionRpg.Injector.Hud;
 
 /// <summary>
-/// The in-game "switch to the web UI" button. One action only — it is not a cheats surface.
+/// The in-match "switch to the web UI" button. One action only — it is not a cheats surface.
+///
+/// Per rift-gate decision 15 this is the **one live-lawn affordance**, restyled to the tombstone
+/// treatment. Per decision 18 it **stays IMGUI**: it is match HUD chrome drawn over a live board, not
+/// part of a menu hierarchy, so it deliberately does not join the uGUI menu art.
 ///
 /// Interactive IMGUI cannot use the Repaint-only gate the floaters use: the control has to be drawn
 /// on the Layout and mouse passes too or it never receives input. Same event filter as
@@ -15,6 +19,13 @@ public static class OverlaySwitchGui
     static Rect _rect;
     static int _rectW = -1;
     static int _rectH = -1;
+
+    /// <summary>
+    /// The tombstone treatment. Presentation constants, not balance numbers: they exist so the control
+    /// reads as the same Rift affordance as the menu tombstone, and no balance pass would move them.
+    /// </summary>
+    static readonly Color TombstoneControlTint = new(0.43f, 0.16f, 0.82f, 1f);
+    static readonly Color TombstoneLabelTint = new(0.90f, 1f, 0.72f, 1f);
 
     public static void Draw()
     {
@@ -37,8 +48,26 @@ public static class OverlaySwitchGui
         try
         {
             EnsureLayout();
-            if (GUI.Button(_rect, "RPG"))
-                OverlaySwitch.RequestToggle();
+
+            // Decision 15: the tombstone treatment, applied as a tint so the control itself is the
+            // same one button. The default skin's control colour is replaced with the rift violet and
+            // restored in a finally, so this cannot leak into any other GUI drawn in the same pass.
+            var priorBackground = GUI.backgroundColor;
+            var priorColor = GUI.contentColor;
+            try
+            {
+                GUI.backgroundColor = TombstoneControlTint;
+                GUI.contentColor = TombstoneLabelTint;
+
+                // Still exactly ONE action: open/close the web FE through the shared request path.
+                if (GUI.Button(_rect, "RPG"))
+                    OverlaySwitch.RequestToggle();
+            }
+            finally
+            {
+                GUI.backgroundColor = priorBackground;
+                GUI.contentColor = priorColor;
+            }
         }
         catch { }
     }

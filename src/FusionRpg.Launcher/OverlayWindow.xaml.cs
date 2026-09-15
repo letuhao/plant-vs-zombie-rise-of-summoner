@@ -84,9 +84,34 @@ public partial class OverlayWindow : Window
 
         if (!string.Equals(_currentUrl, url, StringComparison.OrdinalIgnoreCase))
         {
+            // rift-gate decision 16: mark the visit as embedded, so the page knows Leave can work.
+            // The bare URL stays the source; only the navigated form carries the marker.
+            //
+            // The literal is duplicated on purpose: this project (net8.0-windows WPF) shares no
+            // assembly with FusionRpg.Core / the net6.0 injector, exactly like PipeName. The
+            // RiftGateEmbedMarkerGuardTests pin the launcher's literal to the Core constant and to
+            // the web reader, so a drift fails a test instead of silently disabling Leave.
             _currentUrl = url;
-            Web.CoreWebView2.Navigate(url);
+            Web.CoreWebView2.Navigate(AppendEmbedMarker(url));
         }
+    }
+
+    /// <summary>
+    /// rift-gate decision 16 — the embed marker, duplicated from
+    /// <c>FusionRpg.Core.Overlay.OverlayEmbedMarker</c> because this project shares no assembly with
+    /// Core (same as <c>OverlayPipeServer.PipeName</c>). A query flag, not a hash fragment: the FE's
+    /// HashRouter owns the hash. Guarded by <c>RiftGateEmbedMarkerGuardTests</c>.
+    /// </summary>
+    const string EmbedQueryKey = "embed";
+    const string EmbedQueryValue = "1";
+
+    static string AppendEmbedMarker(string? baseUrl)
+    {
+        var url = baseUrl ?? "";
+        if (url.Length == 0) return url;
+        if (url.Contains($"{EmbedQueryKey}={EmbedQueryValue}", StringComparison.Ordinal)) return url;
+        var separator = url.Contains('?', StringComparison.Ordinal) ? '&' : '?';
+        return $"{url}{separator}{EmbedQueryKey}={EmbedQueryValue}";
     }
 
     void Back_Click(object sender, RoutedEventArgs e) => _backToGame();
