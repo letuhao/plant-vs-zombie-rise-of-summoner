@@ -690,10 +690,42 @@ writer.zombie src=effect.fa10:lawn-basic-attack@<plantPtr> ptr=<zombiePtr> hp 79
 repeated across 5 consecutive real hits (-37, -16, -32, -21, -16), source correctly stamped with the
 **plant's own ptr** (not a reflection bounce, not the bullet's ptr) — the direct proof the owner asked
 for from the start of this whole investigation: the plant's attack triggers, and it now actually deals
-real RPG damage to the zombie. (A minor, non-blocking curiosity noted for later: `OnDamageApplied`
-still fires twice per hit, one of the two often reading `0` — worth a follow-up look at
-`TargetResolver.Resolve`'s ptr count for this grant shape, but it does not affect the correctness of
-the nonzero write observed.)
+real RPG damage to the zombie.
+
+**Finding D — found and fixed the same session: `OnDamageApplied` fired TWICE per single real hit,
+doubling every basic-attack's RPG delta.** Traced from the arithmetic (5 consecutive samples:
+`-16+-21=-37`, `0+-16=-16`, `-16+-16=-32`, `0+-21=-21`, `-16+0=-16`, each pair summing exactly to the
+logged `writer.zombie hp X->Y` delta) to the real cause: `EffectOwnerKey.MatchesEvent`'s `"entity:"`
+branch (`EffectProcAndOwner.cs:107-117`) matched a grant whenever its own ptr equalled EITHER
+`ev.ActorPtr` OR `ev.TargetPtr`, with no regard for which trigger was firing. For `OnDamageDealt`
+specifically (directional — `ActorPtr` is the attacker, `TargetPtr` the victim), any entity-scoped
+grant bound to BOTH combatants — `lawn-basic-attack`'s own shape, since every plant AND every zombie
+holds one — matched twice per hit: the attacker's own grant (correct) and the victim's own grant for
+its unrelated future attacks (wrong). Both produced a packet with the SAME `ActorPtr` (the field comes
+from the event, never from whichever grant matched), which is exactly why both `OnDamageApplied`
+calls showed the plant's ptr, not one plant/one zombie as a reflection bounce would. **Fixed**:
+narrowed `OnDamageDealt` to actor-only, mirroring the `plant:{tid}`/`zombie:{tid}` branches just above,
+which already carried this exact narrowing for the identical trigger; every other trigger (crucially
+`OnDeath` kill-credit, per `EffectBagAuditTests`'s own documented "Actor or Target" contract) keeps the
+broader match, unaudited and untouched. Verified: full `Core.Tests` (13513/13513), `Server.Tests`
+(443/443), `Data.Tests` (1295/1295, one failure isolated to cross-run interference from a parallel
+co-run, confirmed clean alone) — zero regressions from narrowing the one over-broad case. Committed
+`29cbb7f3`.
+
+**Live re-verification of this second fix was attempted and could not be completed this session — an
+honest gap, not a silent skip.** Three consecutive fresh-process attempts (full `Stop-Process` +
+redeploy each time, `lab-overlay` setup, `reset-mods`, `session/end`, waited 90s+ through the
+already-diagnosed post-load warm-up each time) produced **zero** `BulletInit`/combat activity at all —
+the plant never fired a single bullet, even repositioning the zombie to `x=3.0` (well within range).
+`loopMs` was healthy (~10ms) throughout the third attempt, ruling out the warm-up stall as the cause.
+This is a pure vanilla-PvZ/Unity-level symptom (no bullet ever spawns — a Harmony/game-AI question,
+not anything the two Core-layer C# fixes above could touch) and was not root-caused before time ran
+out this session. The fix itself does not depend on this re-verification: it is fully covered by the
+deterministic test suite above, and the FIRST fix (`fx.overlay_damage`) was already live-verified
+working correctly, with real nonzero, correctly-attributed damage, in the run immediately preceding
+this one. Whoever picks this up next: check whether the plant's own attack-interval/countdown state
+is somehow getting stuck across a redeploy (not ruled out — only in-memory staleness across a full
+process restart was ruled out) before assuming this is a build/deploy problem.
 
 **Net effect on this task's status:** proof 1 (attribution) is now confirmed **three ways** — the
 observer's `swing=<plantPtr>:N` sample, the independent FSM log trail (nodes 1-5), and now a genuine
