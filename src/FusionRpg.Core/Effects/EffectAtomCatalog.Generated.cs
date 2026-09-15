@@ -216,7 +216,7 @@ public static class EffectAtomCatalog
                     Action = "ApplyResourceDelta",
                     Params = new()
                     {
-                        ["amount"] = new Dictionary<string, object?> { ["eventField"] = "damage", ["multiplierMilli"] = 1000 },
+                        ["amount"] = new Dictionary<string, object?> { ["eventField"] = "damage", ["multiplierMilli"] = -1000 },
                         ["channel"] = "hp",
                     },
                 },

@@ -37,7 +37,7 @@
       "icdKey": "fx.overlay_damage",
       "params": {
         "channel": "hp",
-        "amount": { "eventField": "damage", "multiplierMilli": 1000 }
+        "amount": { "eventField": "damage", "multiplierMilli": -1000 }
       },
       "when": {
         "trigger": "OnDamageDealt"

@@ -139,7 +139,7 @@ public class MigrationParityTests
             {
                 Assert.Equal("channel=\"hp\"", wantCanon); // frozen: no amount source at all
                 Assert.Equal(
-                    "amount={\"eventField\":\"damage\",\"multiplierMilli\":1000},channel=\"hp\"",
+                    "amount={\"eventField\":\"damage\",\"multiplierMilli\":-1000},channel=\"hp\"",
                     gotCanon); // live: reads the real event damage
                 continue;
             }

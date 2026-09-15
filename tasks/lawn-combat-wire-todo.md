@@ -1126,12 +1126,13 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
 - [ ] **L-N17** Test: bind grant at ptr P, forget P, re-register P → no stale grant (T10).
 - [ ] **L-N18** Test `ResourceBaselineSubsystem` for side=zombie (max stamina > 0, spend succeeds),
       or record a stated exemption in `spec-basic-attack-cost.md` (T12).
-- [ ] **L-N19** `fx.overlay_damage` sign contract. Producers disagree: lawn records store
+- [x] **L-N19** `fx.overlay_damage` sign contract. Producers disagree: lawn records store
       `amount = -|damage|`; `EffectBag.DrainOverlayProcs`, battle `BasicAttack`, `SimEffectHost` emit
       positive `Damage`; `OverlayCombatMath.Finalize` treats positive as heal. Define the sign in
       `ValueSpec`/`DamagePacketBuilder.ResolveAmount` (or author `multiplierMilli:-1000` against a
       magnitude-positive contract) and add bag-level tests with a lawn-shaped AND a battle-shaped
       event asserting a non-zero negative HP packet.
+      *Done: `eventField:"damage"` now reads the magnitude (`DamagePacketBuilder.ResolveAmount`); `fx.overlay_damage` authored `multiplierMilli:-1000`; catalog regenerated (1-line diff); parity pin updated; sign contract added to `spec-value-spec-and-curve.md`. `EventLinkedDamageSignTests` 5/5 (lawn -20 and battle +20 both give -20; +500 gives +10 heal); before the fix the lawn-shaped cases failed. Core.Tests 13537, AtomImporter.Tests 33, ElementEnumGen.Tests 14. Lawn numbers unchanged by construction; live check stays L-N22. Registry gained `seed-atoms-fallback` owner.*
 - [ ] **L-N20** Move the debug-spawn HP pin from a post-write re-assert into a Hub override input
       (`InjectorDerivedOverride` pattern) so a pin never clobbers Hub maxHp bonuses; move pin/ratio
       math into Core with unit tests (currently zero tests, Injector.Tests not in CI).

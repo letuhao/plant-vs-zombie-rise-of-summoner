@@ -150,6 +150,13 @@ adding a second member is a reviewed change here, the same discipline `LeafId` a
 an `eventField` with no `multiplierMilli` as `BadValueSpec`) — it is the balance number ("50% lifesteal"),
 so it is never silently defaulted the way an omitted `roll` may be.
 
+**Sign (amended 2026-09-15, lawn-combat-wire L-N19).** `"damage"` resolves to the event's damage
+**magnitude**; `multiplierMilli` carries the sign — negative damages the target, positive heals
+(`500` = 50% lifesteal). Producers disagree on `EffectEventDto.Damage`'s own sign (lawn `EventDrain`
+stamps `-|d|`, battle `BasicAttack` and `EffectBag` overlay procs `+|d|`), so reading the signed value
+made `fx.overlay_damage` damage on the lawn and heal everywhere else. Pinned by
+`EventLinkedDamageSignTests`.
+
 **Why this could not resolve through `ValueSpec.Resolve(IAtomRandom?)`.** That method has exactly two
 callers in the runtime (`Instantiator.Freeze` at item-drop time, `CostLedger.TryPay` at action-cast
 time) and **neither has a firing combat event in scope** — confirmed by tracing both call stacks, not

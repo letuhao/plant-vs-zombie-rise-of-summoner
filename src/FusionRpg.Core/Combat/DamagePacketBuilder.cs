@@ -82,7 +82,10 @@ public static class DamagePacketBuilder
                 // throwing — the same "never crash the hot path" rule every other overlay read follows.
                 var fieldValue = field switch
                 {
-                    "damage" => ev?.Damage ?? 0,
+                    // Magnitude: producers disagree on Damage's sign (lawn EventDrain -|d|, battle and
+                    // overlay procs +|d|). The authored multiplierMilli carries the sign: negative
+                    // damages, positive heals ("500" = 50% lifesteal). lawn-combat-wire L-N19.
+                    "damage" => Math.Abs(ev?.Damage ?? 0),
                     _ => 0,
                 };
                 return PowerMath.DivRound(fieldValue * multiplierMilli, PowerMath.One);
