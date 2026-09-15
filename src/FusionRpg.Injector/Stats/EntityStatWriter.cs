@@ -307,9 +307,15 @@ public static class EntityStatWriter
     /// lawn-combat-wire 2026-09-15) — <see cref="ForceSetPlantHp"/> sets current HP to its own `hp`
     /// argument unconditionally, which is exactly wrong for a per-reapply re-assert: it would snap the
     /// plant back to full health every time the max-HP override needed correcting, undoing whatever
-    /// real damage combat had already dealt. No-op when the live max already meets or exceeds the pin
-    /// (the common case, once applied) — only fires the one time an <c>includeAbsolute: false</c>
-    /// reapply has actually reverted it.
+    /// real damage combat had already dealt. True no-op only when the live max already exactly matches
+    /// the pin; corrects in EITHER direction otherwise — a debug-spawn's pinned HP is an intentional
+    /// exact value, not a floor. <b>2026-09-15 correction (found live during a T14 soul-farming
+    /// attempt):</b> this used to `return` whenever `liveMax >= targetMaxHp`, which silently made the
+    /// pin a one-way buff-only ratchet — a deliberately LOW pin (e.g. a 15-HP debug zombie spawned to
+    /// die quickly) was invisibly healed back to its species baseline by the very next
+    /// `PushScalesNow()`/reapply cycle (`liveMax=270 >= targetMaxHp=15` skipped the correction), and
+    /// the zombie survived hits it should not have. The ratio-preserving math below already works
+    /// correctly in both directions; only the early-return direction check was wrong.
     /// </summary>
     public static void ForceSetPlantMaxHpPreserveRatio(Plant p, long targetMaxHp, string source)
     {
@@ -317,7 +323,7 @@ public static class EntityStatWriter
         try
         {
             var liveMax = (long)p.thePlantMaxHealth;
-            if (liveMax >= targetMaxHp) return;
+            if (liveMax == targetMaxHp) return;
             var liveHp = (long)p.thePlantHealth;
             var ratio = liveMax > 0 ? (double)liveHp / liveMax : 1.0;
             var newHp = Math.Clamp((long)Math.Round(targetMaxHp * ratio), 1, targetMaxHp);
@@ -340,7 +346,7 @@ public static class EntityStatWriter
         try
         {
             var liveMax = ZombieCombatFields.GetMaxHp(z);
-            if (liveMax >= targetMaxHp) return;
+            if (liveMax == targetMaxHp) return;
             var liveHp = ZombieCombatFields.GetHp(z);
             var ratio = liveMax > 0 ? (double)liveHp / liveMax : 1.0;
             var newHp = Math.Clamp((long)Math.Round(targetMaxHp * ratio), 1, targetMaxHp);
