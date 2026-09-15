@@ -107,13 +107,27 @@ public static class EffectOwnerKey
         if (key.StartsWith("entity:", StringComparison.OrdinalIgnoreCase))
         {
             var want = StatApplyScope.Normalize(key);
-            if (!string.IsNullOrWhiteSpace(ev.ActorPtr) &&
-                string.Equals(want, StatApplyScope.Normalize(EffectOwnerKeys.Entity(ev.ActorPtr)), StringComparison.Ordinal))
-                return true;
-            if (!string.IsNullOrWhiteSpace(ev.TargetPtr) &&
-                string.Equals(want, StatApplyScope.Normalize(EffectOwnerKeys.Entity(ev.TargetPtr)), StringComparison.Ordinal))
-                return true;
-            return false;
+            var matchesActor = !string.IsNullOrWhiteSpace(ev.ActorPtr) &&
+                string.Equals(want, StatApplyScope.Normalize(EffectOwnerKeys.Entity(ev.ActorPtr)), StringComparison.Ordinal);
+            var matchesTarget = !string.IsNullOrWhiteSpace(ev.TargetPtr) &&
+                string.Equals(want, StatApplyScope.Normalize(EffectOwnerKeys.Entity(ev.TargetPtr)), StringComparison.Ordinal);
+
+            // lawn-combat-wire (2026-09-15, real live-verified defect): OnDamageDealt is directional —
+            // ev.ActorPtr is the ATTACKER, ev.TargetPtr the victim. Every entity-scoped grant bound to
+            // BOTH combatants in a fight (lawn-basic-attack's own shape: every plant AND every zombie
+            // holds one) matched on EITHER ptr before this line, so a single hit fired the attacker's
+            // OWN grant (correct) AND the victim's OWN grant for its (unrelated, future) attacks
+            // (wrong) — silently doubling every basic-attack's RPG delta since T10 shipped, hidden
+            // until the same session's fx.overlay_damage fix (fdf3885c) made the delta non-zero enough
+            // to notice. Narrowed to actor-only here, mirroring the plant:{tid}/zombie:{tid} branches
+            // above, which already carry this exact narrowing for the identical trigger. OnDamageTaken
+            // and every other trigger keep the broader either-ptr match (e.g. OnDeath kill-credit,
+            // EffectBagAuditTests's own documented "Actor or Target" contract) — unaudited here, named
+            // rather than silently swept into the same fix.
+            if (string.Equals(ev.Trigger, EffectTriggers.OnDamageDealt, StringComparison.OrdinalIgnoreCase))
+                return matchesActor;
+
+            return matchesActor || matchesTarget;
         }
 
         if (key.StartsWith("player:", StringComparison.OrdinalIgnoreCase))
