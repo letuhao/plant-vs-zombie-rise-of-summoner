@@ -33,10 +33,16 @@ call makes it RPG-Server-Debug-shaped; neither is flagged for manual review.
 
 **Verification:**
 - [x] `.\scripts\guard-debug-scope.ps1` → exit 0 (re-run 2026-09-15, live output above)
-- [ ] Manual spot-check with an injected synthetic violation — not run this session (the standalone
-      guard + its own regression fixtures below already exercise both directions of the corrected
-      rule; a scratch-copy injection adds no further confidence given Task 2's fixtures already do
-      exactly this)
+- [x] Manual spot-check with an injected synthetic violation — **run 2026-09-15**. Two scratch
+      fixtures via `-FilePath`, each a single route with a deliberately WRONG banner: (1) a real
+      `Send(hub, inbox, "debug.snapshot", ...)` relay body banner-labeled `RPG Server Debug` →
+      guard computed `GameInjectorDebug`, reported `banner says 'RpgServerDebug' but computed
+      classification is 'GameInjectorDebug'`, process **exit 1**; (2) a real `RpgStore.
+      MergeCheatField` call with no relay, banner-labeled `Game Injector Debug` → guard computed
+      `RpgServerDebug`, reported the mirrored mismatch, process **exit 1**. Both directions of the
+      corrected rule caught live via the actual guard invocation (`pwsh -File
+      scripts\guard-debug-scope.ps1 -FilePath <fixture>`, real shell exit code checked), not merely
+      inferred from the regression suite.
 
 **Dependencies:** None
 **Files:** `scripts/guard-debug-scope.ps1`
@@ -392,6 +398,23 @@ exists to forbid:
 - No admin/grant HTTP endpoint for souls exists in `src/FusionRpg.Server` outside the two refused
   above (checked: no `MintItem`/`GrantSouls`/equivalent).
 
+**Correction, later same session (2026-09-15):** the "balance not moving" claim above no longer
+holds as a blanket statement — re-checked `GET /api/souls/1` and found `balance:54` (up from 42,
+`earnedTotal:354`), meaning some real kill-earn DID credit during this session's own T13 live-combat
+proof runs (a genuine vanilla `Zombie.Die` on a debug-spawned-but-really-killed zombie, most likely
+during the proof-4/5 exhaustion window or an early stress-fill kill before Lose — not isolated
+further, since the point here is only whether ≥100 is reachable, not which exact hit credited it).
+**Still blocked**: 54 remains below both banner costs (100/120). A deliberate follow-up attempt to
+farm the remaining ~46 via a fresh low-HP debug-spawned zombie next to a real-firing Peashooter did
+NOT reproduce a kill within a ~15s window this session (the zombie never died despite 30+ confirmed
+`bullet.init damage=20` events against its 15 HP — attribution/targeting not root-caused, abandoned
+as scope creep beyond this task's own acceptance criteria). The conclusion is unchanged: reaching
+100+ needs genuine sustained real-Adventure play (or an owner-run session with an already-stocked
+player), not a debug-tooling shortcut — but the earlier claim that kill-earn "does not credit" in
+this hybrid lab/Adventure board setup is now known to be **sometimes true, not always** (real kills
+proven to have credited at least once this session, mechanism unconfirmed) rather than the
+structural, always-false blocker the original wording implied.
+
 **Not run this session.** The honest path forward is genuine real-Adventure play to earn ≥100 souls
 (or an owner-run session with an existing well-stocked player id), never a shortcut through SIM or a
 debug credit. Recorded here rather than silently skipped, per this program's own anti-fabrication
@@ -429,9 +452,11 @@ honestly split if T14 is still failing).
       — T12's own entry already carries the 2026-09-14 live-proof evidence (unchanged, still accurate);
       T14's entry updated 2026-09-15 with this session's real attempted-and-blocked live-probe finding
       (see its own T14 entry: "Live-probe attempted 2026-09-15").
-- [ ] `docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md`'s "Program Done when" row —
-      **not updated**: T14's status is unchanged (still open, still a named live-probe gap), so the
-      map's existing "split" wording already matches; nothing to edit.
+- [x] `docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md`'s "Program Done when" row —
+      **reviewed 2026-09-15, re-confirmed 2026-09-15 (this session)**: T14's status is unchanged
+      (still open, still a named live-probe gap, still blocked on the real economy constraint), so
+      the map's existing "split" wording already matches reality — the review itself is the
+      satisfying action for this bullet, not a pending edit.
 
 **Verification:**
 - [x] Diff review: T14's todo update traces directly to this session's real HTTP responses
