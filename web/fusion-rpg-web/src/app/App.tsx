@@ -3,6 +3,7 @@ import { useActorSurfaceCatalog } from "@/lib/bus";
 import { Toasts } from "@/shell/Toasts";
 import { OverlayLeave } from "@/shell/OverlayLeave";
 import { FirstOpenSignal } from "@/shell/FirstOpenSignal";
+import { EntryLandingHost } from "@/shell/EntryLandingHost";
 import { AppProviders } from "./providers";
 import { AppRoutes } from "./routes";
 
@@ -15,12 +16,15 @@ import { AppRoutes } from "./routes";
 //
 // FirstOpenSignal is here too (rift-gate first-open-signal): the durable "the FE has been opened" fact
 // is about the FE opening, not about any route, so it belongs at the root and fires once per load.
+//
+// EntryLandingHost must be INSIDE HashRouter — it navigates (rift-gate entry-landing).
 export default function App() {
   return (
     <AppProviders>
       <ActorSurfaceCatalogBootstrap />
       <FirstOpenSignal />
       <HashRouter>
+        <EntryLandingHost />
         <AppRoutes />
         <Toasts />
         <OverlayLeave />

@@ -8,7 +8,8 @@ import { getJson, sendJson } from "./rest";
  * on; it builds no capture.
  *
  * Keyed on the FE being opened, deliberately NOT on the tombstone or the embed marker: it must be
- * equally correct for the menu tombstone, F10, the launcher's "Open RPG UI", or a plain browser visit.
+ * equally correct for the menu tombstone, the host hotkey, the launcher's "Open RPG UI", or a plain
+ * browser visit.
  *
  * The write is best-effort: a failure is retried on the next load and never blocks the FE.
  */

@@ -1,7 +1,7 @@
 # Todo: `rift-gate`
 
 **Status:** **approved 2026-09-15** (owner). Phase 2 (Plan) complete; implementation is authorized via `/build full`.
-**13 tasks · 5 checkpoints · 0 gates.**
+**13 tasks · 5 checkpoints · 0 gates.** · **Build complete 2026-09-15**: all 13 tasks gated PASS by an independent fresh-context verifier.
 **Plan:** [rift-gate-plan.md](rift-gate-plan.md) · **Map:**
 [../docs/architecture/rift-gate-map.md](../docs/architecture/rift-gate-map.md) ·
 **Specs:** `docs/architecture/rift-gate/spec-{menu-anchor,tombstone,overlay-hide,first-open-signal,entry-landing}.md`
