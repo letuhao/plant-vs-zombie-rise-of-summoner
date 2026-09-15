@@ -407,13 +407,24 @@ further, since the point here is only whether ≥100 is reachable, not which exa
 **Still blocked**: 54 remains below both banner costs (100/120). A deliberate follow-up attempt to
 farm the remaining ~46 via a fresh low-HP debug-spawned zombie next to a real-firing Peashooter did
 NOT reproduce a kill within a ~15s window this session (the zombie never died despite 30+ confirmed
-`bullet.init damage=20` events against its 15 HP — attribution/targeting not root-caused, abandoned
-as scope creep beyond this task's own acceptance criteria). The conclusion is unchanged: reaching
-100+ needs genuine sustained real-Adventure play (or an owner-run session with an already-stocked
-player), not a debug-tooling shortcut — but the earlier claim that kill-earn "does not credit" in
-this hybrid lab/Adventure board setup is now known to be **sometimes true, not always** (real kills
-proven to have credited at least once this session, mechanism unconfirmed) rather than the
-structural, always-false blocker the original wording implied.
+`bullet.init damage=20` events against its 15 HP) — **root-caused, not abandoned unexplained**: found
+and fixed a real bug in this session's own `InjectorSpawnHpPin` mechanism (commit `755c1805`):
+`ForceSetPlantMaxHpPreserveRatio`/`ForceSetZombieMaxHpPreserveRatio`'s early-return guard
+(`if (liveMax >= targetMaxHp) return;`) only ever re-asserted a BUFF, never an intentional DEBUFF —
+a 15-HP pin was silently healed back to the species baseline (270) by the very next
+`PushScalesNow()` reapply, since `270 >= 15` skipped the correction. Fixed to `if (liveMax ==
+targetMaxHp) return;`, correcting in either direction; `dotnet test tests/FusionRpg.Core.Tests`
+13513/13513 via `verify-change.ps1`. **Live redeploy/re-test blocked separately**: the running
+MelonLoader game holds a persistent OS-level lock on `FusionRpg.Contracts.dll` for its whole
+lifetime (confirmed after a full `debug_restart_game` cycle re-locked it immediately under a new
+PID) — matches `CLAUDE.md`'s own documented dll-freshness gotcha ("close the game first if it holds
+the DLL lock"). A full close from the owner's own terminal, then redeploy, is needed before the
+farm attempt can be retried with the fix live. The conclusion is unchanged: reaching 100+ needs
+genuine sustained real-Adventure play (or an owner-run session with an already-stocked player), not
+a debug-tooling shortcut — but the earlier claim that kill-earn "does not credit" in this hybrid
+lab/Adventure board setup is now known to be **sometimes true, not always** (real kills proven to
+have credited at least once this session, mechanism unconfirmed) rather than the structural,
+always-false blocker the original wording implied.
 
 **Not run this session.** The honest path forward is genuine real-Adventure play to earn ≥100 souls
 (or an owner-run session with an existing well-stocked player id), never a shortcut through SIM or a
