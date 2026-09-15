@@ -347,7 +347,10 @@ internal static class ContractTuningTestBootstrap
             BaseButtonW: 72f, BaseButtonH: 28f, BaseMargin: 16f, ReferenceHeight: 1080f,
             MinScale: 1f, MaxScale: 3f),
         SwitchState: new OverlaySwitchStateTuning(DebounceMs: 300, ProbeIntervalMs: 30_000, SendTimeoutMs: 3_000),
-        SettingsGui: new OverlaySettingsGuiTuning(PanelW: 280f, PanelH: 196f));
+        SettingsGui: new OverlaySettingsGuiTuning(PanelW: 280f, PanelH: 196f),
+        RiftMenu: new RiftMenuTuning(
+            AnchorCenterX: 0.5f, AnchorCenterY: 0.62f,
+            WidthFraction: 0.11f, HeightFraction: 0.16f, MinDevicePx: 44f));
 
     public static readonly StatsTuning DefaultStats = new(
         SchemaVersion: 1,

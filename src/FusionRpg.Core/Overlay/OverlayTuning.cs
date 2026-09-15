@@ -12,12 +12,20 @@ public sealed record OverlaySwitchStateTuning(int DebounceMs, int ProbeIntervalM
 
 public sealed record OverlaySettingsGuiTuning(float PanelW, float PanelH);
 
+/// <summary>
+/// The reviewed-menu tombstone's placement (rift-gate, menu-anchor). Screen-fraction anchored, with a
+/// device-pixel floor so the affordance stays hittable on small windows. These are feel numbers, not
+/// logic: they live here, never as literals in the injector.
+/// </summary>
+public sealed record RiftMenuTuning(
+    float AnchorCenterX, float AnchorCenterY, float WidthFraction, float HeightFraction, float MinDevicePx);
+
 /// <summary>Overlay balance/UI surface (tunables-ssot.md T1) — loaded, not hard-coded. See
 /// <see cref="OverlayTuningHub.Configure"/> and <see cref="OverlayTuningLoader"/>.</summary>
 public sealed record OverlayTuning(
     int SchemaVersion, int Version,
     OverlayPauseTuning Pause, OverlaySwitchLayoutTuning SwitchLayout, OverlaySwitchStateTuning SwitchState,
-    OverlaySettingsGuiTuning SettingsGui);
+    OverlaySettingsGuiTuning SettingsGui, RiftMenuTuning RiftMenu);
 
 public sealed class OverlayTuningRejection : Exception
 {
@@ -64,8 +72,16 @@ public static class OverlayTuningLoader
                 PanelW: Flt(g, "panelW", "settingsGui"),
                 PanelH: Flt(g, "panelH", "settingsGui"));
 
+            var r = Obj(root, "riftMenu");
+            var riftMenu = new RiftMenuTuning(
+                AnchorCenterX: Flt(r, "anchorCenterX", "riftMenu"),
+                AnchorCenterY: Flt(r, "anchorCenterY", "riftMenu"),
+                WidthFraction: Flt(r, "widthFraction", "riftMenu"),
+                HeightFraction: Flt(r, "heightFraction", "riftMenu"),
+                MinDevicePx: Flt(r, "minDevicePx", "riftMenu"));
+
             return new OverlayTuning(Int(root, "schemaVersion", "$"), Int(root, "version", "$"),
-                pause, layout, state, settingsGui);
+                pause, layout, state, settingsGui, riftMenu);
         }
     }
 
