@@ -566,8 +566,8 @@ work is counted)*
 - [x] Where `CostLedger.Check` is called on the lawn is specified, and its position relative to the
       swing dedupe.
       *audit 2026-09-15 CONFIRMED: `LawnBasicAttackCostCharger.cs` class doc :18-28*
-- [ ] **Zombies**: confirmed able to hold and spend `stamina`, or exempt with a stated reason.
-      **audit 2026-09-15 OPEN: pools are side-agnostic but no test or live zombie spend (cost spec :224 `[ ]`). Next run L-N18**
+- [x] **Zombies**: confirmed able to hold and spend `stamina`, or exempt with a stated reason.
+      *audit 2026-09-15 CONFIRMED: hold — `LawnActorResourcePoolsTests.SeedResourceBaseline_gives_a_lawn_zombie_the_same_non_zero_resource_max_stamina` (pre-existing, missed by the first audit pass); spend — `A_lawn_zombie_pool_spends_stamina_and_refuses_an_unaffordable_cost`.*
 - [x] One cost authority — no second gate; `guard-actor-hub` green.
       *audit 2026-09-15 CONFIRMED: `guard-actor-hub.ps1` OK at audit*
 
@@ -1129,8 +1129,9 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       on the funnel path; fixture for `EventDrainHost.DeferForget` ordering (T9, GATE 2).
 - [x] **L-N17** Test: bind grant at ptr P, forget P, re-register P → no stale grant (T10).
       *Done: `BasicAttackGrantRecycleTests` 4/4 — forget withdraws; new entity at P carries only its own element; withdraw catches a differently-cased ptr spelling (found: GrantId keyed on the raw spelling let two spellings of one entity hold two grants that both fire — fixed by normalising `GrantIdFor`, test `Two_spellings_of_one_ptr_bind_one_grant_not_two`); same-ptr rebind is an upsert. Mutation fails 2/4. Core.Tests 13541 via verify-change.*
-- [ ] **L-N18** Test `ResourceBaselineSubsystem` for side=zombie (max stamina > 0, spend succeeds),
+- [x] **L-N18** Test `ResourceBaselineSubsystem` for side=zombie (max stamina > 0, spend succeeds),
       or record a stated exemption in `spec-basic-attack-cost.md` (T12).
+      *Done: hold was already tested (verifier missed it); spend test added. LawnActorResourcePoolsTests 11/11; Core.Tests via verify-change.*
 - [x] **L-N19** `fx.overlay_damage` sign contract. Producers disagree: lawn records store
       `amount = -|damage|`; `EffectBag.DrainOverlayProcs`, battle `BasicAttack`, `SimEffectHost` emit
       positive `Damage`; `OverlayCombatMath.Finalize` treats positive as heal. Define the sign in

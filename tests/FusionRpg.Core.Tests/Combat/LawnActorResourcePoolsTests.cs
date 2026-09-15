@@ -178,6 +178,28 @@ public class LawnActorResourcePoolsTests
         Assert.Equal(plantMax, zombieMax); // same Hub, same baseline shape -- no side-based exemption
     }
 
+    /// <summary>lawn-combat-wire L-N18: holding a pool is half of T12's zombie criterion; this is the
+    /// spend half — a zombie's lawn pool pays a stamina cost and refuses one it cannot afford, exactly
+    /// like a plant's.</summary>
+    [Fact]
+    public void A_lawn_zombie_pool_spends_stamina_and_refuses_an_unaffordable_cost()
+    {
+        var hub = ActorHubBootstrap.CreateDefault(
+            powerIndex: new FixedPowerIndexProvider(theta: 1), seedResourceBaseline: true);
+        var zombieCtx = hub.Stats.Contexts.ForZombie(
+            "0xZ2", new EntityBaseline { Hp = 300, MaxHp = 300, Atk = 20 }, typeId: 1);
+        var derived = hub.ResolveDerived(zombieCtx);
+        var max = ResourceChannelReader.Max(derived, "stamina");
+        Assert.True(max > 0);
+
+        var pools = new LawnActorResourcePools();
+        var zombie = pools.GetOrCreate("0xZ2", derived, atTick: 0);
+
+        Assert.True(zombie.TrySpend("stamina", max, nowTick: 0, derived));
+        Assert.Equal(0, zombie.Resolve("stamina", 0, derived));
+        Assert.False(zombie.TrySpend("stamina", 1, nowTick: 0, derived));
+    }
+
     /// <summary>The negative control this whole feature exists to distinguish itself from: a bare
     /// `CreateDefault` (no `seedResourceBaseline`) is exactly today's bug — max reads 0. Kept here,
     /// alongside the two tests above, so a reader sees both sides of the "0 is the bug, non-zero is
