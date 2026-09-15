@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Xunit;
 
 namespace FusionRpg.Guard.Tests;
@@ -29,16 +28,11 @@ namespace FusionRpg.Guard.Tests;
 /// text is now stripped before matching, the same discipline <see cref="ReadsTheWorldItself"/>
 /// already applies one line at a time.</para>
 ///
-/// <para><b>3. The float-purity check does NOT widen with the clock/RNG check.</b> `Core/Battle`'s
-/// derived-stat/aura recompose system (aura-skill T4: <c>ActorDerivedSnapshot</c>,
-/// <c>BattleDerivedModifierLedger</c>, <c>combat.*</c> channel values) is `double`-typed by a prior,
-/// reviewed, already-shipped program — not something Gate 0 for base-defense has license to relitigate
-/// into a fixed-point refactor. Every `double` found on first widening is either that subsystem
-/// (recompute-each-battle intermediate math, never itself hashed — only the resolved `long` outcome
-/// is) or presentation (`DamageFx`, `UiPresentSink` — VFX/UI, not simulation). Rule 8 in
-/// base-defense-ideal.md §2 says "integer/fixed-point only in <b>game-affecting branches</b>", not
-/// "everywhere `Core/Battle` touches" — so this check stays scoped to `Core/World`'s own stored,
-/// hashed state, which is what it was written to certify and is unaffected by this widening.</para>
+/// <para><b>No floating-point check (owner ruling 2026-09-15).</b> This class used to carry a
+/// <c>double|float|decimal</c> declaration ban over <c>Core/World</c>. The project-wide floating-point
+/// ban is removed: floating point is allowed for any quantity, and determinism of a double in a hashed
+/// golden is handled by a platform stamp (ssot-power-scale.md §10.7), not a source ban. Integer RANGE
+/// rules stay with <c>scripts/audit-overflow.py</c>.</para>
 /// </summary>
 public class WorldDeterminismGuardTests
 {
@@ -100,27 +94,6 @@ public class WorldDeterminismGuardTests
     {
         var i = line.IndexOf("//", StringComparison.Ordinal);
         return i < 0 ? line : line[..i];
-    }
-
-    [Fact]
-    public void Game_affecting_world_state_carries_no_floating_point()
-    {
-        // Integer or fixed-point only: a float in stored state is a cross-machine hash difference
-        // waiting to happen. Scoped to Core/World only — see the class-level comment's point 3 for
-        // why this does NOT widen alongside the clock/RNG check.
-        var floats = new Regex(@"\b(double|float|decimal)\s+\w+\s*[;={)]", RegexOptions.Compiled);
-        var violations = new List<string>();
-
-        foreach (var file in WorldSourceFiles())
-        {
-            var lines = File.ReadAllLines(file);
-            for (var i = 0; i < lines.Length; i++)
-                if (floats.IsMatch(StripLineComment(lines[i])))
-                    violations.Add($"{Path.GetFileName(file)}:{i + 1} → {lines[i].Trim()}");
-        }
-
-        Assert.True(violations.Count == 0,
-            "world state must stay integer/fixed-point:\n" + string.Join("\n", violations));
     }
 
     /// <summary>
@@ -260,9 +233,7 @@ public class WorldDeterminismGuardTests
     }
 
     /// <summary>
-    /// base-defense Gate 0 part 2: World-only, for `Game_affecting_world_state_carries_no_floating_point`
-    /// and the AI-belief and source-count checks below — UNCHANGED. See the class-level comment's
-    /// point 3 for why the float check does not widen with the clock/RNG one.
+    /// base-defense Gate 0 part 2: World-only, for the AI-belief and source-count checks — UNCHANGED.
     /// </summary>
     static IEnumerable<string> WorldSourceFiles()
     {

@@ -36,23 +36,6 @@ public class ItemPowerReadsTests
             Assert.DoesNotContain(t.Name, forbidden);
     }
 
-    [Fact]
-    public void No_float_on_any_read_path()
-    {
-        var types = new[] { typeof(ItemPowerReads), typeof(AptitudeAffixPrice), typeof(ItemPowerTuning), typeof(PowerShareRead), typeof(CardPowerDisplay) };
-        foreach (var t in types)
-        foreach (var m in t.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly))
-        {
-            Assert.NotEqual(typeof(float), m.ReturnType);
-            Assert.NotEqual(typeof(double), m.ReturnType);
-            foreach (var p in m.GetParameters())
-            {
-                Assert.NotEqual(typeof(float), p.ParameterType);
-                Assert.NotEqual(typeof(double), p.ParameterType);
-            }
-        }
-    }
-
     // ---- R1 -------------------------------------------------------------------------------------
 
     [Fact]

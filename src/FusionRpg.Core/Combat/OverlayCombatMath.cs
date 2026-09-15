@@ -86,9 +86,9 @@ public sealed class OverlayCombatMath : ICombatMath
         var effectiveHeal = Math.Max(0.0, signedAmount + healPower);
         // combat-numerics (lawn-combat-wire T4): `checked` so a heal magnitude past `long`'s range
         // throws (CLAUDE.md: "overflow throws, never wraps") instead of silently narrowing.
-        // `healPower` stays `double` — it is a CombatDerivedReader/ActorDerivedSnapshot channel read,
-        // the same out-of-scope, already-accepted double contract OverlayCombatCalculator's own class
-        // doc documents (audit-overflow.py A7: "decision, not defect").
+        // `healPower` is `double` — a CombatDerivedReader/ActorDerivedSnapshot channel read. That is
+        // allowed (floating point is permitted for any quantity since the 2026-09-15 owner ruling);
+        // the range rule is the checked narrowing to `long` below.
         return checked((long)Math.Round(effectiveHeal, MidpointRounding.AwayFromZero));
     }
 }

@@ -7,7 +7,8 @@
     "guard": "tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj",
     "elementenumgen": "tests/FusionRpg.ElementEnumGen.Tests/FusionRpg.ElementEnumGen.Tests.csproj",
     "proveliveprobe": "tools/ProveLiveProbe.Tests/ProveLiveProbe.Tests.csproj",
-    "cheatcore": "tests/FusionRpg.CheatCore.Tests/FusionRpg.CheatCore.Tests.csproj"
+    "cheatcore": "tests/FusionRpg.CheatCore.Tests/FusionRpg.CheatCore.Tests.csproj",
+    "squadharness": "tests/FusionRpg.SquadHarness.Tests/FusionRpg.SquadHarness.Tests.csproj"
   },
   "guards": {
     "dal": "scripts/guard-dal.ps1",
@@ -17,7 +18,8 @@
     "actor-hub": "scripts/guard-actor-hub.ps1",
     "secondary-no-unity": "scripts/guard-secondary-no-unity.ps1",
     "debug-scope": "scripts/guard-debug-scope.ps1",
-    "injector-compile": "scripts/guard-injector-compile.ps1"
+    "injector-compile": "scripts/guard-injector-compile.ps1",
+    "overflow": "scripts/guard-overflow.ps1"
   },
   "boundaries": [
     { "id": "data-item-socket", "kind": "owner", "paths": ["src/FusionRpg.Data/Sqlite/RpgStore.Sockets.cs"], "project": "data", "verificationId": "data.item-socket", "guards": ["dal", "test-substrate"], "level": "focused" },
@@ -39,6 +41,8 @@
     ,{ "id": "proveliveprobe-fallback", "kind": "owner", "paths": ["tools/ProveLiveProbe/**", "tools/ProveLiveProbe.Tests/**"], "project": "proveliveprobe", "level": "module", "guards": ["debug-scope"] }
     ,{ "id": "mutant-sets-fallback", "kind": "owner", "paths": ["scripts/mutants/**"], "project": "core", "level": "module", "guards": [] }
     ,{ "id": "injector-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Injector.Tests/**"], "project": "guard", "level": "module", "guards": ["injector-compile"] }
+    ,{ "id": "overflow-audit", "kind": "owner", "paths": ["scripts/audit-overflow.py", "scripts/guard-overflow.ps1"], "project": "guard", "level": "module", "guards": ["overflow"] }
+    ,{ "id": "squadharness-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.SquadHarness.Tests/**"], "project": "squadharness", "level": "module", "guards": [] }
     ,{ "id": "server-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Server.Tests/**"], "project": "server", "level": "module", "guards": [] }
   ]
 }

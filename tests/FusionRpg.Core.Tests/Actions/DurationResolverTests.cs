@@ -180,17 +180,6 @@ public class DurationResolverTests
         Assert.Throws<NoDurationResolverRegisteredException>(() => registry.Resolve("battle")); // still unregistered
     }
 
-    [Fact]
-    public void NoFloatOrDoubleCrossesToTicksBoundary()
-    {
-        // Architecture-level float-leakage guard for THIS interface specifically, on top of the
-        // blanket purity scan: every parameter and the return type must be an integer shape.
-        var method = typeof(IDurationResolver).GetMethod(nameof(IDurationResolver.ToTicks))!;
-        var allTypes = method.GetParameters().Select(p => p.ParameterType).Append(method.ReturnType);
-        foreach (var t in allTypes)
-            Assert.False(t == typeof(float) || t == typeof(double) || t == typeof(decimal), $"{t} must not cross ToTicks's boundary");
-    }
-
     // ---- BattleDurationResolver (P0.5 unblocked T29, 2026-08-28) -------------------------------
 
     static ActorDerivedSnapshot TurnSnapshot(double speed, double haste)

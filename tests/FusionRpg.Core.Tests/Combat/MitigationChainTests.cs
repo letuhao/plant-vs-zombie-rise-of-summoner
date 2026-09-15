@@ -196,14 +196,15 @@ public class MitigationChainTests
     {
         // spec §7: widen before multiplying, divide by 1000 last, overflow throws. T5.1's
         // penetration/absorption/amplification/reduction math is double throughout, matching this
-        // method's OWN pre-existing style -- CombatDerivedReader.cs's double-return pattern is an
-        // already-audited, accepted exception (audit-overflow.py A7: "decision, not defect").
+        // method's OWN pre-existing style -- CombatDerivedReader.cs returns double, and floating point
+        // is allowed for any quantity (owner ruling 2026-09-15; audit-overflow.py's former A7 double
+        // review rule was removed with the floating-point ban).
         // T5.3 (spec-evasion-chain.md) legitimately adds a NEW long boundary: ClampedContest is
         // permille `long` throughout (matching ShieldMath's own rule), so the double base/delta
         // round to long once, at the one point they cross into it -- 3 new casts (the shared base,
         // and one delta expression per parry/block branch) alongside the original signed-delta
         // conversion, 4 total. Verified empirically too: audit-overflow.py before and after T5.1+T5.3
-        // reports the identical A3=21/A7=15/0-critical baseline -- no new finding either module.
+        // reported an identical, 0-critical baseline -- no new finding either module.
         // Proven here structurally: no cast-after-multiply (the A4 violation class) anywhere in the
         // file, and every `long` appearance is one of these known, accounted-for boundaries.
         //

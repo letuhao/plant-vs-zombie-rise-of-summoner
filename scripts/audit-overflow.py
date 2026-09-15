@@ -1,14 +1,25 @@
 #!/usr/bin/env python3
 """
-Numeric-overflow audit — the power ladder makes old type choices wrong.
+Numeric-overflow audit — INTEGER RANGE only. The power ladder makes old integer type choices wrong.
 
-Thresholds are computed from the shipped curve (ssot-power-scale.md §4, B=0.4), not estimated:
+This tool audits integer range: a value exceeding what its integer type can hold (C# integer
+arithmetic wraps silently unless `checked`). It does NOT audit floating point. Owner ruling
+2026-09-15: the project-wide floating-point ban is removed — float/double are allowed for any
+quantity (magnitudes, ratios, chances, rates, multipliers, curves). A float/double losing integer
+exactness past 2^24/2^53 is PRECISION (rounding), not overflow, and is not a finding here.
+Determinism of a double in a hashed golden is handled by a platform stamp (ssot-power-scale.md
+§10.7), not by this audit. The former A1 (float magnitude) and A7 (double magnitude review) rules
+were removed for that reason; the remaining category ids are kept stable.
 
-    float   loses integer exactness at  Theta =     232     <- inside normal play
+Integer range thresholds, computed from the shipped curve (ssot-power-scale.md §4, B=0.4):
+
     int     per-mille                   Theta =   3,213
     int     whole units                 Theta = 103,557
-    double                              Theta = 6,710,822   <- and non-deterministic
-    long                                Theta = 214,748,300 <- the default
+    long                                Theta = 214,748,300 <- the default for integer magnitudes
+
+Rules kept: long for integer magnitudes (A2/A3), widen before multiplying (A4/A5), integer overflow
+throws rather than wraps (A6). Integer per-mille division happens last because integer division
+truncates.
 
 Usage (repo root):
     python scripts/audit-overflow.py                    # full report
@@ -73,42 +84,36 @@ NOT_MAGNITUDE = re.compile(
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}
 SKIP_FILE = re.compile(r"\.Generated\.cs$|\.designer\.cs$", re.I)
 
-# Float is correct here: frame deltas, probability, rendering, diagnostics, Unity interop.
-FLOAT_OK_PATH = re.compile(
+# A4 false-positive filter. A regex cannot see operand types, and in these paths (timing,
+# diagnostics, rendering, Unity interop) `(long)(a * b)` is a floating-point product converted to
+# an integer — e.g. `(long)(dtSeconds * 1_000_000f)` — where no INTEGER multiply exists to wrap.
+# This is not a floating-point permission list (floating point needs none); it only keeps A4, an
+# integer-range rule, from misreading a float-domain conversion as an integer overflow.
+FLOAT_DOMAIN_CAST_PATH = re.compile(
     r"(Diagnostics|Vfx|Overlay|Perf|Probability|Sigmoid|Random|Rng|Clock|InjectorLoop|"
     r"EventDrainHost|EffectRuntime|CheatActions|DebugActions|Host[\\/])", re.I)
-FLOAT_OK_NAME = re.compile(r"(deltatime|unscaled|sun|scale|interval|duration|seconds|accum)", re.I)
-
-# Where a double magnitude is the SHIPPED architecture rather than a new defect. The stat system
-# composes in double by design (stat-system.md); calling that a bug would be re-litigating a
-# locked decision. Flagged as REVIEW, not as a finding to fix.
-ARCH_DOUBLE = re.compile(r"(Stats[\\/]|CombatDerivedReader|ElementHub|StatModifier|Derived)", re.I)
 
 CATEGORIES = {
-    "A1": ("CRITICAL", "float on an unbounded magnitude - non-exact past Theta 232"),
     "A2": ("CRITICAL", "int on a per-mille MAGNITUDE - overflows at Theta 3,213"),
     "A3": ("HIGH",     "int on a magnitude - overflows at Theta 103,557; long is the default"),
     "A4": ("CRITICAL", "cast-after-multiply (long)(a*b) - the multiply already overflowed"),
     "A5": ("HIGH",     "int*int widened on assignment - widen an operand, not the result"),
     "A6": ("MEDIUM",   "unchecked on a magnitude path - overflow must throw, not wrap"),
-    "A7": ("REVIEW",   "double magnitude in the shipped stat architecture - decision, not defect"),
 }
 
 
 def rules():
     m = MAGNITUDE
-    # A1/A3/A7 don't pass re.I: MAGNITUDE now handles its own case sensitivity (hp is
-    # case-sensitive; the rest is wrapped in an inline (?i:...) group), and "float"/"int"/"double"
-    # are always-lowercase C# keywords, so a blanket re.I here would just re-fold "hp" back open.
+    # A3 doesn't pass re.I: MAGNITUDE handles its own case sensitivity (hp is case-sensitive; the
+    # rest is wrapped in an inline (?i:...) group), and "int" is an always-lowercase C# keyword, so
+    # a blanket re.I here would just re-fold "hp" back open.
     return [
-        ("A1", re.compile(r"\bfloat\s+(\w*(?:%s)\w*)\b" % m)),
         ("A2", re.compile(r"\bint\s+(\w*(?:milli|permille)\w*)\b", re.I)),
         ("A3", re.compile(r"\b(?:public|private|internal|protected)?\s*(?:readonly\s+)?"
                           r"int\s+(\w*(?:%s)\w*)\b" % m)),
         ("A4", re.compile(r"\((?:long|ulong)\)\s*\([^()]*\*[^()]*\)")),
         ("A5", re.compile(r"\blong\s+\w+\s*=\s*(?!\(long\))[A-Za-z_]\w*\s*\*\s*[A-Za-z_]\w*\s*;")),
         ("A6", re.compile(r"\bunchecked\b")),
-        ("A7", re.compile(r"\bdouble\s+(\w*(?:%s)\w*)\b" % m)),
     ]
 
 
@@ -132,14 +137,8 @@ def keep(cat, name, path, line):
         # identifier. Found via the P0.3 triage (SoulLootMilli and five siblings).
         if MILLI_SUFFIX.search(name) and not UNBOUNDED_MILLI.search(name):
             return False
-    if cat == "A1":
-        if RATIO.search(name) or FLOAT_OK_PATH.search(path) or FLOAT_OK_NAME.search(name):
-            return False
-    if cat == "A7":
-        if not ARCH_DOUBLE.search(path):
-            return False        # outside the stat architecture a double magnitude is just A1
-    if cat == "A4" and FLOAT_OK_PATH.search(path):
-        return False        # (long)(floatSeconds * n) is a timing conversion, not an int overflow
+    if cat == "A4" and FLOAT_DOMAIN_CAST_PATH.search(path):
+        return False        # (long)(floatSeconds * n) is a float-to-integer conversion, not an int multiply
     if cat == "A6" and not re.search(MAGNITUDE, line, re.I):
         return False
     return True
@@ -198,7 +197,7 @@ def fix_a4(findings, apply):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Numeric-overflow audit for the power ladder.")
+    ap = argparse.ArgumentParser(description="Integer-range overflow audit for the power ladder (does not audit floating point).")
     ap.add_argument("--paths", nargs="*", default=["src"])
     ap.add_argument("--category", help="report one category only")
     ap.add_argument("--targets", metavar="CAT", help="bare file:line list for targeted work")
@@ -215,7 +214,7 @@ def main():
     if a.fix:
         if a.fix != "A4":
             print("Only A4 is auto-fixable.\n\n"
-                  "Widening a type (A1/A2/A3/A7) ripples through every caller, DTO, serializer and\n"
+                  "Widening an integer type (A2/A3) ripples through every caller, DTO, serializer and\n"
                   "golden that touches it. There is no safe blanket rewrite; use --targets to get the\n"
                   "list and change them behind a compiler that will tell you what broke.",
                   file=sys.stderr)
@@ -232,7 +231,7 @@ def main():
     for f in findings:
         buckets[f[0]].append(f)
 
-    print("Numeric-overflow audit  —  scanned: %s" % ", ".join(paths))
+    print("Integer-range overflow audit  —  scanned: %s" % ", ".join(paths))
     print("=" * 100)
     crit = 0
     for cat in sorted(CATEGORIES):

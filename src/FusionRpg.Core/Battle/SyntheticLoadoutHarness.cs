@@ -23,9 +23,9 @@ public static class SyntheticLoadoutBuilder
 
 /// <summary>
 /// A20's plain output record (spec §3: "never a rendered report, a chart, or a file write"). Raw
-/// counts are carried as `long`/`int` (numeric discipline: a magnitude never floats); the two derived
-/// means are `double` because they are descriptive balance-report numbers, never re-fed into battle
-/// math, hashed, or persisted — the same exemption a UI-facing percentage already gets.
+/// counts are carried as `long`/`int` (whole counts); the two derived means are `double` because they
+/// are descriptive balance-report numbers (floating point is allowed for any quantity — no exemption
+/// needed since the 2026-09-15 owner ruling).
 /// </summary>
 public readonly record struct LoadoutComparisonResult(
     int Runs,

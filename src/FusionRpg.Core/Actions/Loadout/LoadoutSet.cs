@@ -51,8 +51,8 @@ public static class LoadoutSet
     /// <see cref="FusionRpg.Core.Stats.Derived.DerivedStatChannels.LoadoutSlots"/> value (0 when
     /// nothing worn grants it) — a Data/Battle-layer fact this pure module cannot read itself, same
     /// reasoning as "held" and "is this actor mid-run" below. Whole-count `long`, not the channel's
-    /// own composed `double` (ActionsPurityGuardTests bans floating point anywhere under `Actions/`,
-    /// with no exceptions — the caller rounds at the Data-layer boundary before crossing in).
+    /// own composed `double` — a slot count is a whole number, so the caller rounds at the Data-layer
+    /// boundary before crossing in. (Not a floating-point ban: that was removed 2026-09-15.)
     /// </summary>
     public static int EffectiveMaxSize(long loadoutSlotsChannel = 0) =>
         MaxSize + (loadoutSlotsChannel > 0 ? 1 : 0);

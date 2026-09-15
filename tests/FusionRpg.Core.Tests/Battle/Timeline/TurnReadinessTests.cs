@@ -83,10 +83,11 @@ public class TurnReadinessTests
         Assert.Throws<ArgumentOutOfRangeException>(() => TurnReadiness.TicksFor(remainingWork: -1, rate: 100));
 
     [Fact]
-    public void NoFloatOrDoubleCrossesTheReadinessBoundary()
+    public void TheReadinessBoundaryIsLongTyped()
     {
-        // Architecture-level guard on top of the blanket purity scan: every parameter and return
-        // type of the public readiness surface must be an integer shape.
+        // Integer RANGE contract: tick counts and work units are magnitudes, so every parameter and
+        // return type of the public readiness surface is long (never a narrower int). This is not a
+        // floating-point ban — that project-wide ban was removed by the 2026-09-15 owner ruling.
         foreach (var method in typeof(TurnReadiness).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static))
         {
             foreach (var p in method.GetParameters())

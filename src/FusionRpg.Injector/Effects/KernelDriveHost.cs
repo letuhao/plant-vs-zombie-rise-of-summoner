@@ -152,8 +152,8 @@ public static class KernelDriveHost
     /// the budget follows the machine's.</para>
     ///
     /// <para><b>The float→integer conversion happens here and only here.</b> Unity hands us a
-    /// <c>float</c>; Core's clock states that no floating-point value reaches it, and the kernel
-    /// purity scan enforces that with no file exempt. Rounding rather than truncating matters: a
+    /// <c>float</c>; Core's clock is an integer-tick clock by design, so the conversion to whole
+    /// microseconds is done once at this boundary. Rounding rather than truncating matters: a
     /// truncation biases every frame downward, which is the exact drift class the carry exists to
     /// remove.</para>
     ///

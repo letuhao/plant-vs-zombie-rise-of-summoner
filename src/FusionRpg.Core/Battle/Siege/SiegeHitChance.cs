@@ -21,9 +21,10 @@ namespace FusionRpg.Core.Battle.Siege;
 ///
 /// <para><b>The double stays inside this function.</b> `CombatProbability.Sigmoid` returns a
 /// `double` (0..1) — converted to an `int` per-mille and rounded ONCE, immediately, before crossing
-/// back into `AiScoring`'s own integer-only, source-scan-enforced world (R5: "no non-integer numeric
-/// type anywhere in this file's arithmetic" — that rule is about `SiegeAi.cs`, and stays true because
-/// the boundary is exactly here, not smeared across both files).</para>
+/// back into `AiScoring`'s own integer per-mille arithmetic (spec R5's integer scoring design for
+/// `SiegeAi.cs`, which stays integer because the boundary is exactly here, not smeared across both
+/// files). The former source scan that banned float/double in `SiegeAi.cs` was removed by the
+/// 2026-09-15 owner ruling; this is a design boundary, not an enforced ban.</para>
 /// </summary>
 public static class SiegeHitChance
 {

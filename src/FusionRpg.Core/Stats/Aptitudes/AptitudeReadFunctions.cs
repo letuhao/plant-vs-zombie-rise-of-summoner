@@ -8,12 +8,12 @@ namespace FusionRpg.Core.Stats.Aptitudes;
 /// G5 fails the build if a second <c>class AptitudeReadFunctions</c> appears anywhere under `src/`.
 ///
 /// <para><b>Contest</b> is Θ-free: <c>k · share^γ · spanPoints</c>. Its result is a bounded contest
-/// point value (0..spanPoints), not a game magnitude — <c>double</c> throughout is the PS-8 bounded-
-/// ratio exemption, not a violation of CLAUDE.md's long-magnitude rule.</para>
+/// point value (0..spanPoints), not a game magnitude — <c>double</c> throughout (floating point is
+/// allowed for any quantity; no exemption is needed).</para>
 ///
 /// <para><b>Magnitude</b> reads the ladder: <c>k · share^γ · P(Θ)</c>. Its result IS a magnitude, so
 /// it never returns anything but a `long`, and only ever throws (never wraps) when the true answer
-/// does not fit one. `share^γ` is the sole unavoidable floating-point step — a real-exponent power of
+/// does not fit one. `share^γ` is the floating-point step — a real-exponent power of
 /// a bounded [0,1] ratio has no pure-integer form — so it is collapsed to a per-mille `long`
 /// immediately (bounded [0,1000], since `x^γ ∈ [0,1]` for `x ∈ [0,1]`, `γ > 0`) and never touched as a
 /// `double` again. The widening multiply uses `decimal`, not `checked long`: two independent per-mille

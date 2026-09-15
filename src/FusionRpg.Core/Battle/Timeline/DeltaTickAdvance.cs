@@ -11,10 +11,11 @@ namespace FusionRpg.Core.Battle.Timeline;
 /// shield tick fast or slow by exactly the frame-rate error, on precisely the weak machines the frame
 /// budget exists for. See <c>docs/architecture/battle/spec-injector-kernel-drive.md</c> §3.2.</para>
 ///
-/// <para><b>Microseconds, and no floating point.</b> Unity hands the host a <c>float</c> seconds
-/// value; the host converts it once, at its own boundary, and everything from here down is integer.
-/// <see cref="SimulationClock"/> states that no floating-point value reaches it, and the kernel purity
-/// scan enforces it — so the conversion may not live in this assembly.</para>
+/// <para><b>Microseconds, integer from here down.</b> Unity hands the host a <c>float</c> seconds
+/// value; the host converts it once, at its own boundary, and everything from here down is integer
+/// ticks — <see cref="SimulationClock"/> is an integer-tick clock by design. (This is a design
+/// choice, not an enforced floating-point ban: the kernel purity scan no longer bans floating point
+/// since the 2026-09-15 owner ruling.)</para>
 ///
 /// <para><b>The <c>frames</c> argument is deliberately ignored</b>, exactly as
 /// <see cref="NextEventAdvance"/> ignores it: a frame count means nothing to a policy driven by

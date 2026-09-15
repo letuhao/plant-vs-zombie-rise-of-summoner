@@ -69,15 +69,4 @@ public class BulletModifyMathTests
         Assert.Throws<OverflowException>(() =>
             BulletModifyMath.Apply(int.MaxValue, "add", int.MaxValue));
     }
-
-    // §3: never float anywhere on this path — every overload here is long/int, provable by the
-    // signature alone, pinned as a regression guard against a future edit widening it to double.
-    [Fact]
-    public void The_signature_carries_no_float_or_double()
-    {
-        var method = typeof(BulletModifyMath).GetMethod(nameof(BulletModifyMath.Apply))!;
-        Assert.DoesNotContain(method.GetParameters(), p => p.ParameterType == typeof(float) || p.ParameterType == typeof(double));
-        Assert.NotEqual(typeof(float), method.ReturnType);
-        Assert.NotEqual(typeof(double), method.ReturnType);
-    }
 }

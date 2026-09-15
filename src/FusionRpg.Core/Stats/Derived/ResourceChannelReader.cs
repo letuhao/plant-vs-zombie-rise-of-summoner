@@ -7,9 +7,10 @@ namespace FusionRpg.Core.Stats.Derived;
 /// "Numeric overflow"), so the round-to-long happens here, once, at the boundary — the same point
 /// <c>BattleRuleset.BaseHp</c>/<c>BattleChannelMod</c> already round at.
 ///
-/// Lives outside <c>Core/Actions/</c> deliberately: <c>KernelPurityScan</c> bans a bare
-/// <c>double</c> declaration in that tree so the tick-driving action layer can never pick up
-/// floating-point drift, and this is the one place that boundary is crossed on purpose.
+/// Lives outside <c>Core/Actions/</c>: the round-to-long is a stats-layer boundary concern, so the
+/// action layer consumes a <c>long</c> pool size. (The placement once cited a floating-point ban in
+/// <c>KernelPurityScan</c>; that ban was removed by the 2026-09-15 owner ruling — floating point is
+/// allowed for any quantity. The integer RANGE reason above, <c>long</c> for a magnitude, still holds.)
 /// </summary>
 public static class ResourceChannelReader
 {

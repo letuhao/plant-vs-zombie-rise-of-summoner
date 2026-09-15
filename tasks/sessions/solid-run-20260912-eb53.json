@@ -61,7 +61,18 @@
     "scripts/mutants/lawn-combat.json",
     "src/FusionRpg.CheatCore/**",
     "tests/FusionRpg.CheatCore.Tests/**",
-    "docs/architecture/resource-hub-ssot.md"
+    "docs/architecture/resource-hub-ssot.md",
+    "docs/architecture/**",
+    "docs/design/**",
+    "tasks/*-plan.md",
+    "tasks/*-todo.md",
+    "scripts/audit-overflow.py",
+    "tools/seedsmith/seedsmith/metrics/passive_tree.py",
+    "tools/seedsmith/seedsmith/adapters/trees/census.py",
+    "tools/tuning/resource_ownership.py",
+    "tests/FusionRpg.SquadHarness.Tests/**",
+    "scripts/guard-overflow.ps1",
+    "src/FusionRpg.Injector/DebugLeaveBoard.cs"
   ],
   "started": "2026-09-12T14:38:04Z",
   "status": "active",
@@ -74,5 +85,6 @@
   "scopeAmended7": "2026-09-13T22:30:00Z - BUILD scope for lawn-combat-wire, owner-authorized ('we will build all'). 15 tasks across Core/Injector/data/tuning/tools. Adds tools/tuning (publish.py needs an add-key mode), the seedsmith actions vocab mirror, event-pipeline-v2-ssot.md (T9b amends it), the injector host csprojs, a new observer tool, and Injector.Tests. This program was born from this session's own live finding and the owner chose to build it here rather than open a second session.",
   "scopeAmended8": "2026-09-15T11:20:00Z - audit of the long run (owner request: audit, fix bugs, extend plan). Added scripts/verification-boundaries.v1.json: injector-fallback ran only Core.Tests with no guards and tests/FusionRpg.Core.Tests/** had no owner (lawn-combat-wire L-N23). Recorded mismatch: this record says mode=worktree/branch worktree-solid-run-20260912-eb53, but the run and audit edited the main worktree on features/derived-stat-extension.",
   "scopeAmended9": "2026-09-15 audit: live-probe Task 18 offline tests (tools/ProveLiveProbe.Tests) and the lawn-combat-wire L-N15 mutant set (scripts/mutants/lawn-combat.json).",
-  "scopeAmended10": "2026-09-15 owner rulings: L-N1 basic-attack default OFF (CheatCore schema/registry follow), L-N28 battle stamina regen on (resource-hub-ssot.md section 11 amendment)."
+  "scopeAmended10": "2026-09-15 owner rulings: L-N1 basic-attack default OFF (CheatCore schema/registry follow), L-N28 battle stamina regen on (resource-hub-ssot.md section 11 amendment).",
+  "scopeAmended11": "2026-09-15 owner ruling: remove the whole floating-point ban and correct the overflow concept (range vs precision) across rules, specs, plans, scan tests and audit-overflow.py. Excludes other active sessions' files: docs/architecture/rift-gate*, docs/architecture/debug-mcp*, docs/architecture/verification-boundaries*."
 }

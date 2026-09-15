@@ -11,8 +11,8 @@ public sealed class OverlayCombatRequest
     /// an integral magnitude — <c>OverlayCombatMath.Finalize</c> passes <c>Math.Abs(signedAmount)</c>
     /// (a <c>long</c>), <c>BasicAttack.cs</c> passes <c>attacker.LiveAtk(...)</c> (a <c>long</c>),
     /// <c>DebugCombatActions.cs</c> passes <c>Math.Abs(amount)</c> — so <c>long</c> here is a pure
-    /// representation fix (CLAUDE.md: "long for any magnitude, never float/double"), not a behavior
-    /// change. This is the entry point of the file's own magnitude path.
+    /// representation fix (an integral magnitude carried in <c>long</c>, whose range holds it), not a
+    /// behavior change. This is the entry point of the file's own magnitude path.
     /// </summary>
     public long BaseOverlayDamage { get; init; }
     public IReadOnlyList<ElementPayloadComponent> Components { get; init; } = Array.Empty<ElementPayloadComponent>();
@@ -42,11 +42,11 @@ public sealed class OverlayCombatRequest
     /// +25%, and -250 gives -25%.
     ///
     /// <para><b>Why this conversion lives in Combat/ and not at the call site.</b> The caller is
-    /// <c>Actions/BasicAttack.cs</c>, and the action layer bans floating point outright
-    /// (<c>ActionsPurityGuardTests</c>: "no wall clock, no ambient RNG, no floating point") — writing
-    /// <c>1.0 + pm / 1000.0</c> there would be a purity violation, and as of B31's tightened literal
-    /// rule the guard actually catches it. The resolver is where double arithmetic is legitimate, so
-    /// the seam is a `long` per-mille in and a `double` multiplier out.</para>
+    /// <c>Actions/BasicAttack.cs</c>; keeping the per-mille-to-multiplier conversion next to the
+    /// resolver that consumes it gives one definition of the seam — a `long` per-mille in and a
+    /// `double` multiplier out. (This placement was once justified by an action-layer floating-point
+    /// ban; that ban was removed by the 2026-09-15 owner ruling, and floating point is allowed at the
+    /// call site too.)</para>
     /// </summary>
     public static double MultiplierFromPerMille(long perMille) => 1.0 + perMille / 1000.0;
 
@@ -63,31 +63,20 @@ public sealed class OverlayCombatRequest
 /// <summary>
 /// Overlay damage pipeline — combat-damage-ssot.md §6.
 ///
-/// <para><b>combat-numerics (lawn-combat-wire T4) numeric scope, read this before "fixing" a
-/// remaining <c>double</c> here:</b> the magnitude BOUNDARY of this file is now <c>long</c>/checked
-/// end to end — <see cref="OverlayCombatRequest.BaseOverlayDamage"/> in, the parry/block chip
-/// removal (<see cref="ClampedContest"/>), and the final <c>signedDelta</c> out. The CONTINUOUS
-/// mitigation-chain interior (power, defense, penetration/absorption, pierce/amp factors,
-/// hit/crit/parry/block probabilities) stays <c>double</c> — not an oversight, but structurally
-/// forced by three out-of-scope files this task may not edit:</para>
-/// <list type="bullet">
-/// <item><c>CombatDerivedReader.cs</c> returns <c>double</c> from every channel read, and
-/// <c>ActorDerivedSnapshot</c>'s own storage is <c>Dictionary&lt;string, double&gt;</c> —
-/// <c>MitigationChainTests.LongThroughout</c> already documents this as
-/// "an already-audited, accepted exception (audit-overflow.py A7: 'decision, not defect')".</item>
-/// <item><c>CombatPolicy.cs</c>'s shape constants (<c>PierceScale</c>, <c>AmpScale</c>,
-/// <c>DefenseDivisorK</c>, <c>ReflectRateScale</c>, <c>ReflectShareScale</c>) are <c>double</c>
-/// properties read from <c>data/tuning/combat.v1.json</c> (e.g. <c>defenseDivisorK: 0.45</c>).</item>
-/// <item><c>CombatProbability.cs</c>'s <c>Sigmoid</c>/<c>RollSuccess</c> are <c>double</c> in and
-/// out, and <c>scripts/audit-overflow.py</c>'s own <c>FLOAT_OK_PATH</c> regex already names
-/// "Overlay"/"Probability"/"Sigmoid" paths as correct-as-double.</item>
-/// </list>
-/// <para>A full purge would mean overturning that accepted decision and editing those three files —
-/// a larger, cross-cutting change than this leaf task's permitted file list allows, and (per this
-/// repo's SOLID hard rule) not something to do informally inside an unrelated numerics fix. What
-/// changed here: the entry magnitude, the two named defects (divide-before-multiply, unchecked
-/// overflow exit), and every other narrowing-to-<c>long</c> conversion in this file, now
-/// <c>checked</c>.</para>
+/// <para><b>combat-numerics (lawn-combat-wire T4) numeric scope:</b> the magnitude BOUNDARY of this
+/// file is <c>long</c>/checked end to end — <see cref="OverlayCombatRequest.BaseOverlayDamage"/> in,
+/// the parry/block chip removal (<see cref="ClampedContest"/>), and the final <c>signedDelta</c> out.
+/// The CONTINUOUS mitigation-chain interior (power, defense, penetration/absorption, pierce/amp
+/// factors, hit/crit/parry/block probabilities) is <c>double</c>, and that is correct: floating point
+/// is allowed for any quantity (owner ruling 2026-09-15 removed the project-wide floating-point ban),
+/// so there is no <c>double</c> here to "fix". The inputs are <c>double</c> too —
+/// <c>CombatDerivedReader.cs</c> channel reads over <c>ActorDerivedSnapshot</c>'s double storage,
+/// <c>CombatPolicy.cs</c>'s tuning shape constants (e.g. <c>defenseDivisorK: 0.45</c>), and
+/// <c>CombatProbability.cs</c>'s <c>Sigmoid</c>/<c>RollSuccess</c>.</para>
+/// <para>The rules that DO apply are integer RANGE rules at the boundary: what changed here is the
+/// entry magnitude, the two named defects (divide-before-multiply, unchecked overflow exit), and
+/// every narrowing-to-<c>long</c> conversion in this file, now <c>checked</c> so an out-of-range
+/// result throws instead of wrapping.</para>
 /// </summary>
 public sealed class OverlayCombatCalculator
 {
