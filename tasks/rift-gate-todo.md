@@ -4,16 +4,19 @@
 [../docs/architecture/rift-gate-map.md](../docs/architecture/rift-gate-map.md) ·
 **Specs:** `docs/architecture/rift-gate/spec-*.md`
 
-> **Read the map's Audit section first.** Its three corrections are load-bearing:
+> **Read the map's Audit section *and* Decision 17 first.** Its load-bearing points:
 > `overlay-hide` relays through the **existing** server→injector command path; `first-open-signal` is
 > written **FE/server-side** (the injector cannot see the launcher's F10, and the player row already
-> exists); `menu-anchor`'s real work is the **exit edges** of a state signal, not the patch.
+> exists); and **`menu-anchor` is a menu-screen _presence_ signal (Decision 17)** — patch the screen's
+> own lifecycle, **never** a `UIMgr` navigation static. The rule: **switch the WebView; never fight the
+> PVZ engine.** `UIMgr.BackToMenu`/`EnterMainMenu` are forbidden (live hazard, `DebugActions.cs:1495-1496`);
+> calling them mid-run breaks a live run.
 
 ## Standing verification (every code task — T1–T13)
 
 - [ ] `.\scripts\verify-change.ps1 -Paths <changed files> -Session <build-session-id>` selects the
       focused checks (required local workflow — never a broad suite from caution)
-- [ ] Injector tasks (T3–T7): `dotnet build src/FusionRpg.Injector.MelonLoader.39 -c Release -p:MlGameDir=$env:FUSIONRPG_ML_GAMEDIR -p:GameProfile=pvzrh-3.9` green — CI cannot build the interop
+- [ ] Injector tasks (T2–T6): `dotnet build src/FusionRpg.Injector.MelonLoader.39 -c Release -p:MlGameDir=$env:FUSIONRPG_ML_GAMEDIR -p:GameProfile=pvzrh-3.9` green — CI cannot build the interop
 - [ ] Const/tuning-introducing tasks: `python scripts/audit-magic-numbers.py` shows no new M1/M2
       (structural consts carry their T2 comment)
 - [ ] Web tasks: `npm run build` (tsc --noEmit) + `npm run check:bundle` green
@@ -25,147 +28,185 @@
 
 ## Slice 1 — `menu-anchor` (prerequisite for `tombstone`)
 
-### Task 1: Closed surface enum + pure state carrier + the `EnterMainMenu` patch
+### Task 1: 3.9 interop verification — the one-time check, before any patch
+
+**Description:** Confirm against the live 3.9 interop what the spec session already verified by
+decompiling, and settle the remaining live item. Per the owner, *no one redesigns a main-menu hierarchy
+between versions*, so this is **one check**, not a risk to carry. Confirm: `Il2Cpp.MainMenu : BaseMenu`
+exists; `Start` is the entry method (and is **private**, so it must be patched by **string name**);
+`OnHide`/`OnExit` are `virtual` on `BaseMenu` and are the clearance callbacks (there is **no**
+`OnDestroy`); and the live main-menu hierarchy paths (`Grave/…`, `LowerButtons`, `LanguagesButton`,
+`UpdateInfoButton`) using the reference's own `Find` calls. Record every finding in the spec.
+
+**Acceptance criteria:**
+
+- [ ] `Il2Cpp.MainMenu : BaseMenu` confirmed in the 3.9 interop; `Start` confirmed (private).
+- [ ] `BaseMenu`’s `OnHide`/`OnExit` confirmed `virtual`; **no** `OnDestroy` relied upon.
+- [ ] Each hierarchy path is confirmed **live** (or recorded as a named miss with its logged warning).
+- [ ] The BepInEx scope is recorded as **settled and secondary**: MelonLoader is the deployed default
+      (`deploy-play.ps1:39,115`); if BepInEx interop lacks `MainMenu` when that host is touched, the
+      affordance is Melon-only and BepInEx keeps **F10** — stated, not treated as a design input.
+
+**Verification:**
+
+- [ ] `ilspycmd -t Il2Cpp.MainMenu "$env:FUSIONRPG_ML_GAMEDIR\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll"`
+- [ ] `ilspycmd -t Il2Cpp.BaseMenu …` (lifecycle members)
+- [ ] Live (owner terminal): the main menu is observed and the path names are read off the real scene
+
+**Dependencies:** None (map + Decision 17/18 approved).
+
+**Files likely touched:**
+
+- `docs/architecture/rift-gate/spec-menu-anchor.md` (record the findings)
+
+**Estimated scope:** S.
+
+### Task 2: Presence signal — closed enum + pure carrier + the **menu-screen lifecycle** patch
 
 **Description:** New `src/FusionRpg.Core/Overlay/RiftMenuAnchor.cs` — `RiftMenuSurface { None, MainMenu }`
-(closed enum the code owns and a human reviews), a pure `RiftMenuAnchor` state carrier
-(`Set`/`Current`/`IsReviewed`/`AllowsInteractiveAffordance`), Unity-free. One new Harmony patch
-`[HarmonyPatch(typeof(UIMgr), nameof(UIMgr.EnterMainMenu))]` in `GameCaptureHooks.cs`, beside the
-existing three (`:780,790,812`) → `Set(MainMenu)`. The pause menu is in the excluded set **by name**
-(map gap 7; it sits over a live board — `OverlaySwitchState.cs:44-48`).
+(closed enum the code owns and a human reviews) and a pure presence carrier
+(`Set`/`Clear`/`Current`/`IsReviewed`), Unity-free. New `src/FusionRpg.Injector/Hud/MenuPresenceHook.cs`
+with the Harmony patches: `[HarmonyPatch(typeof(MainMenu), "Start")]` (string name — `Start` is private
+in 3.9) → `Set(MainMenu)`; `[HarmonyPatch(typeof(BaseMenu), nameof(BaseMenu.OnHide))]` and `OnExit`
+postfixes, **guarded by `__instance is MainMenu`** → `Clear(MainMenu)`. Host-gated with
+`#if FUSIONRPG_MELON` (the type resolves only on the Melon host; see Task 1). The pause menu is excluded
+**by name** (it is not a `MainMenu`, so the guard cannot set it; it sits over a live board —
+`OverlaySwitchState.cs:44-48`).
 
 **Acceptance criteria:**
 
 - [ ] `RiftMenuSurface` is closed; its pinned-literal test states the closed-vocabulary reason.
-- [ ] `EnterMainMenu` patch sets `MainMenu`; the signal is a pure read (no server, no hit path).
-- [ ] The pause menu appears in the enum's **documented excluded set by name**, with the reason.
+- [ ] The signal is set by `MainMenu.Start` and cleared by `BaseMenu`’s hide/exit — **no `UIMgr`
+      navigation method is patched or called anywhere**.
+- [ ] The **type guard** is tested: a non-`MainMenu` `BaseMenu` hiding does **not** clear the signal.
+- [ ] The patch is host-gated (`FUSIONRPG_MELON`) and a patch failure logs rather than escaping.
 - [ ] No per-frame allocation; the signal read is O(1).
 
 **Verification:**
 
-- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Overlay"` green
-- [ ] `.\scripts\verify-change.ps1 -Paths src/FusionRpg.Core/Overlay/RiftMenuAnchor.cs,src/FusionRpg.Injector/GameCaptureHooks.cs -Session <id>`
-- [ ] Injector compiles with interop (MelonLoader.39 build)
-
-**Dependencies:** None (map + spec approved).
-
-**Files likely touched:**
-
-- `src/FusionRpg.Core/Overlay/RiftMenuAnchor.cs` (new)
-- `src/FusionRpg.Injector/GameCaptureHooks.cs` (one patch)
-
-**Estimated scope:** S.
-
-### Task 2: **Every exit edge** clears the signal — one test each
-
-**Description:** Patch the already-patched nav methods (`EnterPauseMenu` `:780`, `BackToGame` `:790`,
-`BackToMenu` `:812`) to `Set(None)`, and cover the remaining observation points the injector has. The
-exit-edge matrix is: `enter-match / open-submenu / open-pause-menu / open-modal / lose-board /
-game-quit` → all `None`. `BackToMenu` landing one layer short of the main menu is itself an exit edge
-for the previous surface and an entry only once `EnterMainMenu` is reached (both directions tested) —
-`DebugActions.cs:1517-1527` documents the live proof that `BackToMenu()` alone lands on the Challenge
-Mode select.
-
-**Acceptance criteria:**
-
-- [ ] Every listed exit edge has its **own** test; no edge is inferred from another.
-- [ ] Entering `MainMenu` then `None`, and the reverse, both clear — order-independent.
-- [ ] An **unobserved modal** is recorded as a named blind spot (Open Question 2), not assumed away.
-- [ ] The exit set is **not** copied from `menu.enter` (a one-shot on a single patch, `:812-818`).
-
-**Verification:**
-
 - [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~RiftMenuAnchor"` green
-- [ ] Live (owner terminal): main menu reads `MainMenu`; pause from a live board reads `None`; lose a
-      board reads `None` — read back through the tombstone's own accessor, not a response body
+- [ ] `.\scripts\verify-change.ps1 -Paths src/FusionRpg.Core/Overlay/RiftMenuAnchor.cs,src/FusionRpg.Injector/Hud/MenuPresenceHook.cs -Session <id>`
+- [ ] Injector compiles with interop (MelonLoader.39 build)
 
 **Dependencies:** Task 1.
 
 **Files likely touched:**
 
-- `src/FusionRpg.Injector/GameCaptureHooks.cs` (exit edges on three existing patches)
-- `tests/FusionRpg.Core.Tests/Overlay/RiftMenuAnchorTests.cs` (new — the matrix)
+- `src/FusionRpg.Core/Overlay/RiftMenuAnchor.cs` (new)
+- `src/FusionRpg.Injector/Hud/MenuPresenceHook.cs` (new)
 
 **Estimated scope:** M.
 
-### Task 3: The hit-target geometry contract + the `riftMenu` tuning group
+### Task 3: Presence semantics tests + the **no-navigation red guard** + the `riftMenu` tuning group
 
-**Description:** `RiftMenuOverlayLayout` gains `HitBox(w,h)` (axis-aligned, from the same percentages as
-`TopMiddleLeft`, `:44-53`), `MinimumHitDevicePx`, `MeetsMinimumHitTarget(...)`. Author the `riftMenu`
-group in `data/tuning/overlay.v1.json` **by hand once** (`publish.py` refuses to invent a key,
-`:130-131`); `OverlayTuningLoader.Parse` gains the group and **rejects by name** when absent (mirroring
-`switchLayout` `:47-54`).
+**Description:** The presence test matrix: `Start` → `MainMenu`; `OnHide`/`OnExit` on a `MainMenu` →
+`None`; the same callbacks on a **non-`MainMenu`** `BaseMenu` → **unchanged**; order-independence both
+ways. Add a **guard-style test** (source-read, matching `OverlayPipeContractGuardTests`’ style) asserting
+**no rift-gate source calls a `UIMgr` navigation method** (`EnterMainMenu`, `BackToMenu`,
+`EnterPauseMenu`, `BackToGame`) while allowing the existing *observe-only* patches
+(`GameCaptureHooks.cs:780,790,812`) to remain. Author the `riftMenu` group in
+`data/tuning/overlay.v1.json` **by hand once** (the placement percentages + device-pixel minimum size);
+`OverlayTuningLoader.Parse` gains the group and **rejects by name** when absent (mirroring
+`switchLayout`, `OverlayTuning.cs:47-60`).
 
 **Acceptance criteria:**
 
-- [ ] `HitBox` is axis-aligned and **independent of the wobble** — byte-identical across the pulse's
-      angle range (`RiftMenuOverlay.cs:78`).
-- [ ] Positive, on-screen rect at `(0,0)`, 720p, 1080p, 4K.
-- [ ] Minimum device-pixel hit target enforced, read from `riftMenu`, never a literal.
+- [ ] Each presence path has its **own** test; the non-`MainMenu` case is explicitly covered.
+- [ ] **The no-navigation guard is green** — and goes red if a `UIMgr` nav call is introduced (prove it
+      by a temporary local check, then revert).
 - [ ] A missing `riftMenu` key is a **load rejection naming it**, never a default.
 - [ ] No test asserts a population count; these are structural bounds.
+- [ ] The first draft’s `HitBox`/`MinimumHitDevicePx` additions are **not** present in
+      `RiftMenuOverlayLayout`.
 
 **Verification:**
 
-- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Overlay"` green
-- [ ] `python scripts/audit-magic-numbers.py` — no new M1/M2 (the extracted numbers carry their T2 comment)
+- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~RiftMenuAnchor"` green
+- [ ] `dotnet test tests/FusionRpg.Guard.Tests` green (the new no-navigation guard)
+- [ ] `python scripts/audit-magic-numbers.py` — no new M1/M2 (the extracted numbers carry their comment)
 - [ ] `dotnet run` a tuning load with the group removed → rejection names `riftMenu`
 
-**Dependencies:** Task 1 (shares the module's Core home).
+**Dependencies:** Task 2.
 
 **Files likely touched:**
 
-- `src/FusionRpg.Core/Overlay/RiftMenuOverlayLayout.cs`
-- `src/FusionRpg.Core/Overlay/OverlayTuning.cs` (parse the `riftMenu` group)
+- `tests/FusionRpg.Core.Tests/Overlay/RiftMenuAnchorTests.cs` (new)
+- `tests/FusionRpg.Guard.Tests/` (the no-navigation guard, new)
+- `src/FusionRpg.Core/Overlay/OverlayTuning.cs`
 - `data/tuning/overlay.v1.json`
-- `tests/FusionRpg.Core.Tests/Overlay/RiftMenuOverlayLayoutTests.cs`
 
-**Estimated scope:** S.
+**Estimated scope:** M.
 
 ### Checkpoint A
 
-- [ ] Signal reads `MainMenu` on the main menu; **every** exit edge clears to `None`, one test each.
-- [ ] Hit box stable at `(0,0)`/720p/1080p/4K; min target from `riftMenu`; pause menu excluded by name.
+- [ ] The signal reads `MainMenu` after the screen’s `Start`; clears on the screen’s own hide/exit.
+- [ ] A **non-`MainMenu`** `BaseMenu` hiding does **not** clear it.
+- [ ] **No rift-gate source calls a `UIMgr` navigation method** (red guard proven).
 - [ ] `riftMenu` group loads, or rejects by name when missing.
+- [ ] The 3.9 hierarchy paths are confirmed live (or a named miss is recorded).
 
 ---
 
 ## Slice 2a — `tombstone` (needs slice 1)
 
-### Task 4: The interactive sibling — reviewed gate + hit box + the existing toggle
+### Task 4: Attach a uGUI affordance + move the menu art to uGUI — Decisions 17 & 18
 
-**Description:** New `src/FusionRpg.Injector/Hud/RiftMenuTombstoneGui.cs`: `OverlaySwitchGui`'s event
-filter verbatim (`Repaint`, `Layout`, `MouseDown`, `MouseUp`, `:26-30`), gated on
-`RiftMenuAnchor.AllowsInteractiveAffordance(GameHooks.Board != null)`, drawing the cached `HitBox`, and
-on click calling `OverlaySwitch.RequestToggle()` (`:44`) — the **same** path the in-game button and the
-pipe use. `RiftMenuOverlay`'s broad **paint** gate stays (the ideal keeps paint broad); the **click**
-gate is the reviewed signal.
+**Description:** Two coupled changes, one rendering system.
+
+**(17) The affordance.** New `src/FusionRpg.Injector/Hud/RiftMenuTombstone.cs`, built from the
+`menu-anchor` presence patch: resolve the live `MainMenu`, `Find` the confirmed-live anchor subtree, and
+attach a child `GameObject` with a **stretched** `RectTransform` (`anchorMin` zero / `anchorMax` one /
+offsets zero), an `Image` with `raycastTarget = true`, and a `Button`
+(`transition = Selectable.Transition.None`, `targetGraphic = null`) whose listener calls
+`OverlaySwitch.RequestToggle()` (`:44`) — the **same** path the in-match button and the pipe use. Order
+below the game's primary buttons (`SetAsFirstSibling`) and clear `raycastTarget` on labels we would
+obstruct. **No IMGUI rect, no hand-derived hit box, no `ClassInjector`.** Every `Find` miss logs a
+**named warning** and disables the tombstone cleanly. Cite `ControlClick.cs:150-153` as the precedent for
+clicking a real game Button — do not re-derive it.
+
+**(18) The art.** New `src/FusionRpg.Injector/Hud/RiftMenuArt.cs`: PNG → `Texture2D` (reusing
+`ImageConversion.LoadImage`, `RiftMenuOverlay.cs:112-118`) → **`Sprite.Create`** (the verified new call)
+→ cached `Sprite` on the art node's `Image`. **Retire the IMGUI menu draw path**: remove `RiftMenuOverlay`'s
+`OnGUI` menu draw and its two host `Draw()` call sites. The in-match **RPG button stays IMGUI**
+(decision 15 + 18's deliberate split). If the move proves not small, fallback **(a)** — keep the paint,
+add the uGUI node over the same position — is the documented alternative and the spec records why.
 
 **Acceptance criteria:**
 
-- [ ] A main-menu click opens the FE, identical to F10 in both host modes.
-- [ ] The click routes through `OverlaySwitch.RequestToggle()`; **no** new pipe verb.
-- [ ] The interactive target exists **only** on the reviewed signal — unreachable on the seed picker,
-      Almanac, submenus, live boards, and the pause menu, **even with `Board == null`** (this is the
-      exact seed-picker/Almanac defect, as a click).
-- [ ] One cached rect, one `GUI.Button`, no per-frame allocation; failures swallowed and logged.
+- [ ] The affordance is a real uGUI `Button` **inside** the menu hierarchy — the game's own layout and
+      raycast own hit-testing; no `HitBox`/`MinimumHitDevicePx` additions to `RiftMenuOverlayLayout`.
+- [ ] The menu art is a `Sprite` on a uGUI `Image` under the menu transform; the menu has **one**
+      rendering system; `Sprite.Create` is the only new art call.
+- [ ] A main-menu click opens the FE, identical to F10; the click routes through
+      `OverlaySwitch.RequestToggle()`; **no** new pipe verb.
+- [ ] **A real menu button beside it still receives its click** (sibling order + `raycastTarget` clears).
+- [ ] The affordance exists **only** on the main menu; absent on the pause menu, a live board, and every
+      other screen.
+- [ ] The IMGUI menu draw sites are removed from both hosts; **no** new `OnGUI` line is added; the
+      in-match RPG button keeps its IMGUI path (guard-asserted, not left to drift).
+- [ ] No `ClassInjector` / custom `MonoBehaviour`; a `Find` miss or an undecodable PNG logs a named
+      warning and degrades cleanly.
+- [ ] MelonLoader-first scope stated: BepInEx keeps **F10** if its interop lacks `MainMenu`.
 
 **Verification:**
 
 - [ ] `dotnet test tests/FusionRpg.Guard.Tests --filter "FullyQualifiedName~OverlayPipeContract"` green **untouched**
-- [ ] `.\scripts\verify-change.ps1 -Paths src/FusionRpg.Injector/Hud/RiftMenuTombstoneGui.cs,src/FusionRpg.Injector/Hud/RiftMenuOverlay.cs -Session <id>`
-- [ ] Live (owner terminal): click opens the overlay; no hit target on the seed picker or the Almanac
+- [ ] `.\scripts\verify-change.ps1 -Paths src/FusionRpg.Injector/Hud/RiftMenuTombstone.cs,src/FusionRpg.Injector/Hud/RiftMenuArt.cs,src/FusionRpg.Injector/Hud/RiftMenuOverlay.cs -Session <id>`
+- [ ] Live (owner terminal): tombstone visible on the main menu; absent in a match and on the pause menu;
+      click opens the overlay; a neighbouring menu button still works; the menu art scales with the game's
+      canvas (no IMGUI menu draw); **no `UIMgr` nav call in the log**
 
-**Dependencies:** Task 1–3 (signal + hit box).
+**Dependencies:** Task 1–3 (presence signal + anchor paths confirmed).
 
 **Files likely touched:**
 
-- `src/FusionRpg.Injector/Hud/RiftMenuTombstoneGui.cs` (new)
-- `src/FusionRpg.Injector/Hud/RiftMenuOverlay.cs` (paint gate note; no click path here)
-- `src/FusionRpg.Injector.BepInEx/Plugin.cs` (one call line)
-- `src/FusionRpg.Injector.MelonLoader/MelonFusionRpgMod.cs` (one call line)
+- `src/FusionRpg.Injector/Hud/RiftMenuTombstone.cs` (new)
+- `src/FusionRpg.Injector/Hud/RiftMenuArt.cs` (new)
+- `src/FusionRpg.Injector/Hud/RiftMenuOverlay.cs` (retire the IMGUI menu draw; move the loader)
+- `src/FusionRpg.Injector/Hud/MenuPresenceHook.cs` (calls attach on `Start`)
+- `src/FusionRpg.Injector.BepInEx/Plugin.cs` · `.../MelonLoader/MelonFusionRpgMod.cs` (remove the menu-art `Draw()` line)
 
-**Estimated scope:** M.
+**Estimated scope:** M/L.
 
 ### Task 5: Gap 6 — the injector-host view start stops keying off the button preference
 
@@ -217,7 +258,7 @@ keep one action, and add a test asserting the restyled control has exactly one a
 - [ ] `.\scripts\verify-change.ps1 -Paths src/FusionRpg.Injector/Hud/OverlaySwitchGui.cs -Session <id>`
 - [ ] Live (owner terminal): the restyled button toggles once, and only once (debounce holds)
 
-**Dependencies:** Task 4 (same draw chain; land together).
+**Dependencies:** Task 4 (same menu/lawn affordance work; land together).
 
 **Files likely touched:**
 
@@ -228,8 +269,10 @@ keep one action, and add a test asserting the restyled control has exactly one a
 
 ### Checkpoint B
 
-- [ ] Main-menu click opens the FE, identical to F10 in both host modes.
-- [ ] No hit target on any non-reviewed surface (seed picker, Almanac, submenus, boards, pause).
+- [ ] Main-menu click opens the FE, identical to F10.
+- [ ] No hit target on any non-reviewed surface (pause, boards, every other screen).
+- [ ] The menu has **one** rendering system (uGUI art + uGUI affordance); the in-match RPG button keeps
+      IMGUI (decision 18's deliberate split, guard-asserted).
 - [ ] Pipe guard green **untouched** (no new verb); the in-match button still one action.
 - [ ] Gap 6 fixed: injector mode + preference off → menu entry still opens the view.
 
@@ -506,4 +549,9 @@ edit neither its spec nor its tests.
 - [ ] All five specs' success criteria ticked, or the unticked box is named with its reason.
 - [ ] No acceptance criterion anywhere asserts a derived population count.
 - [ ] ActorHub gate N/A stated in all five specs.
+- [ ] **No rift-gate source calls a `UIMgr` navigation method** (Decision 17's hard rule, guard-asserted).
+- [ ] **The menu has one rendering system** (uGUI art + affordance); the in-match RPG button stays IMGUI
+      (Decision 18's deliberate split).
+- [ ] `Sprite.Create` is the only new uGUI plumbing introduced; `ControlClick`'s click path is cited, not
+      re-derived.
 - [ ] Live proofs recorded per `live-probe-standard.md` §3 (state read back through the normal path).

@@ -1,7 +1,7 @@
 {
   "session": "rift-gate-spec-20260915-c41a",
   "program": "rift-gate",
-  "problem": "Write the five rift-gate module specs under docs/architecture/rift-gate/ and the program plan+todo (tasks/rift-gate-plan.md, tasks/rift-gate-todo.md) from the approved capability map. No runtime code.",
+  "problem": "Write the five rift-gate module specs under docs/architecture/rift-gate/ and the program plan+todo (tasks/rift-gate-plan.md, tasks/rift-gate-todo.md) from the approved capability map. Spec/plan phase only, no runtime code. Corrected 2026-09-15 to map Decisions 17 (menu-screen presence signal, never a UIMgr navigation static) and 18 (one uGUI rendering system for the menu; in-match RPG button stays IMGUI).",
   "mode": "worktree",
   "branch": "rift-gate-spec",
   "worktree": "D:\\Works\\source\\plant-vs-zombie-rise-of-summoner\\.kilo\\worktrees\\rift-gate-spec",
@@ -11,6 +11,19 @@
     "tasks/rift-gate-todo.md",
     "tasks/sessions/rift-gate-spec-20260915-c41a.json"
   ],
+  "planned_build_paths": [
+    "src/FusionRpg.Core/Overlay/RiftMenuAnchor.cs",
+    "src/FusionRpg.Core/Overlay/OverlayTuning.cs",
+    "src/FusionRpg.Injector/Hud/MenuPresenceHook.cs",
+    "src/FusionRpg.Injector/Hud/RiftMenuTombstone.cs",
+    "src/FusionRpg.Injector/Hud/RiftMenuArt.cs",
+    "src/FusionRpg.Injector/Hud/RiftMenuOverlay.cs",
+    "src/FusionRpg.Injector/Hud/OverlaySwitchGui.cs",
+    "src/FusionRpg.Injector/Hud/OverlaySwitch.cs",
+    "data/tuning/overlay.v1.json",
+    "tests/FusionRpg.Core.Tests/Overlay/RiftMenuAnchorTests.cs"
+  ],
+  "planned_build_note": "These are the /build phase's intended files, recorded now so the guard tests a future build adds (e.g. a rift-gate no-navigation guard) can be scoped narrowly rather than claiming all of tests/FusionRpg.Guard.Tests/**, which an active session already owns.",
   "started": "2026-09-15T04:22:53Z",
   "status": "active"
 }
