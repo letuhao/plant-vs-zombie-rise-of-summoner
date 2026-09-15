@@ -243,11 +243,71 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
         // because a board is already live) rather than claiming success it never observed.
         _store.Heartbeat(RpgConstants.SourceInjector);
         SeedLiveBoardStart();
+        var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
 
-        var resp = await _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 1 });
+        var request = _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 1 });
+        await AnswerSetupSkipOk(inbox, new List<CommandDto>());
+
+        var resp = await request;
         Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode);
         var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
         Assert.Contains("did not complete within 1s", body!["error"].ToString());
+    }
+
+    /// <summary>2026-09-15 owner-reported, every run: a level left behind the seed-picker has no game time and
+    /// no usable seed bank. quick-start used to carry on to wave-freeze and the scenario anyway and report a
+    /// "ready" lab; a failed or unacknowledged setup skip is now terminal and names the injector's stage.</summary>
+    [Fact]
+    public async Task Post_setupSkipFails_isTerminal_neverFreezesWavesOrRunsTheScenario()
+    {
+        _store.Heartbeat(RpgConstants.SourceInjector);
+        SeedLiveBoardStart();
+        var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
+
+        var request = _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 3 });
+        var seen = new List<CommandDto>();
+        // The first debug.skip-setup is quick-start's mid-entry probe (left unanswered, so it times out);
+        // the second is the real post-entry dismissal, which the injector reports as failed.
+        await WaitForCommand(inbox, seen, "debug.skip-setup", count: 2);
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.setup.skip",
+            Payload = JsonSerializer.SerializeToElement(new { ok = false, stage = "picker-never-appeared", error = "seed-picker StartGameButton never appeared within 30s" })
+        });
+
+        var resp = await request;
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode);
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Contains("never appeared", body!["error"].ToString());
+        Assert.Equal("picker-never-appeared", body["stage"].ToString());
+
+        seen.AddRange(inbox.Drain(int.MaxValue));
+        Assert.DoesNotContain(seen, c => c.Name == "debug.wave-freeze");
+        Assert.DoesNotContain(seen, c => c.Name == "debug.run-steps");
+    }
+
+    static async Task WaitForCommand(InjectorCommandInbox inbox, List<CommandDto> seen, string name, int count = 1)
+    {
+        for (var i = 0; i < 400 && seen.Count(c => c.Name == name) < count; i++)
+        {
+            await Task.Delay(25);
+            seen.AddRange(inbox.Drain(int.MaxValue));
+        }
+        Assert.True(seen.Count(c => c.Name == name) >= count, $"expected {count} x {name}");
+    }
+
+    /// <summary>Answers the post-entry <c>debug.skip-setup</c> the way the injector does once the picker is
+    /// dismissed (the ack is emitted only after InitBoard.ready, DebugActions.TickPendingSkipSetup).</summary>
+    async Task AnswerSetupSkipOk(InjectorCommandInbox inbox, List<CommandDto> seen)
+    {
+        await WaitForCommand(inbox, seen, "debug.skip-setup");
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.setup.skip",
+            Payload = JsonSerializer.SerializeToElement(new { ok = true, method = "button", stage = "started" })
+        });
     }
 
     [Fact]
@@ -262,10 +322,14 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
         SeedLiveBoardStart();
         var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
 
-        var resp = await _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 1 });
-        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode); // honest timeout -- no real game answering
+        var request = _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 1 });
+        var seenCommands = new List<CommandDto>();
+        await AnswerSetupSkipOk(inbox, seenCommands);
+        var resp = await request;
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode); // honest run-steps timeout -- no real game answering
 
-        var sent = inbox.Drain(int.MaxValue).Select(c => c.Name).ToList();
+        seenCommands.AddRange(inbox.Drain(int.MaxValue));
+        var sent = seenCommands.Select(c => c.Name).ToList();
         var toggleIdx = sent.FindIndex(n => n == "cheat.toggle");
         var skipIdx = sent.FindIndex(n => n == "debug.skip-setup");
         var freezeIdx = sent.FindIndex(n => n == "debug.wave-freeze");

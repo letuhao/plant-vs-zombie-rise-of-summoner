@@ -473,20 +473,47 @@ public static class DebugEndpoints
         });
 
         // Game Injector Debug
+        // Game Injector Debug: leave a live lawn the player's way (menu -> main menu -> confirm) and wait for
+        // the injector's ack, which fires only once the Board is destroyed. Replaces ui-nav back-to-menu for
+        // board exits (that direct call left the Board alive, 2026-09-15).
+        g.MapPost("/leave-board", async (RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            if (!store.InjectorConnected)
+                return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
+            const int timeoutSec = 30; // structural acknowledgement wait, not a balance value
+            var before = store.GetMaxEventId();
+            await Send(hub, inbox, "debug.leave-board", new { });
+            var ack = await PollForKind(store, before, "debug.leave-board", TimeSpan.FromSeconds(timeoutSec));
+            if (ack is null)
+                return Results.Conflict(new { ok = false, error = $"debug.leave-board did not ack within {timeoutSec}s" });
+            return PayloadBool(ack.Payload, "ok")
+                ? Results.Ok(new { ok = true, acknowledgement = ack.Payload })
+                : Results.Conflict(new { ok = false, error = PayloadString(ack.Payload, "error") ?? "leave-board failed", acknowledgement = ack.Payload });
+        });
+
         g.MapPost("/setup/skip", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var b = BodyOrEmpty(body);
-            var method = (StrProp(b, "method") ?? "quick").Trim().ToLowerInvariant();
+            var method = (StrProp(b, "method") ?? "button").Trim().ToLowerInvariant();
             if (method is not ("quick" or "button"))
                 return Results.BadRequest(new { ok = false, error = "unknown method — expected quick or button" });
 
             if (!store.InjectorConnected)
                 return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
 
-            const int defaultTimeoutSec = 15; // structural acknowledgement wait, not a balance value
+            // structural acknowledgement wait, not a balance value: the injector now acks only once the
+            // seed-picker has actually been pressed and InitBoard.ready observed (up to 30s + 10s).
+            const int defaultTimeoutSec = 45;
             var timeoutSec = IntProp(b, "timeoutSec", defaultTimeoutSec);
             var before = store.GetMaxEventId();
-            await Send(hub, inbox, "debug.skip-setup", new { method });
+            // Forward the optional seed-packet pick list and probe flag verbatim (injector DebugActions.SkipSetup).
+            object? cards = b.TryGetProperty("cards", out var cardsEl) && cardsEl.ValueKind == JsonValueKind.Array
+                ? cardsEl.EnumerateArray().Where(e => e.TryGetInt32(out _)).Select(e => e.GetInt32()).ToArray()
+                : null;
+            var waitForBoard = !(b.TryGetProperty("waitForBoard", out var wfb) && wfb.ValueKind == JsonValueKind.False);
+            await Send(hub, inbox, "debug.skip-setup", cards is null
+                ? new { method, waitForBoard }
+                : (object)new { method, waitForBoard, cards });
             var ack = await PollForKind(store, before, "debug.setup.skip", TimeSpan.FromSeconds(timeoutSec));
             if (ack is null)
                 return Results.Conflict(new { ok = false, method, error = $"debug.setup.skip did not ack within {timeoutSec}s" });
@@ -723,6 +750,11 @@ public static class DebugEndpoints
             var timeoutSec = IntProp(b, "timeoutSec", 45);
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
+            // Reject an unknown scenario before any wait or game command (it used to surface only after
+            // the setup-skip wait, and a skip failure now ends the request before the scenario runs).
+            try { DebugScenarios.Expand(scenarioId, "validate"); }
+            catch (ArgumentException ex) { return Results.NotFound(new { ok = false, error = ex.Message }); }
+
             if (!store.InjectorConnected)
                 return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
 
@@ -799,11 +831,13 @@ public static class DebugEndpoints
                 store.MergeCheatField("DEBUG-SETUP-SKIP", true, null);
                 await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-SETUP-SKIP", enabled = true });
                 var probeBeforeSkip = store.GetMaxEventId();
-                await Send(hub, inbox, "debug.skip-setup", new { method = "quick" });
+                // waitForBoard:false -- this is a probe: fail fast at the main menu instead of waiting.
+                await Send(hub, inbox, "debug.skip-setup", new { method = "button", waitForBoard = false });
                 var probeSkipAck = await PollForKind(store, probeBeforeSkip, "debug.setup.skip", TimeSpan.FromSeconds(Math.Min(timeoutSec, 8)));
                 if (probeSkipAck is not null && PayloadBool(probeSkipAck.Payload, "ok")) alreadyMidEntry = true;
             }
             var setupSkipOk = false;
+            var levelEnterAckMissing = false;
 
             var entered = false;
             var boardStart = (alreadyMidEntry || defeatDetected) ? null : FindLatestLiveBoardStart(store);
@@ -829,10 +863,22 @@ public static class DebugEndpoints
                 var beforeEnter = store.GetMaxEventId();
                 await Send(hub, inbox, "debug.enter-level", new { levelType = 0, levelNumber, id = 0, name = "" });
 
-                var ackTimeoutSec = Math.Min(timeoutSec, 20);
+                var ackTimeoutSec = Math.Min(timeoutSec, 8); // short: the game-state fallback below covers a lost ack
                 var enterAck = await PollForKind(store, beforeEnter, "debug.level.enter", TimeSpan.FromSeconds(ackTimeoutSec));
                 if (enterAck is null)
-                    return Results.Conflict(new { ok = false, error = $"debug.level.enter did not ack within {ackTimeoutSec}s", waitedMs = sw.ElapsedMilliseconds, defeatReset });
+                {
+                    // 2026-09-15: observed live — the injector logged "debug.enter-level Advanture#1" and the level
+                    // loaded, but that frame's debug.level.enter (and board.modifiers) events never reached the
+                    // server while neighbouring events did. Confirm entry from the game's own live objects instead
+                    // of failing a level that is actually open, and say the ack was missing.
+                    var beforeCheck = store.GetMaxEventId();
+                    await Send(hub, inbox, "debug.game-state", new { });
+                    var check = await PollForKind(store, beforeCheck, "debug.game-state", TimeSpan.FromSeconds(Math.Min(timeoutSec, 10)));
+                    if (check is null || !PayloadBool(check.Payload, "hasBoard"))
+                        return Results.Conflict(new { ok = false, error = $"debug.level.enter did not ack within {ackTimeoutSec}s and game-state shows no board", waitedMs = sw.ElapsedMilliseconds, defeatReset });
+                    levelEnterAckMissing = true;
+                    enterAck = check;
+                }
 
                 var ackOk = PayloadBool(enterAck.Payload, "ok");
                 if (!ackOk)
@@ -855,7 +901,8 @@ public static class DebugEndpoints
                     // is still authoritative for the level type; keep waiting for board.start for
                     // lifecycle correlation, but do not reject a usable live board solely because
                     // that optional telemetry edge was missed.
-                    enteredLevelType = PayloadString(enterAck.Payload, "levelType");
+                    enteredLevelType = PayloadString(enterAck.Payload, "levelType")
+                        ?? PayloadString(enterAck.Payload, "theBoardTypeName"); // game-state fallback when the ack was lost
                     // Board.Awake telemetry is best-effort on cold starts; bound this optional wait so
                     // quick-start can continue from the authoritative enter acknowledgement instead
                     // of holding the HTTP request for the full scenario timeout.
@@ -900,9 +947,26 @@ public static class DebugEndpoints
             if (!alreadyMidEntry)
             {
                 var beforeSkip = store.GetMaxEventId();
-                await Send(hub, inbox, "debug.skip-setup", new { method = "quick" });
-                var skipAck = await PollForKind(store, beforeSkip, "debug.setup.skip", TimeSpan.FromSeconds(Math.Min(timeoutSec, 10)));
+                // 2026-09-15 fix: the old immediate QuickInGame fired before the picker had slid in and left
+                // the level blocked. The injector now waits for the picker, presses its start button, and
+                // acks only after InitBoard.ready -- so this wait covers level load + picker + start.
+                await Send(hub, inbox, "debug.skip-setup", new { method = "button" });
+                var skipAck = await PollForKind(store, beforeSkip, "debug.setup.skip", TimeSpan.FromSeconds(Math.Min(timeoutSec, 45)));
                 setupSkipOk = skipAck is not null && PayloadBool(skipAck.Payload, "ok");
+                // A board left behind the seed-picker has no game time and no usable seed bank -- never report
+                // it as a ready lab (the owner-reported every-run failure, 2026-09-15).
+                if (!setupSkipOk)
+                    return Results.Conflict(new
+                    {
+                        ok = false,
+                        error = skipAck is null
+                            ? "debug.setup.skip did not ack — the level may still be on the seed-picker"
+                            : PayloadString(skipAck.Payload, "error") ?? "seed-picker was not dismissed",
+                        stage = skipAck is null ? null : PayloadString(skipAck.Payload, "stage"),
+                        levelEnterAckMissing,
+                        defeatReset,
+                        waitedMs = sw.ElapsedMilliseconds
+                    });
             }
 
             await Send(hub, inbox, "debug.wave-freeze", new { enabled = true });
@@ -984,6 +1048,7 @@ public static class DebugEndpoints
                 targetPtr,
                 plantPtr,
                 setupSkip = setupSkipOk,
+                levelEnterAckMissing,
                 defeatReset,
                 liveEntities,
                 elapsedMs = sw.ElapsedMilliseconds,

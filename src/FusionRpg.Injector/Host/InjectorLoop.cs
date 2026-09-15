@@ -55,6 +55,9 @@ public static class InjectorLoop
         try { using (PerfProbe.Measure(PerfSection.PumpMain)) GameHooks.PumpMainThread(); } catch { }
         try { using (PerfProbe.Measure(PerfSection.PollBoard)) GameHooks.PollBoard(); } catch { }
         try { CheatCommandRunner.Drain(); } catch { }
+        try { ScreenshotRunner.TickFallback(); } catch { }
+        try { DebugActions.TickPendingSkipSetup(); } catch { }
+        try { DebugLeaveBoard.Tick(); } catch { }
         try { CheatUiActions.Drain(); }
         catch (Exception ex) { RpgHost.Log.Error("CheatUiActions: " + ex); }
         try

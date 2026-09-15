@@ -1116,7 +1116,7 @@ metric.*
 
 ---
 
-## Next run — audit 2026-09-15 gaps (`L-N1` … `L-N28`)
+## Next run — audit 2026-09-15 gaps (`L-N1` … `L-N29`)
 
 Ordered by the plan's "Next run" phases. Every task reports commands run and raw output; a box is
 ticked only when evidence matches the bullet's exact wording — never reword a bullet to tick it.
@@ -1226,6 +1226,16 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       `enter-level` left stale entities under a main-menu overlay; a kill batch produced no
       `zombie.die` events and no soul credit on the same `matchKey`; `debug_restart_game` ran 30 min
       with no response. Each needs a reproduction and an owner.
+      *audit 2026-09-15 PROGRESS (not ticked — `debug_restart_game` hang and kill→soul gap still unreproduced):
+      (a) screenshots: every capture stuck "already in flight" because OnGUI never delivers a Repaint on this host;
+      `ScreenshotRunner.TickFallback` now captures by camera render after 2s and reports `repaintsSeen` (live: PNGs return,
+      `primitive: camera-fallback-no-repaint`). (b) seed-picker: `debug.skip-setup` fired before the picker existed and
+      acked ok on a blocked level; it now waits for the live StartGameButton, picks seed packets into the bank
+      (`CardUI.OnMouseDown` on the "(Clone)" packet), presses start and acks only after `InitBoard.ready` — live 3/3 cold
+      cycles, and quick-start treats a failed skip as terminal. (c) stale board: `ui-nav back-to-menu` left the Board alive
+      (mowers over the menu, `enter-level` refused "board already live"); new `POST /api/debug/leave-board` presses
+      menu → 主菜单 → 确定 (owner-specified) and acks after `Board.OnDestroy` — live 4/4, re-entry accepted every time.
+      (d) game-state now reports `initBoardReady`/`timeScale`/`gameTime`; it still labels the seed-picker `InMatch`.*
 - [ ] **L-N27** Liveness on pooled reuse (found by L-N16): a dead mark now clears only on a real spawn
       hook. A pooled entity reactivated without `Start()`/`InitHealth()` (T10's frozen-wave replacement
       plant) at a dead-marked ptr still refuses RPG hits, and a pooled zombie skips `NoteZombieDead`.
@@ -1250,3 +1260,10 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       stamina regen on (amend §11 and the BattleModels doc, add a battle test on real v2 numbers) or lawn-only (regen
       opt-in per compose, battle off).*
       *Done: owner ruled "battle regen on" (2026-09-15). `resource-hub-ssot.md` §11 amended (authored regen rows also regenerate during an encounter; pools still not refilled per encounter); `BattleModels.BaseResourceRegen` doc records the decision; explicit-tuning overloads + optional `ResourceBaselineSubsystem` tuning param let `BattleStaminaRegenTests` (3) read the real `battle-resources.v2.json` without mutating ambient state: battle compose seeds the seam, only stamina regenerates, a spent battle pool recovers `min(max, ticks*rate/1000)`. Mutant (subsystem ignores explicit tuning) fails 2 of 3.*
+
+- [ ] **L-N29** Event loss on level entry (found 2026-09-15): twice, on quick-start's path, the injector logged
+      `debug.enter-level Advanture#1` but that frame's `debug.level.enter` and `board.modifiers` events never reached the
+      server while neighbouring events (43.597, 43.604) did. quick-start now confirms entry via game-state and returns
+      `levelEnterAckMissing:true`, which masks nothing but does not explain it. Reproduce with the event ids around
+      `debug.level.enter`, trace `DebugRuntime.Emit` → `GameHooks.Emit` → `RpgClient` batching/dedupe → `EventIngest`,
+      and fix the drop. Verify: 5 quick-starts from the main menu with `levelEnterAckMissing:false`.

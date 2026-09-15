@@ -361,6 +361,9 @@ public static class CheatCommandRunner
             case "debug.game-state":
                 DebugActions.GameState();
                 break;
+            case "debug.leave-board":
+                DebugLeaveBoard.Start();
+                break;
             case "debug.ui-nav":
                 DebugActions.UiNav(p);
                 break;

@@ -1335,21 +1335,45 @@ public static class DebugActions
     }
 
     /// <summary>
-    /// Gated LIVE probe for the host game's plant-selection completion path. The command is drained
-    /// from <see cref="Host.InjectorLoop"/>, so both candidate handlers run on Unity's main thread.
-    /// Do not hide the panel directly: InitBoard may still be awaiting its selection/click state.
+    /// Gated LIVE dismissal of the host game's "choose your plants" seed-picker, run as a pending
+    /// operation ticked from <see cref="Host.InjectorLoop"/> (<see cref="TickPendingSkipSetup"/>).
+    ///
+    /// <para><b>2026-09-15 fix (owner-reported, every run):</b> this used to fire
+    /// <c>InitBoard.QuickInGame()</c> / <c>OnStartBattleButtonClick()</c> the instant the command
+    /// arrived. Right after <c>debug.enter-level</c> the picker is still animating in — the call landed
+    /// with <c>InitBoard.ready=false</c>, acked <c>ok:true</c>, and the level stayed blocked behind the
+    /// picker with no game time passing. Screenshots proved the working sequence: wait until the
+    /// picker's <c>StartGameButton</c> is live, let it settle, press it the same way
+    /// <c>ControlClick</c> presses a <c>*Btn</c> (<c>OnMouseDown</c>/<c>OnMouseUp</c>), and only then read
+    /// <c>InitBoard.ready</c> flip to true. The ack (<c>debug.setup.skip</c>) is emitted once, at the real
+    /// outcome, and names the stage it reached.</para>
+    ///
+    /// <para><c>waitForBoard=false</c> (quick-start's "is a level already mid-entry?" probe) fails fast
+    /// when no picker or InitBoard exists yet instead of waiting. A new request replaces any pending one.</para>
     /// </summary>
     public static void SkipSetup(JsonElement p)
     {
         var envOn = string.Equals(
             Environment.GetEnvironmentVariable("FUSIONRPG_SETUP_SKIP"), "1", StringComparison.Ordinal);
         var toggleOn = CheatState.On("DEBUG-SETUP-SKIP");
-        var method = (Str(p, "method") ?? "quick").Trim().ToLowerInvariant();
+        var method = (Str(p, "method") ?? "button").Trim().ToLowerInvariant();
+        var waitForBoard = !(p.ValueKind == JsonValueKind.Object && p.TryGetProperty("waitForBoard", out var wf)
+                             && wf.ValueKind == JsonValueKind.False);
+        // "cards": [plantTypeId, ...] picks those seed packets into the bank before starting; omitted = every
+        // packet the picker offers (the seed bank must hold cards, or nothing can be planted); [] = none.
+        List<int>? cards = null;
+        if (p.ValueKind == JsonValueKind.Object && p.TryGetProperty("cards", out var cardsEl) && cardsEl.ValueKind == JsonValueKind.Array)
+        {
+            cards = new List<int>();
+            foreach (var c in cardsEl.EnumerateArray())
+                if (c.TryGetInt32(out var id) && !cards.Contains(id)) cards.Add(id);
+        }
         var dump = new Dictionary<string, object>
         {
             ["method"] = method,
             ["env"] = envOn,
-            ["toggle"] = toggleOn
+            ["toggle"] = toggleOn,
+            ["waitForBoard"] = waitForBoard
         };
 
         if (!envOn && !toggleOn)
@@ -1370,38 +1394,244 @@ public static class DebugActions
             return;
         }
 
+        if (!waitForBoard && InitBoard.Instance == null && FindStartGameButton() == null)
+        {
+            dump["ok"] = false;
+            dump["stage"] = "no-picker";
+            dump["error"] = "no seed-picker and no InitBoard right now (waitForBoard=false)";
+            DebugRuntime.Emit("debug.setup.skip", dump);
+            return;
+        }
+
+        var now = Environment.TickCount64;
+        _pendingSkip = new PendingSkipSetup
+        {
+            Method = method,
+            RequestedCards = cards,
+            StartedMs = now,
+            DeadlineMs = now + (waitForBoard ? SkipSetupTimeoutMs : SkipSetupProbeTimeoutMs),
+            Dump = dump
+        };
+        CheatState.Note("debug.skip-setup " + method + " pending (waiting for the seed-picker)");
+    }
+
+    sealed class PendingSkipSetup
+    {
+        public string Method = "button";
+        public long StartedMs;
+        public long DeadlineMs;
+        public long PickerSeenMs = -1;
+        public long PressedMs = -1;
+        public List<int>? RequestedCards;
+        public List<int>? CardsToPick;
+        public int CardIndex;
+        public int CardAttempt;
+        public long LastPickMs = -1;
+        public Dictionary<string, object> Dump = new();
+    }
+
+    static PendingSkipSetup? _pendingSkip;
+
+    // Structural (not tunable): acknowledgement/wait bounds for a debug command, not balance values.
+    const long SkipSetupTimeoutMs = 30_000;       // level load + picker slide-in
+    const long SkipSetupProbeTimeoutMs = 3_000;   // quick-start's mid-entry probe
+    const long PickerSettleMs = 1_500;            // picker animation finishes before the press
+    const long ReadyAfterPressTimeoutMs = 10_000; // InitBoard.ready must follow the press
+    const long CardPickSettleMs = 400;            // a picked packet animates into the bank
+    const int MaxCardPickAttempts = 12;           // ~5s of retries while a cold picker ignores clicks
+
+    /// <summary>Advances a pending <see cref="SkipSetup"/>; called every <c>InjectorLoop.Tick</c>.</summary>
+    public static void TickPendingSkipSetup()
+    {
+        var pending = _pendingSkip;
+        if (pending == null) return;
+        var now = Environment.TickCount64;
         try
         {
             var init = InitBoard.Instance;
-            dump["ready"] = init != null && init.ready;
-            dump["board"] = init != null && init.board != null;
-            dump["ui"] = init != null && init.uI != null;
-            if (init == null)
-                throw new InvalidOperationException("InitBoard.Instance is null");
+            var ready = init != null && SafeReady(init);
 
-            if (method == "quick")
+            if (pending.PressedMs < 0)
             {
-                init.QuickInGame();
-            }
-            else
-            {
-                var ui = InGameUI.Instance;
-                if (ui == null)
-                    throw new InvalidOperationException("InGameUI.Instance is null");
-                ui.OnStartBattleButtonClick();
+                if (ready)
+                {
+                    FinishSkip(pending, true, "already-started", null, now);
+                    return;
+                }
+                var button = FindStartGameButton();
+                if (button != null)
+                {
+                    if (pending.PickerSeenMs < 0) pending.PickerSeenMs = now;
+                    if (now - pending.PickerSeenMs >= PickerSettleMs && !PickCardsStep(pending, now))
+                        return;
+                    if (now - pending.PickerSeenMs >= PickerSettleMs)
+                    {
+                        if (pending.Method == "quick")
+                        {
+                            if (init == null) throw new InvalidOperationException("InitBoard.Instance is null with the picker visible");
+                            init.QuickInGame();
+                        }
+                        else if (!PressBtn(button))
+                        {
+                            FinishSkip(pending, false, "press-failed", "StartGameButton has no *Btn component to press", now);
+                            return;
+                        }
+                        pending.PressedMs = now;
+                        pending.Dump["pickerSettledMs"] = now - pending.PickerSeenMs;
+                        return;
+                    }
+                }
+                if (now > pending.DeadlineMs)
+                    FinishSkip(pending, false, button == null ? "picker-never-appeared" : "picker-not-settled",
+                        "seed-picker StartGameButton " + (button == null ? "never appeared" : "never settled")
+                        + " within " + ((pending.DeadlineMs - pending.StartedMs) / 1000) + "s", now);
+                return;
             }
 
-            dump["ok"] = true;
-            DebugRuntime.Emit("debug.setup.skip", dump);
-            CheatState.Note("debug.skip-setup " + method);
+            if (ready)
+            {
+                FinishSkip(pending, true, "started", null, now);
+                return;
+            }
+            if (now - pending.PressedMs > ReadyAfterPressTimeoutMs)
+                FinishSkip(pending, false, "pressed-not-started",
+                    "start pressed but InitBoard.ready stayed false for " + (ReadyAfterPressTimeoutMs / 1000) + "s", now);
         }
         catch (Exception ex)
         {
-            dump["ok"] = false;
-            dump["error"] = ex.Message;
-            DebugRuntime.Emit("debug.setup.skip", dump);
-            CheatState.Error("debug.skip-setup: " + ex.Message);
+            FinishSkip(pending, false, "exception", ex.Message, now);
         }
+    }
+
+    static void FinishSkip(PendingSkipSetup pending, bool ok, string stage, string? error, long now)
+    {
+        if (!ReferenceEquals(_pendingSkip, pending)) return;
+        _pendingSkip = null;
+        var dump = pending.Dump;
+        dump["ok"] = ok;
+        dump["stage"] = stage;
+        dump["waitedMs"] = now - pending.StartedMs;
+        var init = InitBoard.Instance;
+        dump["ready"] = init != null && SafeReady(init);
+        dump["board"] = init != null && init.board != null;
+        dump["ui"] = init != null && init.uI != null;
+        if (error != null) dump["error"] = error;
+        DebugRuntime.Emit("debug.setup.skip", dump);
+        if (ok) CheatState.Note("debug.skip-setup " + pending.Method + " " + stage + " after " + dump["waitedMs"] + "ms");
+        else CheatState.Error("debug.skip-setup: " + stage + " — " + error);
+    }
+
+    /// <summary>One card-selection step per tick. Returns true when every requested packet is in the seed
+    /// bank (or none were requested), false while still working. A packet is picked with
+    /// <c>CardUI.OnMouseDown</c> — the game's own click (live-verified 2026-09-15: it moves the packet into
+    /// <c>SeedBank/SeedGroup/seedN</c>; <c>Mouse.ClickOnCard</c> instead starts a plant drag).</summary>
+    static bool PickCardsStep(PendingSkipSetup pending, long now)
+    {
+        if (pending.CardsToPick == null)
+        {
+            pending.CardsToPick = pending.RequestedCards != null
+                ? new List<int>(pending.RequestedCards)
+                : LibraryCards().Select(c => SafeType(c)).Where(t => t >= 0).Distinct().ToList();
+            pending.Dump["cardsRequested"] = pending.CardsToPick.ToArray();
+        }
+        if (pending.LastPickMs >= 0 && now - pending.LastPickMs < CardPickSettleMs) return false;
+
+        while (pending.CardIndex < pending.CardsToPick.Count)
+        {
+            var type = pending.CardsToPick[pending.CardIndex];
+            if (BankHas(type))
+            {
+                pending.CardIndex++;
+                pending.CardAttempt = 0;
+                continue;
+            }
+            var candidates = LibraryCards().Where(c => SafeType(c) == type)
+                // The clickable packet is the "(Clone)" one (live-verified 2026-09-15: it moves itself into
+                // SeedBank/SeedGroup/seedN); the bare "Packet " is the library slot's placeholder.
+                .OrderBy(c => NameOf(c).Contains("(Clone)") ? 0 : 1).ToList();
+            if (candidates.Count == 0 || pending.CardAttempt >= MaxCardPickAttempts)
+            {
+                FinishSkip(pending, false, "card-not-selectable",
+                    $"plant type {type} is not offered by the seed-picker, or no packet for it reached the seed bank", now);
+                return false;
+            }
+            // Cycle the candidates: on the first picker after a cold boot the packets ignore clicks for a moment.
+            candidates[pending.CardAttempt % candidates.Count].OnMouseDown();
+            pending.CardAttempt++;
+            pending.LastPickMs = now;
+            return false;
+        }
+        pending.Dump["cardsInBank"] = BankCards().Select(c => SafeType(c)).Where(t => t >= 0).ToArray();
+        return true;
+    }
+
+    static IEnumerable<CardUI> LibraryCards() => CardsUnder("/SeedLibrary/");
+    static IEnumerable<CardUI> BankCards() => CardsUnder("/SeedBank/");
+    static bool BankHas(int type) => BankCards().Any(c => SafeType(c) == type);
+
+    static IEnumerable<CardUI> CardsUnder(string pathPart)
+    {
+        CardUI[] all;
+        try { all = UnityEngine.Object.FindObjectsOfType<CardUI>(); } catch { yield break; }
+        foreach (var c in all)
+        {
+            if (c == null) continue;
+            string path;
+            try { path = PathOf(c.transform); } catch { continue; }
+            if (path.Contains(pathPart, StringComparison.Ordinal)) yield return c;
+        }
+    }
+
+    static string PathOf(Transform t)
+    {
+        var parts = new List<string>();
+        for (var cur = t; cur != null; cur = cur.parent) parts.Add(cur.name);
+        parts.Reverse();
+        return "/" + string.Join("/", parts) + "/";
+    }
+
+    static int SafeType(CardUI c)
+    {
+        try { return (int)c.thePlantType; } catch { return -1; }
+    }
+
+    static string NameOf(CardUI c)
+    {
+        try { return c.gameObject.name ?? ""; } catch { return ""; }
+    }
+
+    static bool SafeReady(InitBoard init)
+    {
+        try { return init.ready; } catch { return false; }
+    }
+
+    /// <summary>The live, active picker start button — the object `debug_inspect` lists as
+    /// <c>CanvasUp/InGameUI(Clone)/Bottom/SeedLibrary/StartGameButton</c>. <c>GameObject.Find</c> only
+    /// returns active objects, which is exactly the "picker is showing" condition.</summary>
+    static GameObject? FindStartGameButton()
+    {
+        try
+        {
+            var go = GameObject.Find("CanvasUp/InGameUI(Clone)/Bottom/SeedLibrary/StartGameButton");
+            return go != null && go.activeInHierarchy ? go : null;
+        }
+        catch { return null; }
+    }
+
+    /// <summary>Presses a custom <c>*Btn</c> component the way <c>ControlClick.Invoke</c> does.</summary>
+    static bool PressBtn(GameObject go)
+    {
+        foreach (var c in go.GetComponents<Component>())
+        {
+            if (c == null) continue;
+            string real;
+            try { real = c.GetIl2CppType().Name; } catch { real = c.GetType().Name; }
+            if (real.IndexOf("Btn", StringComparison.OrdinalIgnoreCase) < 0) continue;
+            c.SendMessage("OnMouseDown");
+            c.SendMessage("OnMouseUp");
+            return true;
+        }
+        return false;
     }
 
     /// <summary>Answers "where is current game state, right now" by reading the game's own live
@@ -1436,6 +1666,15 @@ public static class DebugActions
             {
                 try { dump["sceneType"] = (int)board.sceneType; } catch { }
             }
+            // 2026-09-15 (owner: "use screenshot … better than trust unreliable gamestate endpoint"): the
+            // two facts this answer was missing when a live board looked InMatch while no game time
+            // passed — whether the seed-picker/setup has actually finished, and whether time runs.
+            if (init != null)
+            {
+                try { dump["initBoardReady"] = init.ready; } catch { }
+            }
+            try { dump["timeScale"] = UnityEngine.Time.timeScale; } catch { }
+            try { dump["unscaledTime"] = UnityEngine.Time.unscaledTime; dump["gameTime"] = UnityEngine.Time.time; } catch { }
 
             var matchSnap = Match.MatchHost.Runtime.ToSnapshot();
             var phase = matchSnap.Phase.ToString();
