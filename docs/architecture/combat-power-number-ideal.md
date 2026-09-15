@@ -234,7 +234,7 @@ Do not rediscover these in a later session:
 | **HF-standing** | Wiring + filter | Synthetics + membership filter → `ActorPowerCache.Compose` |
 | **HF-lawn** — RESOLVED 2026-09-14 | Wiring (SSOT) | Bound → UniqueCreature via unique GET + `TryGetByPtr` — closed by aptitude-sheet AS-1.1/AS-1.1b, both orders live-proven |
 | **HF-copy** | Docs | “combat power” = O+S+C Standing |
-| **HF-bound-loadout** — RESOLVED 2026-09-15 | Wrong use | Bound combat via Hub/atoms — not Writer-absolute beside Hub; Core-proven (43/43) and now live-probed (persisted-state half fully passes end to end — real summon/deploy/bind/read-back; the live-engine half hit an unrelated real timeout on a specific random-summon `typeId`, not a Hub-wiring defect — see `actor-hub-and-combat-power-solid-fixing-todo.md` T14 and `live-probe-todo.md` Task 11) |
+| **HF-bound-loadout** | Wrong use | Bound combat via Hub/atoms — not Writer-absolute beside Hub. Core-proven (43/43); live probe still owed — 2026-09-15 attempt: persisted half OK, live read timed out, equip never exercised |
 | **HF-battle-tree** | Wiring / debt | Wire `Battle.TreeAtomSource` into composer or delete dead slot (prefer fuse into Hub) |
 | **HF-battle-ops** | Debt Partial | Battle equip ops must match Hub or stay explicitly Partial until fusion |
 | **HF-channelmods-writers** | Wrong use | Star/Loyalty/etc. → Hub/atoms, not private omni ChannelMods |

@@ -167,3 +167,17 @@ See todo “Ask-first defaults.” Rename `world-actor-combat` only at its `/ide
 1. Owner reviews this plan + [todo](actor-hub-and-combat-power-solid-fixing-todo.md).  
 2. On approval, `/build` starts at **T1** (or owner-named task).  
 3. Stop at each Wave checkpoint for a short green review before the next wave.
+
+## Next run — audit 2026-09-15
+
+- **T14 live loadout probe is open again.** The 2026-09-15 closure (and the Wave 3 checkpoint, the
+  "Program Done when" row, and `combat-power-number-ideal.md` HF-bound-loadout) was reverted: no
+  atk/maxHp/hp was observed and no equip ran. Owned by `live-probe` Tasks 13–16.
+- **Map row corrected.** It claimed loadout done via T13 and UniqueCreature blocked; now UniqueCreature
+  done (live 2026-09-14), loadout live probe owed.
+- **Provenance check owed:** AS-1.1b's live proof used a level-148 specimen with `Might 141`, while
+  `live-probe` Task 10 found real summons land at level 1 with no level-grant path. Confirm how that
+  specimen reached level 148 before treating T12 as fully real-gameplay-shaped.
+- **Checkpoint discipline:** Owner-review checkpoints were skipped while later waves were built. The
+  remaining owner gates (T5 fuse glance, Standing, lawn, Wave 4, stub hygiene, program close) are owner
+  actions; an agent never ticks them.
